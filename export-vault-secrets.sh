@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+
+#if test -f /var/run/secrets/nais.io/srvskanmot1408/username;
+#then
+#    echo "Setting SERVICEUSER_USERNAME"
+#    export DOKSIKKERHETSNETT_SERVICEUSER_USERNAME=$(cat /var/run/secrets/nais.io/srvskanmot1408/username)
+#fi
+
+#if test -f /var/run/secrets/nais.io/srvskanmot1408/password;
+#then
+#    echo "Setting SERVICEUSER_PASSWORD"
+#    export DOKSIKKERHETSNETT_SERVICEUSER_***passord=gammelt_passord***)
+#fi
