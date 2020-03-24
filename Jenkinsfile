@@ -1,5 +1,5 @@
 naiseratorPipeline {
-    applicationName = "skanmot_1408"
+    applicationName = "skanmot1408"
     dockerfileDir = "."
     deployEnvironmentT = ""
     deployEnvironmentQ = "q1"

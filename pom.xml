@@ -34,7 +34,7 @@
                 <groupId>no.nav.skanmot1408</groupId>
                 <artifactId>core</artifactId>
                 <version>${project.version}</version>
-            </dependency>
+            </dependency> 
 
             <dependency>
                 <groupId>org.projectlombok</groupId>
