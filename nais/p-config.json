@@ -1,3 +1,6 @@
 {
-  "NAMESPACE": "default"
+  "NAMESPACE": "default",
+  "INGRESSES": [
+    "https://skanmot1408.nais.adeo.no"
+  ]
 }
