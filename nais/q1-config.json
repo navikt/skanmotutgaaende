@@ -1,5 +1,6 @@
 {
   "NAMESPACE": "q1",
+  "SRVSKANMOT1408": "/serviceuser/data/dev/srvskanmot1408",
   "SKANMOT1408_DOKARKIVJOURNALPOSTURL": "https://dokarkiv-q1.nais.preprod.local/rest/intern/journalpostapi/v1/journalpost",
   "INGRESSES": [
     "https://skanmot1408-q1.nais.preprod.local"

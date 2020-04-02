@@ -6,6 +6,8 @@ import lombok.ToString;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
+import javax.validation.constraints.NotNull;
+
 @Getter
 @Setter
 @ToString
@@ -13,6 +15,11 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class Skanmot1408Properties {
 
+    @NotNull
+    private String dokarkivjournalposturl;
+
+    @NotNull
+    private ServiceUserProperties serviceuser;
 }
 
 
