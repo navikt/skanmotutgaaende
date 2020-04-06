@@ -3,7 +3,7 @@ package no.nav.skanmot1408.services;
 import no.nav.skanmot1408.consumers.LesZipfilConsumer;
 import org.springframework.stereotype.Service;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.io.File;
 
 @Service

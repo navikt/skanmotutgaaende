@@ -5,7 +5,7 @@ import no.nav.skanmot1408.consumers.lagrefildetaljer.LagreFildetaljerRequest;
 import no.nav.skanmot1408.consumers.lagrefildetaljer.LagreFildetaljerResponse;
 import org.springframework.stereotype.Service;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 @Service
 public class LagreFildetaljerService {
