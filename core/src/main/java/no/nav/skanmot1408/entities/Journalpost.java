@@ -1,11 +1,11 @@
 package no.nav.skanmot1408.entities;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.xml.bind.annotation.XmlElement;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import javax.xml.bind.annotation.XmlElement;
 import java.util.Date;
 
 @Getter

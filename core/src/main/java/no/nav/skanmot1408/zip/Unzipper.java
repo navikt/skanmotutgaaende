@@ -1,11 +1,11 @@
 package no.nav.skanmot1408.zip;
 
-import jakarta.xml.bind.JAXBContext;
-import jakarta.xml.bind.JAXBException;
-import jakarta.xml.bind.Unmarshaller;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmot1408.entities.Skanningmetadata;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -67,12 +67,10 @@ public class Unzipper {
     }
 
     private static Skanningmetadata bytesToSkanningmetadata(byte[] bytes) throws UnsupportedEncodingException {
+        String xmlString = new String(bytes, "UTF-8");
+        JAXBContext jaxbContext;
         try {
-            String xmlString = new String(bytes, "UTF-8");
-
-            JAXBContext jaxbContext;
             jaxbContext = JAXBContext.newInstance(Skanningmetadata.class);
-            System.out.println(jaxbContext.toString());
 
             Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 

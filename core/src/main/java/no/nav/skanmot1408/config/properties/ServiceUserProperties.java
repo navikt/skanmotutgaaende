@@ -1,10 +1,11 @@
 package no.nav.skanmot1408.config.properties;
 
-import jakarta.validation.constraints.NotEmpty;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.springframework.validation.annotation.Validated;
+
+import javax.validation.constraints.NotEmpty;
 
 @Getter
 @Setter
