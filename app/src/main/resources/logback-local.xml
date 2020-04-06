@@ -12,7 +12,7 @@
 		<appender-ref ref="CONSOLE"/>
 	</root>
 
-	<logger name="no.nav.skanmot1408" level="INFO" additivity="false">
+	<logger name="no.nav.skanmotutgaaende" level="INFO" additivity="false">
 		<appender-ref ref="CONSOLE"/>
 	</logger>
 

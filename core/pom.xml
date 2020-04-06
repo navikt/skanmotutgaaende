@@ -4,8 +4,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <artifactId>skanmot1408</artifactId>
-        <groupId>no.nav.skanmot1408</groupId>
+        <artifactId>skanmotutgaaende</artifactId>
+        <groupId>no.nav.skanmotutgaaende</groupId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 

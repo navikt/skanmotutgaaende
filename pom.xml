@@ -10,10 +10,10 @@
         <version>2.2.5.RELEASE</version>
     </parent>
 
-    <groupId>no.nav.skanmot1408</groupId>
-    <artifactId>skanmot1408</artifactId>
+    <groupId>no.nav.skanmotutgaaende</groupId>
+    <artifactId>skanmotutgaaende</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>skanmot1408</name>
+    <name>skanmotutgaaende</name>
 
     <packaging>pom</packaging>
     <modules>
@@ -42,7 +42,7 @@
             </dependency>
 
             <dependency>
-                <groupId>no.nav.skanmot1408</groupId>
+                <groupId>no.nav.skanmotutgaaende</groupId>
                 <artifactId>core</artifactId>
                 <version>${project.version}</version>
             </dependency>
