@@ -1,4 +1,4 @@
-package no.nav.skanmotutgaaende.consumers;
+package no.nav.skanmotutgaaende.leszipfil;
 
 import org.springframework.stereotype.Component;
 

@@ -1,8 +1,7 @@
-package no.nav.skanmotutgaaende.zip;
+package no.nav.skanmotutgaaende.domain;
 
 import lombok.Builder;
 import lombok.Data;
-import no.nav.skanmotutgaaende.entities.Skanningmetadata;
 
 @Data
 @Builder

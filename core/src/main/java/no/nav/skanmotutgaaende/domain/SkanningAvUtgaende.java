@@ -1,4 +1,4 @@
-package no.nav.skanmotutgaaende.entities;
+package no.nav.skanmotutgaaende.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

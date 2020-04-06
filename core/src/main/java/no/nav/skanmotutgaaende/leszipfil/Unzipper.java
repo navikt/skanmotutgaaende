@@ -1,7 +1,8 @@
-package no.nav.skanmotutgaaende.zip;
+package no.nav.skanmotutgaaende.leszipfil;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.skanmotutgaaende.entities.Skanningmetadata;
+import no.nav.skanmotutgaaende.domain.MetadataPdfPair;
+import no.nav.skanmotutgaaende.domain.Skanningmetadata;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;

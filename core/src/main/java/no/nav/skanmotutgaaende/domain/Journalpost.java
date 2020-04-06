@@ -1,4 +1,4 @@
-package no.nav.skanmotutgaaende.entities;
+package no.nav.skanmotutgaaende.domain;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;

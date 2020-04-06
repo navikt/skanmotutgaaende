@@ -1,8 +1,8 @@
-package no.nav.skanmotutgaaende.services;
+package no.nav.skanmotutgaaende.lagrefildetaljer;
 
-import no.nav.skanmotutgaaende.consumers.lagrefildetaljer.LagreFildetaljerConsumer;
-import no.nav.skanmotutgaaende.consumers.lagrefildetaljer.LagreFildetaljerRequest;
-import no.nav.skanmotutgaaende.consumers.lagrefildetaljer.LagreFildetaljerResponse;
+import no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerConsumer;
+import no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerRequest;
+import no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerResponse;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;

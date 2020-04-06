@@ -1,7 +1,7 @@
 package no.nav.skanmotutgaaende.unittest;
 
-import no.nav.skanmotutgaaende.zip.Unzipper;
-import no.nav.skanmotutgaaende.zip.MetadataPdfPair;
+import no.nav.skanmotutgaaende.leszipfil.Unzipper;
+import no.nav.skanmotutgaaende.domain.MetadataPdfPair;
 import org.junit.Test;
 
 import java.io.File;

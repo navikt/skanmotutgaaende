@@ -1,18 +1,17 @@
-package no.nav.skanmotutgaaende.services;
+package no.nav.skanmotutgaaende.leszipfil;
 
-import no.nav.skanmotutgaaende.consumers.LesZipfilConsumer;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
 import java.io.File;
 
 @Service
-public class LesZipFilService {
+public class LesZipfilService {
 
     private LesZipfilConsumer lesZipfilConsumer;
 
     @Inject
-    public LesZipFilService(LesZipfilConsumer lesZipfilConsumer) {
+    public LesZipfilService(LesZipfilConsumer lesZipfilConsumer) {
         this.lesZipfilConsumer = lesZipfilConsumer;
     }
 

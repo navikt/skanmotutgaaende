@@ -1,4 +1,4 @@
-package no.nav.skanmotutgaaende.consumers.lagrefildetaljer;
+package no.nav.skanmotutgaaende.lagrefildetaljer;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
