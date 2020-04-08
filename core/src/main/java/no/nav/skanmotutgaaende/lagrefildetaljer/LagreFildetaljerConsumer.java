@@ -5,6 +5,8 @@ import no.nav.skanmotutgaaende.exceptions.functional.MottaDokumentUtgaaendeSkann
 import no.nav.skanmotutgaaende.exceptions.functional.MottaDokumentUtgaaendeSkanningFunctionalException;
 import no.nav.skanmotutgaaende.exceptions.functional.MottaDokumentUtgaaendeSkanningTillaterIkkeTilknyttingFunctionalException;
 import no.nav.skanmotutgaaende.exceptions.technical.MottaDokumentUtgaaendeSkanningTechnicalException;
+import no.nav.skanmotutgaaende.lagrefildetaljer.data.LagreFildetaljerRequest;
+import no.nav.skanmotutgaaende.lagrefildetaljer.data.LagreFildetaljerResponse;
 import no.nav.skanmotutgaaende.metrics.Metrics;
 import no.nav.skanmotutgaaende.constants.MDCConstants;
 import org.slf4j.MDC;

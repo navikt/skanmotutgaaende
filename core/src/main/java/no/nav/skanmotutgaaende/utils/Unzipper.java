@@ -1,7 +1,7 @@
-package no.nav.skanmotutgaaende.leszipfil;
+package no.nav.skanmotutgaaende.utils;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.skanmotutgaaende.domain.MetadataPdfPair;
+import no.nav.skanmotutgaaende.domain.FilepairWithMetadata;
 import no.nav.skanmotutgaaende.domain.Skanningmetadata;
 
 import javax.xml.bind.JAXBContext;
@@ -23,8 +23,9 @@ import java.util.zip.ZipInputStream;
 @Slf4j
 public class Unzipper {
 
-    public static List<MetadataPdfPair> unzipXmlPdf(File zip) throws IOException {
+    public static List<FilepairWithMetadata> unzipXmlPdf(File zip) throws IOException {
         List<Skanningmetadata> skanningmetadatas = new ArrayList<>();
+        Map<String, byte[]> xmls = new HashMap<>();
         Map<String, byte[]> pdfs = new HashMap<>();
         byte[] buffer = new byte[1024];
         ZipInputStream zis = new ZipInputStream(new FileInputStream(zip));
@@ -37,6 +38,7 @@ public class Unzipper {
             }
             if ("xml".equals(getFileType(zipEntry))) {
                 skanningmetadatas.add(bytesToSkanningmetadata(baos.toByteArray()));
+                xmls.put(zipEntry.getName(), baos.toByteArray());
             }
             if ("pdf".equals(getFileType(zipEntry))) {
                 pdfs.put(zipEntry.getName(), baos.toByteArray());
@@ -47,17 +49,18 @@ public class Unzipper {
         zis.closeEntry();
         zis.close();
 
-        return pairFiles(skanningmetadatas, pdfs);
+        return pairFiles(skanningmetadatas, pdfs, xmls);
     }
 
-    private static List<MetadataPdfPair> pairFiles(List<Skanningmetadata> xmls, Map<String, byte[]> pdfs) {
-        List<MetadataPdfPair> combined = new ArrayList<>();
-        for (Skanningmetadata xml : xmls) {
+    private static List<FilepairWithMetadata> pairFiles(List<Skanningmetadata> skanningmetadataList, Map<String, byte[]> pdfs, Map<String, byte[]> xmls) {
+        List<FilepairWithMetadata> combined = new ArrayList<>();
+        for (Skanningmetadata skanningmetadata : skanningmetadataList) {
             for (String pdfName : pdfs.keySet()) {
-                if (pdfName.equals(xml.getJournalpost().getFilNavn())) {
-                    combined.add(MetadataPdfPair.builder()
-                            .skanningmetadata(xml)
+                if (pdfName.equals(skanningmetadata.getJournalpost().getFilNavn())) {
+                    combined.add(FilepairWithMetadata.builder()
+                            .skanningmetadata(skanningmetadata)
                             .pdf(pdfs.get(pdfName))
+                            .xml(xmls.get(Utils.changeFiletypeInFilename(pdfName, "xml")))
                             .build()
                     );
                     break;

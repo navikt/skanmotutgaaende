@@ -15,7 +15,7 @@ public class LesZipfilService {
         this.lesZipfilConsumer = lesZipfilConsumer;
     }
 
-    public File lesZipFil() {
-        return lesZipfilConsumer.hentZipFil();
+    public File lesZipfil() {
+        return lesZipfilConsumer.hentZipfil();
     }
 }

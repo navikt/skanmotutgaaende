@@ -1,4 +1,4 @@
-package no.nav.skanmotutgaaende.lagrefildetaljer;
+package no.nav.skanmotutgaaende.lagrefildetaljer.data;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

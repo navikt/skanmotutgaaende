@@ -14,7 +14,10 @@ import java.util.Date;
 public class Journalpost {
 
     @XmlElement(required = true)
-    private long journalpostId;
+    private String journalpostId;
+
+    @XmlElement(required = true)
+    private String mottakskanal;
 
     @XmlElement(required = true)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
@@ -28,10 +31,4 @@ public class Journalpost {
 
     @XmlElement(required = true)
     private String endorsernr;
-
-    @XmlElement(required = true)
-    private String mottattfra;
-
-    @XmlElement(required = true)
-    private String mottatti;
 }

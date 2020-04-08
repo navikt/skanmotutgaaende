@@ -7,8 +7,8 @@ import java.io.File;
 @Component
 public class LesZipfilConsumer {
 
-    public File hentZipFil() {
-        // TODO: Hent zippede pdf og xml med metadata fra skyfilområde
-        return new File("");
+    public File hentZipfil() {
+        // TODO: Hent zipfil bestående av par av pdf'er og xml'er med metadata fra skyfilområde
+        return new File("src/test/resources/__files/xml_pdf_pairs/xml_pdf_pairs_testdata.zip");
     }
 }
