@@ -1,4 +1,4 @@
-package no.nav.skanmotutgaaende.config.properties.config;
+package no.nav.skanmotutgaaende.config;
 
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;

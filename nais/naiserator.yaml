@@ -38,3 +38,5 @@ spec:
     paths:
       - kvPath: {{ SRVSKANMOTUTGAAENDE }}
         mountPath: /var/run/secrets/nais.io/srvskanmotutgaaende
+     - kvPath: {{ SKANMOTUTGAAENDE_VAULT }}
+        mountPath: /var/run/secrets/nais.io/vault

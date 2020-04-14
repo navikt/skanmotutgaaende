@@ -1,7 +1,7 @@
 package no.nav.skanmotutgaaende.itest.config;
 
 import no.nav.skanmotutgaaende.config.properties.SkanmotutgaaendeProperties;
-import no.nav.skanmotutgaaende.config.properties.config.CoreConfig;
+import no.nav.skanmotutgaaende.config.CoreConfig;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
