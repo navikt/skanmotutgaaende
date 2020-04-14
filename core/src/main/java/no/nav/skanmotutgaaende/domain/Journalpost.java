@@ -2,6 +2,7 @@ package no.nav.skanmotutgaaende.domain;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -9,6 +10,7 @@ import javax.xml.bind.annotation.XmlElement;
 import java.util.Date;
 
 @Getter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Journalpost {

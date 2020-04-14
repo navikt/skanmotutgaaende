@@ -33,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureWireMock(port = 0)
 @ActiveProfiles("itest")
-public class LagrefildetaljerIT {
+public class LagreFildetaljerIT {
 
     private final byte[] DUMMY_FILE = "dummyfile".getBytes();
     private final String JOURNALPOST_ID = "001";
@@ -71,21 +71,32 @@ public class LagrefildetaljerIT {
 
     private LagreFildetaljerRequest createLagreFildetaljerRequest() throws IOException {
         return LagreFildetaljerRequest.builder()
-                .dato(new Date())
-                .endorsernr("3110190003NAV743506")
-                .mottattfra("1400")
-                .mottatti("1400")
+                .datoMottatt(new Date())
                 .batchnavn("__files/xml_pdf_pairs/xml_pdf_pairs_testdata.zip")
+                .tilleggsopplysninger(Arrays.asList(
+                        LagreFildetaljerRequest.Tilleggsopplysninger.builder()
+                                .nokkel(LagreFildetaljerRequest.ENDORSER_NR)
+                                .verdi("3110190003NAV743506")
+                                .build(),
+                        LagreFildetaljerRequest.Tilleggsopplysninger.builder()
+                                .nokkel(LagreFildetaljerRequest.FYSISK_POSTBOKS)
+                                .verdi("1400")
+                                .build(),
+                        LagreFildetaljerRequest.Tilleggsopplysninger.builder()
+                                .nokkel(LagreFildetaljerRequest.STREKKODE_POSTBOKS)
+                                .verdi("1400")
+                                .build()
+                ))
                 .dokumentvarianter(Arrays.asList(
                         LagreFildetaljerRequest.Dokumentvariant.builder()
                                 .filtype("pdf")
-                                .variantFormat("ARKIV")
+                                .variantformat("ARKIV")
                                 .fysiskDokument(DUMMY_FILE)
                                 .filnavn("dummy.pdf")
                                 .build(),
                         LagreFildetaljerRequest.Dokumentvariant.builder()
                                 .filtype("xml")
-                                .variantFormat("ORIGINAL")
+                                .variantformat("ORIGINAL")
                                 .fysiskDokument(DUMMY_FILE)
                                 .filnavn("dummy.xml")
                                 .build()))
