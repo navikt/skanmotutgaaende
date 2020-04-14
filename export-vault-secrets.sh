@@ -3,7 +3,7 @@
 if test -f /var/run/secrets/nais.io/srvskanmotutgaaende/username;
 then
     echo "Setting SERVICEUSER_USERNAME"
-    export SKANMOTUTGAAENDE_SERVICEUSER_USERNAME=$(cat /var/run/secrets/nais.io/skanmotutgaaende/username)
+    export SKANMOTUTGAAENDE_SERVICEUSER_USERNAME=$(cat /var/run/secrets/nais.io/srvskanmotutgaaende/username)
 fi
 
 if test -f /var/run/secrets/nais.io/srvskanmotutgaaende/password;
