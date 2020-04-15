@@ -72,7 +72,7 @@ public class LagreFildetaljerIT {
     private LagreFildetaljerRequest createLagreFildetaljerRequest() throws IOException {
         return LagreFildetaljerRequest.builder()
                 .datoMottatt(new Date())
-                .batchnavn("__files/xml_pdf_pairs/xml_pdf_pairs_testdata.zip")
+                .batchnavn("xml_pdf_pairs_testdata.zip")
                 .tilleggsopplysninger(Arrays.asList(
                         LagreFildetaljerRequest.Tilleggsopplysninger.builder()
                                 .nokkel(LagreFildetaljerRequest.ENDORSER_NR)

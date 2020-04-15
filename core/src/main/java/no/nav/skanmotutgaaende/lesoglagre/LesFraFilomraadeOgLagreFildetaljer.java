@@ -35,7 +35,7 @@ public class LesFraFilomraadeOgLagreFildetaljer {
         lesOgLagre();
     }
 
-    public void lesOgLagre() {
+    public List<LagreFildetaljerResponse> lesOgLagre() {
         File zipfil = lesZipfilService.lesZipfil();
         try {
             List<FilepairWithMetadata> filepairWithMetadataList = Unzipper.unzipXmlPdf(zipfil);
@@ -45,8 +45,10 @@ public class LesFraFilomraadeOgLagreFildetaljer {
                     .collect(Collectors.toList());
             String zipName = filepairWithMetadataList.get(0).getSkanningmetadata().getJournalpost().getBatchNavn();
             log.info("Skanmotutgaaende lagret fildetaljer fra zipfil {} i dokarkiv", zipName);
+            return responses;
         } catch (IOException e) {
             log.error("Skanmotutgaaende klarte ikke lese fra fil {}", zipfil.getName(), e);
+            return null;
         }
     }
 
