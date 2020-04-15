@@ -21,6 +21,9 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import java.net.URI;
 import java.time.Duration;
 
 import static no.nav.skanmotutgaaende.metrics.MetricLabels.DOK_METRIC;
@@ -29,7 +32,7 @@ import static no.nav.skanmotutgaaende.metrics.MetricLabels.PROCESS_NAME;
 @Component
 public class LagreFildetaljerConsumer {
 
-    private final String MOTTA_DOKUMENT_UTGAAENDE_SKANNING_TJENESTE = "/mottaDokumentUtgaaendeSkanning";
+    private final String MOTTA_DOKUMENT_UTGAAENDE_SKANNING_TJENESTE = "mottaDokumentUtgaaendeSkanning";
 
     private final RestTemplate restTemplate;
     private final String dokarkivJournalpostUrl;
@@ -51,9 +54,12 @@ public class LagreFildetaljerConsumer {
             HttpHeaders headers = createHeaders();
             HttpEntity<LagreFildetaljerRequest> requestEntity = new HttpEntity<>(lagreFildetaljerRequest, headers);
 
-            String putLagreFildetaljerUrl = dokarkivJournalpostUrl + "/" + journalpostId + MOTTA_DOKUMENT_UTGAAENDE_SKANNING_TJENESTE;
+            URI uri = UriComponentsBuilder.fromHttpUrl(dokarkivJournalpostUrl)
+                    .pathSegment(journalpostId, MOTTA_DOKUMENT_UTGAAENDE_SKANNING_TJENESTE)
+                    .build().toUri();
+            return restTemplate.exchange(uri, HttpMethod.PUT, requestEntity, LagreFildetaljerResponse.class)
+                    .getBody();
 
-            return restTemplate.exchange(putLagreFildetaljerUrl, HttpMethod.PUT, requestEntity, LagreFildetaljerResponse.class).getBody();
         } catch (HttpClientErrorException e) {
             if (HttpStatus.NOT_FOUND.equals(e.getStatusCode())) {
                 throw new MottaDokumentUtgaaendeSkanningFinnesIkkeFunctionalException(String.format("mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode=%s. Feilmelding=%s", e

@@ -3,17 +3,17 @@ package no.nav.skanmotutgaaende.lesoglagre;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotutgaaende.domain.FilepairWithMetadata;
 import no.nav.skanmotutgaaende.exceptions.functional.AbstractSkanmotutgaaendeFunctionalException;
-import no.nav.skanmotutgaaende.exceptions.functional.MottaDokumentUtgaaendeSkanningFinnesIkkeFunctionalException;
 import no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerService;
-import no.nav.skanmotutgaaende.lagrefildetaljer.data.LagreFildetaljerRequest;
+import no.nav.skanmotutgaaende.lagrefildetaljer.data.LagreFildetaljerResponse;
 import no.nav.skanmotutgaaende.leszipfil.LesZipfilService;
 import no.nav.skanmotutgaaende.utils.Unzipper;
-import no.nav.skanmotutgaaende.utils.Utils;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -21,6 +21,8 @@ public class LesFraFilomraadeOgLagreFildetaljer {
 
     private final LesZipfilService lesZipfilService;
     private final LagreFildetaljerService lagreFildetaljerService;
+    private final int MINUTE = 60_000;
+    private final int HOUR = 60 * MINUTE;
 
     public LesFraFilomraadeOgLagreFildetaljer(LesZipfilService lesZipfilService,
                                               LagreFildetaljerService lagreFildetaljerService) {
@@ -28,11 +30,34 @@ public class LesFraFilomraadeOgLagreFildetaljer {
         this.lagreFildetaljerService = lagreFildetaljerService;
     }
 
-    public void lesOgLagre() throws IOException, AbstractSkanmotutgaaendeFunctionalException {
+    @Scheduled(initialDelay = 3000, fixedDelay = 72 * HOUR)
+    public void scheduledJob() {
+        lesOgLagre();
+    }
+
+    public void lesOgLagre() {
         File zipfil = lesZipfilService.lesZipfil();
-        List<FilepairWithMetadata> filepairWithMetadataList = Unzipper.unzipXmlPdf(zipfil);
-        lagreFildetaljerService.lagreFildetaljer(filepairWithMetadataList);
-        String zipName = filepairWithMetadataList.get(0).getSkanningmetadata().getJournalpost().getBatchNavn();
-        log.info("Skanmotutgaaende lagret fildetaljer fra fil {} i dokarkiv", zipName);
+        try {
+            List<FilepairWithMetadata> filepairWithMetadataList = Unzipper.unzipXmlPdf(zipfil);
+            List<LagreFildetaljerResponse> responses = filepairWithMetadataList.stream()
+                    .map(filepair -> lagreFil(filepair))
+                    .filter(response -> null != response)
+                    .collect(Collectors.toList());
+            String zipName = filepairWithMetadataList.get(0).getSkanningmetadata().getJournalpost().getBatchNavn();
+            log.info("Skanmotutgaaende lagret fildetaljer fra zipfil {} i dokarkiv", zipName);
+        } catch (IOException e) {
+            log.error("Skanmotutgaaende klarte ikke lese fra fil {}", zipfil.getName(), e);
+        }
+    }
+
+    private LagreFildetaljerResponse lagreFil(FilepairWithMetadata filepairWithMetadata) {
+        LagreFildetaljerResponse response = null;
+        try {
+            response = lagreFildetaljerService.lagreFildetaljer(filepairWithMetadata);
+            log.info("Skanmotutgaaende lagret fildetaljer for journalpost med id {}", filepairWithMetadata.getSkanningmetadata().getJournalpost().getJournalpostId());
+        } catch (AbstractSkanmotutgaaendeFunctionalException e) {
+            log.error("Skanmotutgaaende feilet med lagring av fildetaljer til journalpost med id {}", filepairWithMetadata.getSkanningmetadata().getJournalpost().getJournalpostId(), e);
+        }
+        return response;
     }
 }

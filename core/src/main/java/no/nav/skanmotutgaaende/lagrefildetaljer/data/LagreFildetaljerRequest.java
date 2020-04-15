@@ -26,12 +26,12 @@ public class LagreFildetaljerRequest {
     @JsonFormat(pattern="yyyy-MM-dd")
     private final Date datoMottatt;
 
-    private final String batchnavn;
-
     @NotNull(message = "Mottakskanal kan ikke være null")
     private final String mottakskanal;
 
     private final List<Tilleggsopplysninger> tilleggsopplysninger;
+
+    private final String batchnavn;
 
     @NotNull(message = "Dokumentvarianter kan ikke være null")
     private final List<Dokumentvariant> dokumentvarianter;

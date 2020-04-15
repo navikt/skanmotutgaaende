@@ -10,8 +10,6 @@ import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
 import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class LagreFildetaljerService {
@@ -30,12 +28,6 @@ public class LagreFildetaljerService {
     public LagreFildetaljerResponse lagreFildetaljer(FilepairWithMetadata filepairWithMetadata) {
         LagreFildetaljerRequest request = extractLagreFildetaljerRequestFromSkanningmetadata(filepairWithMetadata);
         return lagreFildetaljer(request, filepairWithMetadata.getSkanningmetadata().getJournalpost().getJournalpostId());
-    }
-
-    public List<LagreFildetaljerResponse> lagreFildetaljer(List<FilepairWithMetadata> filepairWithMetadataList) {
-        return filepairWithMetadataList.stream()
-                .map(filepair -> lagreFildetaljer(filepair))
-                .collect(Collectors.toList());
     }
 
     public static LagreFildetaljerRequest extractLagreFildetaljerRequestFromSkanningmetadata(FilepairWithMetadata filepairWithMetadata) {
