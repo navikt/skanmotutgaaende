@@ -3,6 +3,7 @@ package no.nav.skanmotutgaaende.lagrefildetaljer;
 import no.nav.skanmotutgaaende.domain.FilepairWithMetadata;
 import no.nav.skanmotutgaaende.domain.Journalpost;
 import no.nav.skanmotutgaaende.domain.SkanningInfo;
+import no.nav.skanmotutgaaende.exceptions.functional.AbstractSkanmotutgaaendeFunctionalException;
 import no.nav.skanmotutgaaende.lagrefildetaljer.data.LagreFildetaljerRequest;
 import no.nav.skanmotutgaaende.lagrefildetaljer.data.LagreFildetaljerResponse;
 import no.nav.skanmotutgaaende.utils.Utils;

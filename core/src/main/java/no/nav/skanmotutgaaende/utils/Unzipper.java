@@ -3,6 +3,7 @@ package no.nav.skanmotutgaaende.utils;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotutgaaende.domain.FilepairWithMetadata;
 import no.nav.skanmotutgaaende.domain.Skanningmetadata;
+import no.nav.skanmotutgaaende.exceptions.functional.SkanmotutgaaendeUnzipperFunctionalException;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -82,8 +83,7 @@ public class Unzipper {
 
             return skanningmetadata;
         } catch (JAXBException e) {
-            log.warn("Could not convert file to skanningmetadata", e);
-            return null;
+            throw new SkanmotutgaaendeUnzipperFunctionalException("Skanmotutgaaende klarte ikke lese metadata i zipfil", e);
         }
     }
 

@@ -3,6 +3,7 @@ package no.nav.skanmotutgaaende.lesoglagre;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotutgaaende.domain.FilepairWithMetadata;
 import no.nav.skanmotutgaaende.exceptions.functional.AbstractSkanmotutgaaendeFunctionalException;
+import no.nav.skanmotutgaaende.exceptions.technical.AbstractSkanmotutgaaendeTechnicalException;
 import no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerService;
 import no.nav.skanmotutgaaende.lagrefildetaljer.data.LagreFildetaljerResponse;
 import no.nav.skanmotutgaaende.leszipfil.LesZipfilService;
@@ -58,7 +59,11 @@ public class LesFraFilomraadeOgLagreFildetaljer {
             response = lagreFildetaljerService.lagreFildetaljer(filepairWithMetadata);
             log.info("Skanmotutgaaende lagret fildetaljer for journalpost med id {}", filepairWithMetadata.getSkanningmetadata().getJournalpost().getJournalpostId());
         } catch (AbstractSkanmotutgaaendeFunctionalException e) {
-            log.error("Skanmotutgaaende feilet med lagring av fildetaljer til journalpost med id {}", filepairWithMetadata.getSkanningmetadata().getJournalpost().getJournalpostId(), e);
+            // TODO: Feilhåndtering
+            log.error("Skanmotutgaaende feilet funskjonelt med lagring av fildetaljer til journalpost med id {}", filepairWithMetadata.getSkanningmetadata().getJournalpost().getJournalpostId(), e);
+        } catch (AbstractSkanmotutgaaendeTechnicalException e) {
+            // TODO: Feilhåndtering
+            log.error("Skanmotutgaaende feilet teknisk med lagring av fildetaljer til journalpost med id {}", filepairWithMetadata.getSkanningmetadata().getJournalpost().getJournalpostId(), e);
         }
         return response;
     }

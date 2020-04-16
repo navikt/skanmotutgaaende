@@ -2,6 +2,7 @@ package no.nav.skanmotutgaaende.itest;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import no.nav.skanmotutgaaende.config.properties.SkanmotutgaaendeProperties;
+import no.nav.skanmotutgaaende.exceptions.functional.MottaDokumentUtgaaendeSkanningFunctionalException;
 import no.nav.skanmotutgaaende.itest.config.TestConfig;
 import no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerConsumer;
 import no.nav.skanmotutgaaende.lagrefildetaljer.data.LagreFildetaljerRequest;
@@ -18,15 +19,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.io.IOException;
 import java.util.Arrays;
-import java.util.Date;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.put;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = {TestConfig.class},
@@ -37,7 +37,9 @@ public class LagreFildetaljerIT {
 
     private final byte[] DUMMY_FILE = "dummyfile".getBytes();
     private final String JOURNALPOST_ID = "001";
+    private final String JOURNALPOST_ID_INVALID = "002";
     private final String MOTTA_DOKUMENT_UTGAAENDE_SKANNING_TJENESTE = "/rest/intern/journalpostapi/v1/journalpost/001/mottaDokumentUtgaaendeSkanning";
+    private final String MOTTA_DOKUMENT_UTGAAENDE_SKANNING_TJENESTE_INVALID_JOURNALPOST = "/rest/intern/journalpostapi/v1/journalpost/002/mottaDokumentUtgaaendeSkanning";
 
     private LagreFildetaljerConsumer lagrefildetaljerConsumer;
 
@@ -60,18 +62,26 @@ public class LagreFildetaljerIT {
     private void setUpStubs() {
         stubFor(put(urlMatching(MOTTA_DOKUMENT_UTGAAENDE_SKANNING_TJENESTE))
             .willReturn(aResponse().withStatus(HttpStatus.OK.value())));
+        stubFor(put(urlMatching(MOTTA_DOKUMENT_UTGAAENDE_SKANNING_TJENESTE_INVALID_JOURNALPOST))
+            .willReturn(aResponse().withStatus(HttpStatus.BAD_REQUEST.value())));
     }
 
     @Test
-    public void shouldLagreFildetaljer() throws IOException {
+    public void shouldLagreFildetaljer() {
         LagreFildetaljerRequest request = createLagreFildetaljerRequest();
         LagreFildetaljerResponse res = lagrefildetaljerConsumer.lagreFilDetaljer(request, JOURNALPOST_ID);
         assertEquals(null, res);
     }
 
-    private LagreFildetaljerRequest createLagreFildetaljerRequest() throws IOException {
+    @Test
+    public void shoulfFailIfInvalidRequest() {
+        LagreFildetaljerRequest request = createLagreFildetaljerRequest();
+        assertThrows(MottaDokumentUtgaaendeSkanningFunctionalException.class, () -> lagrefildetaljerConsumer.lagreFilDetaljer(request, JOURNALPOST_ID_INVALID));
+    }
+
+    private LagreFildetaljerRequest createLagreFildetaljerRequest() {
         return LagreFildetaljerRequest.builder()
-                .datoMottatt(new Date())
+                //.datoMottatt(new Date())
                 .batchnavn("xml_pdf_pairs_testdata.zip")
                 .tilleggsopplysninger(Arrays.asList(
                         LagreFildetaljerRequest.Tilleggsopplysninger.builder()
