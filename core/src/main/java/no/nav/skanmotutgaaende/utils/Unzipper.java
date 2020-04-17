@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -29,46 +30,45 @@ public class Unzipper {
         Map<String, byte[]> xmls = new HashMap<>();
         Map<String, byte[]> pdfs = new HashMap<>();
         byte[] buffer = new byte[1024];
-        ZipInputStream zis = new ZipInputStream(new FileInputStream(zip));
-        ZipEntry zipEntry = zis.getNextEntry();
+        ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(zip));
+        ZipEntry zipEntry = zipInputStream.getNextEntry();
         while (zipEntry != null) {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             int len;
-            while ((len = zis.read(buffer)) > 0) {
-                baos.write(buffer, 0, len);
+            while ((len = zipInputStream.read(buffer)) > 0) {
+                byteArrayOutputStream.write(buffer, 0, len);
             }
             if ("xml".equals(getFileType(zipEntry))) {
-                skanningmetadatas.add(bytesToSkanningmetadata(baos.toByteArray()));
-                xmls.put(zipEntry.getName(), baos.toByteArray());
+                skanningmetadatas.add(bytesToSkanningmetadata(byteArrayOutputStream.toByteArray()));
+                xmls.put(zipEntry.getName(), byteArrayOutputStream.toByteArray());
             }
             if ("pdf".equals(getFileType(zipEntry))) {
-                pdfs.put(zipEntry.getName(), baos.toByteArray());
+                pdfs.put(zipEntry.getName(), byteArrayOutputStream.toByteArray());
             }
-            baos.close();
-            zipEntry = zis.getNextEntry();
+            byteArrayOutputStream.close();
+            zipEntry = zipInputStream.getNextEntry();
         }
-        zis.closeEntry();
-        zis.close();
+        zipInputStream.closeEntry();
+        zipInputStream.close();
 
         return pairFiles(skanningmetadatas, pdfs, xmls);
     }
 
     private static List<FilepairWithMetadata> pairFiles(List<Skanningmetadata> skanningmetadataList, Map<String, byte[]> pdfs, Map<String, byte[]> xmls) {
-        List<FilepairWithMetadata> combined = new ArrayList<>();
-        for (Skanningmetadata skanningmetadata : skanningmetadataList) {
-            for (String pdfName : pdfs.keySet()) {
-                if (pdfName.equals(skanningmetadata.getJournalpost().getFilNavn())) {
-                    combined.add(FilepairWithMetadata.builder()
-                            .skanningmetadata(skanningmetadata)
-                            .pdf(pdfs.get(pdfName))
-                            .xml(xmls.get(Utils.changeFiletypeInFilename(pdfName, "xml")))
-                            .build()
-                    );
-                    break;
-                }
+        return skanningmetadataList.stream().map(metadata -> {
+            String pdfFilnavn = metadata.getJournalpost().getFilNavn();
+            String xmlFilnavn = Utils.changeFiletypeInFilename(pdfFilnavn, "xml");
+            if (!pdfs.containsKey(pdfFilnavn)) {
+                throw new SkanmotutgaaendeUnzipperFunctionalException("Skanmotutgaaende fant ikke tilhørende pdf-fil til journalpost " + metadata.getJournalpost().getJournalpostId());
+            } if (!xmls.containsKey(xmlFilnavn)) {
+                throw new SkanmotutgaaendeUnzipperFunctionalException("Skanmotutgaaende fant ikke tilhørende xml-fil til journalpost " + metadata.getJournalpost().getJournalpostId());
             }
-        }
-        return combined;
+            return FilepairWithMetadata.builder()
+                    .skanningmetadata(metadata)
+                    .pdf(pdfs.get(pdfFilnavn))
+                    .xml(xmls.get(xmlFilnavn))
+                    .build();
+        }).collect(Collectors.toList());
     }
 
     private static Skanningmetadata bytesToSkanningmetadata(byte[] bytes) throws UnsupportedEncodingException {

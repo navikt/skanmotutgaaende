@@ -20,6 +20,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Arrays;
+import java.util.Date;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.put;
@@ -81,7 +82,7 @@ public class LagreFildetaljerIT {
 
     private LagreFildetaljerRequest createLagreFildetaljerRequest() {
         return LagreFildetaljerRequest.builder()
-                //.datoMottatt(new Date())
+                .datoMottatt(new Date())
                 .batchnavn("xml_pdf_pairs_testdata.zip")
                 .tilleggsopplysninger(Arrays.asList(
                         LagreFildetaljerRequest.Tilleggsopplysninger.builder()
