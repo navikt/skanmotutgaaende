@@ -3,7 +3,10 @@ package no.nav.skanmotutgaaende.utils;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotutgaaende.domain.FilepairWithMetadata;
 import no.nav.skanmotutgaaende.domain.Skanningmetadata;
+import no.nav.skanmotutgaaende.exceptions.functional.InvalidMetadataException;
 import no.nav.skanmotutgaaende.exceptions.functional.SkanmotutgaaendeUnzipperFunctionalException;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -20,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 @Slf4j
 public class Unzipper {
@@ -30,8 +32,8 @@ public class Unzipper {
         Map<String, byte[]> xmls = new HashMap<>();
         Map<String, byte[]> pdfs = new HashMap<>();
         byte[] buffer = new byte[1024];
-        ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(zip));
-        ZipEntry zipEntry = zipInputStream.getNextEntry();
+        ZipArchiveInputStream zipInputStream = new ZipArchiveInputStream(new FileInputStream(zip));
+        ZipArchiveEntry zipEntry = zipInputStream.getNextZipEntry();
         while (zipEntry != null) {
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             int len;
@@ -46,9 +48,8 @@ public class Unzipper {
                 pdfs.put(zipEntry.getName(), byteArrayOutputStream.toByteArray());
             }
             byteArrayOutputStream.close();
-            zipEntry = zipInputStream.getNextEntry();
+            zipEntry = zipInputStream.getNextZipEntry();
         }
-        zipInputStream.closeEntry();
         zipInputStream.close();
 
         return pairFiles(skanningmetadatas, pdfs, xmls);
@@ -80,6 +81,8 @@ public class Unzipper {
             Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 
             Skanningmetadata skanningmetadata = (Skanningmetadata) jaxbUnmarshaller.unmarshal(new StringReader(xmlString));
+
+            skanningmetadata.verifyFields();
 
             return skanningmetadata;
         } catch (JAXBException e) {

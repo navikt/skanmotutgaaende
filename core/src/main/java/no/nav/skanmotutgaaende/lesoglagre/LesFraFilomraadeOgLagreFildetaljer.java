@@ -3,6 +3,8 @@ package no.nav.skanmotutgaaende.lesoglagre;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotutgaaende.domain.FilepairWithMetadata;
 import no.nav.skanmotutgaaende.exceptions.functional.AbstractSkanmotutgaaendeFunctionalException;
+import no.nav.skanmotutgaaende.exceptions.functional.InvalidMetadataException;
+import no.nav.skanmotutgaaende.exceptions.functional.SkanmotutgaaendeUnzipperFunctionalException;
 import no.nav.skanmotutgaaende.exceptions.technical.AbstractSkanmotutgaaendeTechnicalException;
 import no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerService;
 import no.nav.skanmotutgaaende.lagrefildetaljer.data.LagreFildetaljerResponse;
@@ -40,17 +42,23 @@ public class LesFraFilomraadeOgLagreFildetaljer {
         File zipfil = lesZipfilService.lesZipfil();
         try {
             List<FilepairWithMetadata> filepairWithMetadataList = Unzipper.unzipXmlPdf(zipfil);
+
             List<LagreFildetaljerResponse> responses = filepairWithMetadataList.stream()
                     .map(filepair -> lagreFil(filepair))
                     .filter(response -> null != response)
                     .collect(Collectors.toList());
+
             String zipName = filepairWithMetadataList.get(0).getSkanningmetadata().getJournalpost().getBatchNavn();
             log.info("Skanmotutgaaende lagret fildetaljer fra zipfil {} i dokarkiv", zipName);
             return responses;
         } catch (IOException e) {
             log.error("Skanmotutgaaende klarte ikke lese fra fil {}", zipfil.getName(), e);
-            return null;
+        } catch (SkanmotutgaaendeUnzipperFunctionalException e) {
+            log.error("Skanmotutgaaende feilet i unzipping av fil {}", zipfil.getName(), e);
+        } catch (InvalidMetadataException e) {
+            log.error("Skanningmetadata hadde ugyldige verdier", e);
         }
+        return null;
     }
 
     private LagreFildetaljerResponse lagreFil(FilepairWithMetadata filepairWithMetadata) {

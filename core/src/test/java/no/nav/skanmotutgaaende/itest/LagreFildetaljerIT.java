@@ -103,13 +103,13 @@ public class LagreFildetaljerIT {
                                 .filtype("pdf")
                                 .variantformat("ARKIV")
                                 .fysiskDokument(DUMMY_FILE)
-                                .filnavn("dummy.pdf")
+                                .filnavn("1408-005.pdf")
                                 .build(),
                         LagreFildetaljerRequest.Dokumentvariant.builder()
                                 .filtype("xml")
                                 .variantformat("ORIGINAL")
                                 .fysiskDokument(DUMMY_FILE)
-                                .filnavn("dummy.xml")
+                                .filnavn("1408-005.xml")
                                 .build()))
                 .build();
     }
