@@ -46,6 +46,9 @@ public class UnzipperTest {
         Journalpost journalpost = pair.getSkanningmetadata().getJournalpost();
         SkanningInfo skanningInfo = pair.getSkanningmetadata().getSkanningInfo();
 
+        System.out.println("Direct: " + new String(xml));
+        System.out.println("Zip: " + new String(pair.getXml()));
+
         assertEquals(10, extracted.size());
         assertEquals(JOURNALPOST_ID, journalpost.getJournalpostId());
         assertEquals(MOTTAKSKANAL, journalpost.getMottakskanal());
@@ -61,13 +64,13 @@ public class UnzipperTest {
 
     @Test
     public void shouldThrowExceptionIfUnableToReadMetadata() {
-        File zip = new File(BROKEN_ZIP_FILE_PATH);
+        File zip = Paths.get(BROKEN_ZIP_FILE_PATH).toFile();
         assertThrows(SkanmotutgaaendeUnzipperFunctionalException.class, () -> Unzipper.unzipXmlPdf(zip));
     }
 
     @Test
     public void shouldThrowExceptionIfInvalidMetadata() {
-        File zip = new File(INVALID_ZIP_FILE_PATH);
+        File zip = Paths.get(INVALID_ZIP_FILE_PATH).toFile();
         assertThrows(InvalidMetadataException.class, () -> Unzipper.unzipXmlPdf(zip));
     }
 
