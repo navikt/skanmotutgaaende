@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -37,7 +38,7 @@ public class UnzipperTest {
 
     @Test
     public void shouldExtractContentFromZip() throws IOException {
-        File zip = new File(ZIP_FILE_PATH);
+        File zip = Paths.get(ZIP_FILE_PATH).toFile();
         byte[] pdf = Files.readAllBytes(Path.of(PDF_PATH));
         byte[] xml = Files.readAllBytes(Path.of(XML_PATH));
         List<FilepairWithMetadata> extracted = Unzipper.unzipXmlPdf(zip);
