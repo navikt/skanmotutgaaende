@@ -24,6 +24,7 @@
     <properties>
         <java.version>11</java.version>
 
+        <apache.commons.version>1.20</apache.commons.version>
         <glassfish.jaxb.version>2.3.2</glassfish.jaxb.version>
         <javax.validation.version>2.0.1.Final</javax.validation.version>
         <javax.activation.version>1.1.1</javax.activation.version>
@@ -86,7 +87,7 @@
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-compress</artifactId>
-                <version>1.20</version>
+                <version>${apache.commons.version}</version>
             </dependency>
 
             <!--test-->

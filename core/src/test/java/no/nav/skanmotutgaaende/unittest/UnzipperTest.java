@@ -5,7 +5,7 @@ import no.nav.skanmotutgaaende.domain.Journalpost;
 import no.nav.skanmotutgaaende.domain.SkanningInfo;
 import no.nav.skanmotutgaaende.exceptions.functional.InvalidMetadataException;
 import no.nav.skanmotutgaaende.exceptions.functional.SkanmotutgaaendeUnzipperFunctionalException;
-import no.nav.skanmotutgaaende.utils.Unzipper;
+import no.nav.skanmotutgaaende.unzipskanningmetadata.Unzipper;
 import org.junit.Test;
 
 import java.io.File;

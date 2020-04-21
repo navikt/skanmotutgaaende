@@ -9,12 +9,13 @@ import no.nav.skanmotutgaaende.exceptions.technical.AbstractSkanmotutgaaendeTech
 import no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerService;
 import no.nav.skanmotutgaaende.lagrefildetaljer.data.LagreFildetaljerResponse;
 import no.nav.skanmotutgaaende.leszipfil.LesZipfilService;
-import no.nav.skanmotutgaaende.utils.Unzipper;
+import no.nav.skanmotutgaaende.unzipskanningmetadata.Unzipper;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -56,9 +57,9 @@ public class LesFraFilomraadeOgLagreFildetaljer {
         } catch (SkanmotutgaaendeUnzipperFunctionalException e) {
             log.error("Skanmotutgaaende feilet i unzipping av fil {}", zipfil.getName(), e);
         } catch (InvalidMetadataException e) {
-            log.error("Skanningmetadata hadde ugyldige verdier", e);
+            log.error("Skanningmetadata hadde ugyldige verdier i zipFil {}", zipfil.getName(), e);
         }
-        return null;
+        return new ArrayList<>();
     }
 
     private LagreFildetaljerResponse lagreFil(FilepairWithMetadata filepairWithMetadata) {
