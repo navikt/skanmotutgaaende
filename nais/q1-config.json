@@ -1,6 +1,6 @@
 {
   "NAMESPACE": "q1",
-  "SRVSKANMOTUTGAAENDE": "/serviceuser/data/dev/srvskanmotutgaaende"
+  "SRVSKANMOTUTGAAENDE": "/serviceuser/data/dev/srvskanmotutgaaende",
   "SKANMOTUTGAAENDE_DOKARKIVJOURNALPOSTURL": "https://dokarkiv-q1.nais.preprod.local/rest/intern/journalpostapi/v1/journalpost",
   "INGRESSES": [
     "https://skanmotutgaaende-q1.nais.preprod.local"
