@@ -46,8 +46,13 @@ public class UnzipperTest {
         Journalpost journalpost = pair.getSkanningmetadata().getJournalpost();
         SkanningInfo skanningInfo = pair.getSkanningmetadata().getSkanningInfo();
 
-        System.out.println("Direct: " + new String(xml));
-        System.out.println("Zip: " + new String(pair.getXml()));
+        System.out.print("Direct: ");
+        for (byte b: xml) System.out.print(b + ", ");
+        System.out.println(new String(xml));
+
+        System.out.print("Zip: ");
+        for (byte b: pair.getXml()) System.out.print(b + ", ");
+        System.out.println(new String(pair.getXml()));
 
         assertEquals(10, extracted.size());
         assertEquals(JOURNALPOST_ID, journalpost.getJournalpostId());
