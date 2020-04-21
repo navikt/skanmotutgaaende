@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -35,6 +36,7 @@ public class UnzipperTest {
     private final String ENDORSERNR = "3110190003NAV743506";
     private final String FYSISK_POSTBOKS = "1400";
     private final String STREKKODE_POSTBOKS = "1400";
+    private final byte CR = 13;
 
     @Test
     public void shouldExtractContentFromZip() throws IOException {
@@ -46,14 +48,6 @@ public class UnzipperTest {
         Journalpost journalpost = pair.getSkanningmetadata().getJournalpost();
         SkanningInfo skanningInfo = pair.getSkanningmetadata().getSkanningInfo();
 
-        System.out.print("Direct: ");
-        for (byte b: xml) System.out.print(b + ", ");
-        System.out.println(new String(xml));
-
-        System.out.print("Zip: ");
-        for (byte b: pair.getXml()) System.out.print(b + ", ");
-        System.out.println(new String(pair.getXml()));
-
         assertEquals(10, extracted.size());
         assertEquals(JOURNALPOST_ID, journalpost.getJournalpostId());
         assertEquals(MOTTAKSKANAL, journalpost.getMottakskanal());
@@ -63,8 +57,8 @@ public class UnzipperTest {
         assertEquals(ENDORSERNR, journalpost.getEndorsernr());
         assertEquals(FYSISK_POSTBOKS, skanningInfo.getFysiskPostboks());
         assertEquals(STREKKODE_POSTBOKS, skanningInfo.getStrekkodePostboks());
-        assertArrayEquals(xml, pair.getXml());
-        assertArrayEquals(pdf, pair.getPdf());
+        assertArrayEqualsIgnoreCR(xml, pair.getXml());
+        assertArrayEqualsIgnoreCR(pdf, pair.getPdf());
     }
 
     @Test
@@ -77,6 +71,23 @@ public class UnzipperTest {
     public void shouldThrowExceptionIfInvalidMetadata() {
         File zip = Paths.get(INVALID_ZIP_FILE_PATH).toFile();
         assertThrows(InvalidMetadataException.class, () -> Unzipper.unzipXmlPdf(zip));
+    }
+
+    private void assertArrayEqualsIgnoreCR(byte[] expected, byte[] actual) {
+        byte[] expectedIgnored = removeCR(expected);
+        byte[] actualIgnored = removeCR(actual);
+        assertArrayEquals(expectedIgnored, actualIgnored);
+    }
+
+    private byte[] removeCR(byte[] array) {
+        int i = 0;
+        byte[] byteArrayWithoutCR = new byte[array.length];
+        for (byte b: array) {
+            if (CR != b) {
+                byteArrayWithoutCR[i++] = b;
+            }
+        }
+        return byteArrayWithoutCR;
     }
 
     private FilepairWithMetadata getSkanningmetadataPdfPairFromPdfName(List<FilepairWithMetadata> filepairWithMetadata, String name) {
