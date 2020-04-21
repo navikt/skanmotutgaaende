@@ -17,8 +17,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "skanningmetadata")
 public class Skanningmetadata {
 
+    SkanningmetadataValidator skanningmetadataValidator = new SkanningmetadataValidator();
+
     public void verifyFields() throws InvalidMetadataException {
-        SkanningmetadataValidator.validate(this);
+        skanningmetadataValidator.validate(this);
     }
 
     @XmlElement(required = true)

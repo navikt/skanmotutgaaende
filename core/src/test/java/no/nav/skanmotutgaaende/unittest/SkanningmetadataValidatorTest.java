@@ -13,6 +13,8 @@ import java.util.Date;
 
 public class SkanningmetadataValidatorTest {
 
+    private final SkanningmetadataValidator skanningmetadataValidator = new SkanningmetadataValidator();
+
     private final String JPID_VALID = "123456789";
     private final String JPID_INVALID = "ugyldig id";
     private final String FILE_NAME_VALID = "filtest.zip";
@@ -26,18 +28,18 @@ public class SkanningmetadataValidatorTest {
 
     @Test
     public void shouldNotValidateInvalidJournalpostId() {
-        assertThrows(InvalidMetadataException.class, () -> SkanningmetadataValidator.validate(getSkanningmetadata(JPID_INVALID, FILE_NAME_VALID)));
+        assertThrows(InvalidMetadataException.class, () -> skanningmetadataValidator.validate(getSkanningmetadata(JPID_INVALID, FILE_NAME_VALID)));
     }
 
     @Test
     public void shouldNotValidateInvalidFileName() {
-        assertThrows(InvalidMetadataException.class, () -> SkanningmetadataValidator.validate(getSkanningmetadata(JPID_VALID, FILE_NAME_INVALID)));
+        assertThrows(InvalidMetadataException.class, () -> skanningmetadataValidator.validate(getSkanningmetadata(JPID_VALID, FILE_NAME_INVALID)));
     }
 
     @Test
     public void shouldNotValidateMissingSkanningInfo() {
         assertThrows(InvalidMetadataException.class, () ->
-                SkanningmetadataValidator.validate(Skanningmetadata.builder()
+                skanningmetadataValidator.validate(Skanningmetadata.builder()
                         .journalpost(Journalpost.builder()
                                 .journalpostId(JPID_VALID)
                                 .mottakskanal("SKAN_IM")
@@ -50,7 +52,7 @@ public class SkanningmetadataValidatorTest {
     }
 
     private void assertSkanningmetadataIsValid(Skanningmetadata skanningmetadata) {
-        SkanningmetadataValidator.validate(skanningmetadata);
+        skanningmetadataValidator.validate(skanningmetadata);
     }
 
     private Skanningmetadata getSkanningmetadata(String journalpostId, String filNavn) {

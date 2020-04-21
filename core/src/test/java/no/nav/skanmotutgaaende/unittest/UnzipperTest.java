@@ -88,8 +88,6 @@ public class UnzipperTest {
                 byteArrayWithoutCR[i++] = b;
             }
         }
-        for (byte b: byteArrayWithoutCR) System.out.print(b + ", ");
-        System.out.println();
         return byteArrayWithoutCR;
     }
 
