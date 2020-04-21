@@ -74,19 +74,22 @@ public class UnzipperTest {
     }
 
     private void assertArrayEqualsIgnoreCR(byte[] expected, byte[] actual) {
-        byte[] expectedIgnored = removeCR(expected);
-        byte[] actualIgnored = removeCR(actual);
+        int len = Math.min(expected.length, actual.length);
+        byte[] expectedIgnored = removeCR(expected, len);
+        byte[] actualIgnored = removeCR(actual, len);
         assertArrayEquals(expectedIgnored, actualIgnored);
     }
 
-    private byte[] removeCR(byte[] array) {
+    private byte[] removeCR(byte[] array, int len) {
         int i = 0;
-        byte[] byteArrayWithoutCR = new byte[array.length];
+        byte[] byteArrayWithoutCR = new byte[len];
         for (byte b: array) {
             if (CR != b) {
                 byteArrayWithoutCR[i++] = b;
             }
         }
+        for (byte b: byteArrayWithoutCR) System.out.print(b + ", ");
+        System.out.println();
         return byteArrayWithoutCR;
     }
 
