@@ -1,11 +1,14 @@
 kind: Application
 apiVersion: nais.io/v1alpha1
 metadata:
-  name: skanmot1408
+  name: skanmotutgaaende
   namespace: {{ NAMESPACE }}
   labels:
     team: teamdokumenthandtering
 spec:
+  env:
+    - name: SKANMOTUTGAAENDE_DOKARKIVJOURNALPOSTURL
+      value: {{ SKANMOTUTGAAENDE_DOKARKIVJOURNALPOSTURL }}
   image: {{ image }}
   ingresses:
     {{#each INGRESSES}}
@@ -32,3 +35,6 @@ spec:
       memory: 1024Mi
   vault:
     enabled: true
+    paths:
+      - kvPath: {{ SRVSKANMOTUTGAAENDE }}
+        mountPath: /var/run/secrets/nais.io/srvskanmotutgaaende

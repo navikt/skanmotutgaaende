@@ -1,6 +1,8 @@
 {
   "NAMESPACE": "default",
+  "SRVSKANMOTUTGAAENDE": "/serviceuser/data/prod/srvskanmotutgaaende",
+  "SKANMOTUTGAAENDE_DOKARKIVJOURNALPOSTURL": "https://dokarkiv.nais.adeo.no/rest/intern/journalpostapi/v1/journalpost",
   "INGRESSES": [
-    "https://skanmot1408.nais.adeo.no"
+    "https://skanmotutgaaende.nais.adeo.no"
   ]
 }

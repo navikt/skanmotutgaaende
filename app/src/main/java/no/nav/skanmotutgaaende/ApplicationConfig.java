@@ -1,0 +1,26 @@
+package no.nav.skanmotutgaaende;
+
+import io.micrometer.core.instrument.MeterRegistry;
+import no.nav.skanmotutgaaende.config.properties.ServiceUserProperties;
+import no.nav.skanmotutgaaende.config.properties.SkanmotutgaaendeProperties;
+import no.nav.skanmotutgaaende.metrics.DokTimedAspect;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
+
+@ComponentScan
+@EnableAutoConfiguration
+@EnableAspectJAutoProxy
+@EnableConfigurationProperties(SkanmotutgaaendeProperties.class)
+@Configuration
+public class ApplicationConfig {
+
+    @Bean
+    public DokTimedAspect timedAspect(MeterRegistry registry) {
+        return new DokTimedAspect(registry);
+    }
+
+}
