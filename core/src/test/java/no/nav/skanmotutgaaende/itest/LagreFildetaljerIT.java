@@ -91,11 +91,11 @@ public class LagreFildetaljerIT {
                                 .build(),
                         LagreFildetaljerRequest.Tilleggsopplysninger.builder()
                                 .nokkel(LagreFildetaljerRequest.FYSISK_POSTBOKS)
-                                .verdi("1400")
+                                .verdi("1408")
                                 .build(),
                         LagreFildetaljerRequest.Tilleggsopplysninger.builder()
                                 .nokkel(LagreFildetaljerRequest.STREKKODE_POSTBOKS)
-                                .verdi("1400")
+                                .verdi("1408")
                                 .build()
                 ))
                 .dokumentvarianter(Arrays.asList(
@@ -103,13 +103,13 @@ public class LagreFildetaljerIT {
                                 .filtype("pdf")
                                 .variantformat("ARKIV")
                                 .fysiskDokument(DUMMY_FILE)
-                                .filnavn("1408-005.pdf")
+                                .filnavn("data_005.pdf")
                                 .build(),
                         LagreFildetaljerRequest.Dokumentvariant.builder()
                                 .filtype("xml")
                                 .variantformat("ORIGINAL")
                                 .fysiskDokument(DUMMY_FILE)
-                                .filnavn("1408-005.xml")
+                                .filnavn("data_005.xml")
                                 .build()))
                 .build();
     }

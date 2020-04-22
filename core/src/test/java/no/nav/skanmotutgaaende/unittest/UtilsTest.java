@@ -7,8 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class UtilsTest {
 
-    private final String PDF_NAME = "1408-005.pdf";
-    private final String XML_NAME = "1408-005.xml";
+    private final String PDF_NAME = "data_005.pdf";
+    private final String XML_NAME = "data_005.xml";
 
     @Test
     public void shouldConvertPdfFilenameToXmlFilename() {

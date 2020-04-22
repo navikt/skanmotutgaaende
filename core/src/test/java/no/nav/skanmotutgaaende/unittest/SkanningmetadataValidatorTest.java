@@ -66,8 +66,8 @@ public class SkanningmetadataValidatorTest {
                         .endorsernr("00001111NAV22")
                         .build())
                 .skanningInfo(SkanningInfo.builder()
-                        .fysiskPostboks("1400")
-                        .strekkodePostboks("1400")
+                        .fysiskPostboks("1408")
+                        .strekkodePostboks("1408")
                         .build())
                 .build();
     }

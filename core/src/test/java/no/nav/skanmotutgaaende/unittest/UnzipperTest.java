@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -25,17 +24,17 @@ public class UnzipperTest {
     private final String ZIP_FILE_PATH = "src/test/resources/__files/xml_pdf_pairs/xml_pdf_pairs_testdata.zip";
     private final String BROKEN_ZIP_FILE_PATH = "src/test/resources/__files/xml_pdf_pairs/xml_pdf_pairs_broken_testdata.zip";
     private final String INVALID_ZIP_FILE_PATH = "src/test/resources/__files/xml_pdf_pairs/xml_pdf_pairs_invalid_testdata.zip";
-    private final String PDF_PATH = "src/test/resources/__files/xml_pdf_pairs/1408-005.pdf";
-    private final String XML_PATH = "src/test/resources/__files/xml_pdf_pairs/1408-005.xml";
-    private final String ZIPPED_PDF_NAME = "1408-005.pdf";
+    private final String PDF_PATH = "src/test/resources/__files/xml_pdf_pairs/data_005.pdf";
+    private final String XML_PATH = "src/test/resources/__files/xml_pdf_pairs/data_005.xml";
+    private final String ZIPPED_PDF_NAME = "data_005.pdf";
     private final String JOURNALPOST_ID = "005";
     private final String MOTTAKSKANAL = "SKAN_IM";
     private final long DATO_MOTTATT = ***gammelt_fnr***00L;
     private final String BATCH_NAVN = "xml_pdf_pairs_testdata.zip";
-    private final String FIL_NAVN = "1408-005.pdf";
+    private final String FIL_NAVN = "data_005.pdf";
     private final String ENDORSERNR = "3110190003NAV743506";
-    private final String FYSISK_POSTBOKS = "1400";
-    private final String STREKKODE_POSTBOKS = "1400";
+    private final String FYSISK_POSTBOKS = "1408";
+    private final String STREKKODE_POSTBOKS = "1408";
     private final byte CR = 13;
 
     @Test
@@ -83,7 +82,7 @@ public class UnzipperTest {
     private byte[] removeCR(byte[] array, int len) {
         int i = 0;
         byte[] byteArrayWithoutCR = new byte[len];
-        for (byte b: array) {
+        for (byte b : array) {
             if (CR != b) {
                 byteArrayWithoutCR[i++] = b;
             }

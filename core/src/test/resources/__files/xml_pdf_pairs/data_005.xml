@@ -5,11 +5,11 @@
         <mottakskanal>SKAN_IM</mottakskanal>
         <datoMottatt>2019-10-31</datoMottatt>
         <batchNavn>xml_pdf_pairs_testdata.zip</batchNavn>
-        <filNavn>1408-005.pdf</filNavn>
+        <filNavn>data_005.pdf</filNavn>
         <endorsernr>3110190003NAV743506</endorsernr>
     </journalpost>
     <skanningInfo>
-        <fysiskPostboks>1400</fysiskPostboks>
-        <strekkodePostboks>1400</strekkodePostboks>
+        <fysiskPostboks>1408</fysiskPostboks>
+        <strekkodePostboks>1408</strekkodePostboks>
     </skanningInfo>
 </skanningmetadata>
