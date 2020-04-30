@@ -32,7 +32,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -109,11 +108,6 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
                 .willReturn(aResponse().withStatus(HttpStatus.OK.value())
                         .withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
                         .withBody("{}")));
-    }
-
-    @Test
-    public void shouldConnect() {
-        lesFraFilomraadeOgLagreFildetaljer.tryToConnect();
     }
 
     @Test

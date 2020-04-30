@@ -1,6 +1,7 @@
 package no.nav.skanmotutgaaende.leszipfil;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.skanmotutgaaende.exceptions.technical.SkanmotutgaaendeSftpTechnicalException;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
@@ -19,8 +20,8 @@ public class LesZipfilService {
         this.lesZipfilConsumer = lesZipfilConsumer;
     }
 
-    public Map<String, byte[]> getZipFiles() throws Exception {
-        try{
+    public Map<String, byte[]> getZipFiles() throws SkanmotutgaaendeSftpTechnicalException {
+        try {
             List<String> fileNames = lesZipfilConsumer.listZipFiles();
             Map<String, byte[]> files = new HashMap<>();
 
@@ -34,7 +35,7 @@ public class LesZipfilService {
             return files;
         } catch (Exception e) {
             log.warn("failed to connect to sftp");
-            throw e;
+            throw new SkanmotutgaaendeSftpTechnicalException("Failed to connect to sftp", e);
         }
     }
 

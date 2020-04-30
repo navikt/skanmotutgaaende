@@ -6,6 +6,7 @@ import no.nav.skanmotutgaaende.exceptions.functional.AbstractSkanmotutgaaendeFun
 import no.nav.skanmotutgaaende.exceptions.functional.InvalidMetadataException;
 import no.nav.skanmotutgaaende.exceptions.functional.SkanmotutgaaendeUnzipperFunctionalException;
 import no.nav.skanmotutgaaende.exceptions.technical.AbstractSkanmotutgaaendeTechnicalException;
+import no.nav.skanmotutgaaende.exceptions.technical.SkanmotutgaaendeSftpTechnicalException;
 import no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerService;
 import no.nav.skanmotutgaaende.lagrefildetaljer.data.LagreFildetaljerResponse;
 import no.nav.skanmotutgaaende.leszipfil.LesZipfilService;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Component;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -67,12 +69,8 @@ public class LesFraFilomraadeOgLagreFildetaljer {
     }
 
     public List<List<LagreFildetaljerResponse>> lesOgLagre() {
-        Map<String, byte[]> zipfiles;
-        try {
-            zipfiles = lesZipfilService.getZipFiles();
-        } catch (Exception e) {
-            return new ArrayList<>();
-        }
+        Map<String, byte[]> zipfiles = lesFil();
+        log.info("Skanmotutgaaende leste fra filområde og fant {} zipfiler", zipfiles.size());
 
         List<List<LagreFildetaljerResponse>> allResponses = new ArrayList<>();
         for (String zipname : zipfiles.keySet()) {
@@ -95,6 +93,14 @@ public class LesFraFilomraadeOgLagreFildetaljer {
             }
         }
         return allResponses;
+    }
+
+    private Map<String, byte[]> lesFil() {
+        try {
+            return lesZipfilService.getZipFiles();
+        } catch (SkanmotutgaaendeSftpTechnicalException e) {
+            return new HashMap<>();
+        }
     }
 
     private LagreFildetaljerResponse lagreFil(FilepairWithMetadata filepairWithMetadata) {
