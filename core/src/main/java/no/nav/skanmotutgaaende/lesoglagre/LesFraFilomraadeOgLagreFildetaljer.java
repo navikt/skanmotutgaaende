@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -39,53 +40,62 @@ public class LesFraFilomraadeOgLagreFildetaljer {
 
     @Scheduled(initialDelay = 3000, fixedDelay = 72 * HOUR)
     public void scheduledJob() {
-        //lesOgLagre();
         tryToConnect();
+        lesOgLagre();
     }
 
-    public void tryToConnect(){
+    public void tryToConnect() {
         try {
             log.info("Trying to connect");
-            List<byte[]> zipFiles = lesZipfilService.getZipFiles();
-            zipFiles.stream()
-                    .map(zipFile -> new ZipInputStream(new ByteArrayInputStream(zipFile)))
+            Map<String, byte[]> zipFiles = lesZipfilService.getZipFiles();
+            zipFiles.keySet().stream()
+                    .map(zipFilename -> new ZipInputStream(new ByteArrayInputStream(zipFiles.get(zipFilename))))
                     .forEach(this::logZipEntries);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
     private void logZipEntries(ZipInputStream inputStream) {
         ZipEntry entry;
         try {
-            while ((entry = inputStream.getNextEntry()) != null){
+            while ((entry = inputStream.getNextEntry()) != null) {
                 log.info("ZipEntry = " + entry.getName());
             }
-        } catch( Exception e ) {
+        } catch (Exception e) {
             log.error("//TODO");
         }
     }
 
-    public List<LagreFildetaljerResponse> lesOgLagre() {
-        File zipfil = lesZipfilService.lesZipfil();
+    public List<List<LagreFildetaljerResponse>> lesOgLagre() {
+        Map<String, byte[]> zipfiles;
         try {
-            List<FilepairWithMetadata> filepairWithMetadataList = Unzipper.unzipXmlPdf(zipfil);
-
-            List<LagreFildetaljerResponse> responses = filepairWithMetadataList.stream()
-                    .map(filepair -> lagreFil(filepair))
-                    .filter(response -> null != response)
-                    .collect(Collectors.toList());
-
-            String zipName = filepairWithMetadataList.get(0).getSkanningmetadata().getJournalpost().getBatchNavn();
-            log.info("Skanmotutgaaende lagret fildetaljer fra zipfil {} i dokarkiv", zipName);
-            return responses;
-        } catch (IOException e) {
-            log.error("Skanmotutgaaende klarte ikke lese fra fil {}", zipfil.getName(), e);
-        } catch (SkanmotutgaaendeUnzipperFunctionalException e) {
-            log.error("Skanmotutgaaende feilet i unzipping av fil {}", zipfil.getName(), e);
-        } catch (InvalidMetadataException e) {
-            log.error("Skanningmetadata hadde ugyldige verdier i zipFil {}", zipfil.getName(), e);
+            zipfiles = lesZipfilService.getZipFiles();
+        } catch (Exception e) {
+            return new ArrayList<>();
         }
-        return new ArrayList<>();
+
+        List<List<LagreFildetaljerResponse>> allResponses = new ArrayList<>();
+        for (String zipname : zipfiles.keySet()) {
+            try {
+                List<FilepairWithMetadata> filepairWithMetadataList = Unzipper.unzipXmlPdf(zipfiles.get(zipname));
+
+                List<LagreFildetaljerResponse> responses = filepairWithMetadataList.stream()
+                        .map(filepair -> lagreFil(filepair))
+                        .filter(response -> null != response)
+                        .collect(Collectors.toList());
+
+                log.info("Skanmotutgaaende lagret fildetaljer fra zipfil {} i dokarkiv", zipname);
+                allResponses.add(responses);
+            } catch (IOException e) {
+                log.error("Skanmotutgaaende klarte ikke lese fra fil {}", zipname, e);
+            } catch (SkanmotutgaaendeUnzipperFunctionalException e) {
+                log.error("Skanmotutgaaende feilet i unzipping av fil {}", zipname, e);
+            } catch (InvalidMetadataException e) {
+                log.error("Skanningmetadata hadde ugyldige verdier i zipFil {}", zipname, e);
+            }
+        }
+        return allResponses;
     }
 
     private LagreFildetaljerResponse lagreFil(FilepairWithMetadata filepairWithMetadata) {

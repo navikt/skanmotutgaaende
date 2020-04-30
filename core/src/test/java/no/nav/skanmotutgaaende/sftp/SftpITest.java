@@ -52,6 +52,12 @@ public class SftpITest {
         sshd.start();
     }
 
+    @AfterAll
+    void shutdownSftpServer() throws IOException {
+        sshd.stop();
+        sshd.close();
+    }
+
     @Test
     public void shouldConnectToSftp() {
         try {
@@ -145,11 +151,5 @@ public class SftpITest {
         } catch (Exception e) {
             Assert.fail();
         }
-    }
-
-    @AfterAll
-    void shutdownSftpServer() throws IOException {
-        sshd.stop();
-        sshd.close();
     }
 }

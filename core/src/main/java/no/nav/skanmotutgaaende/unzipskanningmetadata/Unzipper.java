@@ -6,6 +6,7 @@ import no.nav.skanmotutgaaende.domain.Skanningmetadata;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -18,12 +19,21 @@ import java.util.Map;
 @Slf4j
 public class Unzipper {
 
+    public static List<FilepairWithMetadata> unzipXmlPdf(byte[] zip) throws IOException {
+        ZipArchiveInputStream zipInputStream = new ZipArchiveInputStream(new ByteArrayInputStream(zip));
+        return unzipXmlPdf(zipInputStream);
+    }
+
     public static List<FilepairWithMetadata> unzipXmlPdf(File zip) throws IOException {
+        ZipArchiveInputStream zipInputStream = new ZipArchiveInputStream(new FileInputStream(zip));
+        return unzipXmlPdf(zipInputStream);
+    }
+
+    public static List<FilepairWithMetadata> unzipXmlPdf(ZipArchiveInputStream zipInputStream) throws IOException {
         List<Skanningmetadata> skanningmetadatas = new ArrayList<>();
         Map<String, byte[]> xmls = new HashMap<>();
         Map<String, byte[]> pdfs = new HashMap<>();
         byte[] buffer = new byte[1024];
-        ZipArchiveInputStream zipInputStream = new ZipArchiveInputStream(new FileInputStream(zip));
         ZipArchiveEntry zipEntry = zipInputStream.getNextZipEntry();
 
         while (zipEntry != null) {

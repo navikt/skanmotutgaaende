@@ -2,6 +2,7 @@ package no.nav.skanmotutgaaende.leszipfil;
 
 import com.jcraft.jsch.SftpException;
 import lombok.extern.slf4j.Slf4j;
+import no.nav.skanmotutgaaende.config.properties.SkanmotutgaaendeProperties;
 import no.nav.skanmotutgaaende.sftp.Sftp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -10,29 +11,27 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
 public class LesZipfilConsumer {
 
-    private final String INBOUND_DIRECTORY = "";
+    //private final String INBOUND_DIRECTORY = "/inbound/SKANMOTUTGAAENDE";
 
     private Sftp sftp;
+    private String inboundDirectory;
 
     @Autowired
-    public LesZipfilConsumer(Sftp sftp){
+    public LesZipfilConsumer(Sftp sftp, SkanmotutgaaendeProperties skanmotutgaaendeProperties){
         this.sftp = sftp;
+        inboundDirectory = skanmotutgaaendeProperties.getFilomraade().getInboundDirectory();
     }
 
-    public File hentZipfil() {
-        // TODO: Hent zipfil bestående av par av pdf'er og xml'er med metadata fra skyfilområde
-        return new File("core/src/main/resources/tmp/__files/SKAN_NETS.zip");
-    }
-
-    public List<String> listZipFiles() throws Exception {
+    public List<String> listZipFiles() {
         try{
             sftp.connect();
-            sftp.changeDirectory(INBOUND_DIRECTORY);
+            sftp.changeDirectory(inboundDirectory);
             log.info(sftp.getHomePath());
             List<String> files = sftp.listFiles("*.zip");
             sftp.disconnect();
@@ -44,7 +43,7 @@ public class LesZipfilConsumer {
 
     public byte[] getFile(String filename) throws SftpException, IOException {
         sftp.connect();
-        InputStream fileStream = sftp.getFile(INBOUND_DIRECTORY + "/" + filename);
+        InputStream fileStream = sftp.getFile(inboundDirectory + "/" + filename);
         byte[] file = fileStream.readAllBytes();
         sftp.disconnect();
         return file;

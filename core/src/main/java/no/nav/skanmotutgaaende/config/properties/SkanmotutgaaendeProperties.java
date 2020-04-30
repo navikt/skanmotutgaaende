@@ -19,6 +19,9 @@ public class SkanmotutgaaendeProperties {
     private String dokarkivjournalposturl;
 
     @NotNull
+    private FilomraadeProperties filomraade;
+
+    @NotNull
     private ServiceUserProperties serviceuser;
 }
 

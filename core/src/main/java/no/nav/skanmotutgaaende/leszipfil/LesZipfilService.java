@@ -5,7 +5,9 @@ import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -20,14 +22,21 @@ public class LesZipfilService {
         this.lesZipfilConsumer = lesZipfilConsumer;
     }
 
-    public List<byte[]> getZipFiles() throws Exception {
+    public Map<String, byte[]> getZipFiles() throws Exception {
         try{
             List<String> fileNames = lesZipfilConsumer.listZipFiles();
-            List<byte[]> files = fileNames.stream().map(this::getZipFile).filter(Objects::nonNull).collect(Collectors.toList());
+            Map<String, byte[]> files = new HashMap<>();
+
+            for (String filename : fileNames) {
+                byte[] zipFile = getZipFile(filename);
+                if (null != zipFile) {
+                    files.put(filename, zipFile);
+                }
+            }
             log.info("Read " + fileNames.toString() + " from sftp");
             return files;
         } catch (Exception e) {
-            log.info("failed to connect to sftp");
+            log.warn("failed to connect to sftp");
             throw e;
         }
     }
@@ -39,9 +48,5 @@ public class LesZipfilService {
             log.error("Failed to get file " + fileName, e);
             return null;
         }
-    }
-
-    public File lesZipfil() {
-        return lesZipfilConsumer.hentZipfil();
     }
 }
