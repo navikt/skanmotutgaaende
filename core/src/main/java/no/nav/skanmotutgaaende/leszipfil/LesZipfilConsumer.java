@@ -25,7 +25,7 @@ public class LesZipfilConsumer {
     @Autowired
     public LesZipfilConsumer(Sftp sftp, SkanmotutgaaendeProperties skanmotutgaaendeProperties){
         this.sftp = sftp;
-        inboundDirectory = skanmotutgaaendeProperties.getFilomraade().getInboundDirectory();
+        inboundDirectory = skanmotutgaaendeProperties.getFilomraade().getInbounddirectory();
     }
 
     public List<String> listZipFiles() {
