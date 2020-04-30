@@ -45,4 +45,4 @@ spec:
       - kvPath: {{ SKANMOTUTGAAENDE_VAULT }}
         mountPath: /var/run/secrets/nais.io/vault
       - kvPath: {{ SFTP_KEYS }}
-        mountPath: /var/run/secrets/nais.io/keys
+        mountPath: /var/run/secrets/nais.io/vault
