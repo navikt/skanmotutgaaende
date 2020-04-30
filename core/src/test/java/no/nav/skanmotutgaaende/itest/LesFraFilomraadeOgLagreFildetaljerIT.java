@@ -7,7 +7,10 @@ import no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerConsumer;
 import no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerService;
 import no.nav.skanmotutgaaende.lagrefildetaljer.data.LagreFildetaljerResponse;
 import no.nav.skanmotutgaaende.lesoglagre.LesFraFilomraadeOgLagreFildetaljer;
+import no.nav.skanmotutgaaende.leszipfil.LesZipfilConsumer;
 import no.nav.skanmotutgaaende.leszipfil.LesZipfilService;
+import no.nav.skanmotutgaaende.sftp.Sftp;
+import no.nav.skanmotutgaaende.sftp.SftpConfig;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,6 +24,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import javax.inject.Inject;
 import java.io.File;
 import java.util.List;
 
@@ -38,7 +42,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @ExtendWith(SpringExtension.class)
-@SpringBootTest(classes = {TestConfig.class},
+@SpringBootTest(classes = {TestConfig.class, SftpConfig.class},
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureWireMock(port = 0)
 @ActiveProfiles("itest")
@@ -55,9 +59,12 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
     @Autowired
     SkanmotutgaaendeProperties skanmotutgaaendeProperties;
 
+    @Autowired
+    Sftp sftp;
+
     @BeforeEach
     void setUpServices() {
-        lesZipfilService = mock(LesZipfilService.class);
+        lesZipfilService = new LesZipfilService(new LesZipfilConsumer(sftp));
         lagreFildetaljerService = new LagreFildetaljerService(new LagreFildetaljerConsumer(new RestTemplateBuilder(), skanmotutgaaendeProperties));
         lesFraFilomraadeOgLagreFildetaljer = new LesFraFilomraadeOgLagreFildetaljer(lesZipfilService, lagreFildetaljerService);
         setUpStubs();
@@ -78,9 +85,14 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
     }
 
     @Test
+    public void shouldConnect() {
+        lesFraFilomraadeOgLagreFildetaljer.tryToConnect();
+    }
+
+    @Test
     public void shouldLesOgLagreHappy() {
         // TODO: Mocker lesZipFil, endre til stub når den er implementert
-        when(lesZipfilService.lesZipfil()).thenReturn(ZIP_FILE);
+        //when(lesZipfilService.lesZipfil()).thenReturn(ZIP_FILE);
         assertDoesNotThrow(() -> lesFraFilomraadeOgLagreFildetaljer.lesOgLagre());
         verify(exactly(10), putRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
     }
@@ -88,7 +100,7 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
     @Test
     public void shouldContinueIfFailingToLagreFildetaljer() {
         // TODO: Mocker lesZipFil, endre til stub når den er implementert og utvid test for feilhåndtering
-        when(lesZipfilService.lesZipfil()).thenReturn(ZIP_FILE);
+        //when(lesZipfilService.lesZipfil()).thenReturn(ZIP_FILE);
         stubFor(put(urlMatching(URL_DOKARKIV_JOURNALPOST_003))
                 .willReturn(aResponse().withStatus(HttpStatus.BAD_REQUEST.value())));
         List<LagreFildetaljerResponse> responses = lesFraFilomraadeOgLagreFildetaljer.lesOgLagre();

@@ -20,7 +20,7 @@ public class LesZipfilConsumer {
     private Sftp sftp;
 
     @Autowired
-    LesZipfilConsumer(Sftp sftp){
+    public LesZipfilConsumer(Sftp sftp){
         this.sftp = sftp;
     }
 

@@ -11,7 +11,6 @@ import no.nav.skanmotutgaaende.exceptions.functional.MottaDokumentUtgaaendeSkann
 import no.nav.skanmotutgaaende.exceptions.functional.SkanmotutgaaendeSftpFunctionalException;
 import no.nav.skanmotutgaaende.exceptions.functional.SkanmotutgaaendeUnzipperFunctionalException;
 import no.nav.skanmotutgaaende.exceptions.technical.SkanmotutgaaendeSftpTechnicalException;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.io.InputStream;
 import java.util.List;
@@ -24,8 +23,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class Sftp {
 
-    @Value("${spring.application.name}")
-    private String application;
+    private final String APPLICATION = "skanmotutgaaende";
 
     private Session jschSession;
     private ChannelSftp channelSftp;
@@ -37,7 +35,7 @@ public class Sftp {
     private String privateKey;
     private String hostKey;
 
-    Sftp(String host, String username, String port, String privateKey, String hostKey) {
+    public Sftp(String host, String username, String port, String privateKey, String hostKey) {
         this.host = host;
         this.username = username;
         this.port = port;
@@ -51,53 +49,53 @@ public class Sftp {
 
     public List<String> listFiles(String path) {
         if (channelSftp == null || !channelSftp.isConnected()) {
-            log.error(application + " must be connected to list files");
+            log.error(APPLICATION + " must be connected to list files");
             throw new MottaDokumentUtgaaendeSkanningFunctionalException("Must be connected to list files", new Exception());
         }
         try {
             Vector<LsEntry> vector = channelSftp.ls(path);
             return vector.stream().map(ChannelSftp.LsEntry::getFilename).collect(Collectors.toList());
         } catch (SftpException e) {
-            log.error(application + " failed to list files, path: " + path, e);
+            log.error(APPLICATION + " failed to list files, path: " + path, e);
             throw new SkanmotutgaaendeSftpTechnicalException("Failed to list files, path: " + path, e);
         }
     }
 
     public String presentWorkingDirectory() {
         if (channelSftp == null || !channelSftp.isConnected()) {
-            log.error(application + " must be connected to get present working directory");
+            log.error(APPLICATION + " must be connected to get present working directory");
             throw new SkanmotutgaaendeSftpFunctionalException("Must be connected to get present working directory");
         }
         try {
             return channelSftp.pwd();
         } catch (SftpException e) {
-            log.error(application + " failed to get present working directory", e);
+            log.error(APPLICATION + " failed to get present working directory", e);
             throw new SkanmotutgaaendeSftpTechnicalException("Failed to get present working directory", e);
         }
     }
 
     public void changeDirectory(String path) {
         if (channelSftp == null || !channelSftp.isConnected()) {
-            log.error(application + " must be connected to change directory");
+            log.error(APPLICATION + " must be connected to change directory");
             throw new SkanmotutgaaendeSftpFunctionalException("Must be connected to change directory");
         }
         try {
             channelSftp.cd(path);
         } catch (SftpException e) {
-            log.error(application + " failed to change directory, path: " + path, e);
+            log.error(APPLICATION + " failed to change directory, path: " + path, e);
             throw new SkanmotutgaaendeSftpTechnicalException("Failed to change directory, path: " + path, e);
         }
     }
 
     public InputStream getFile(String filename) {
         if (channelSftp == null || !channelSftp.isConnected()) {
-            log.error(application + " must be connected to get file");
+            log.error(APPLICATION + " must be connected to get file");
             throw new SkanmotutgaaendeUnzipperFunctionalException("Must be connected to get file");
         }
         try {
             return channelSftp.get(filename);
         } catch (SftpException e) {
-            log.error(application + " failed to download " + filename, e);
+            log.error(APPLICATION + " failed to download " + filename, e);
             throw new SkanmotutgaaendeSftpTechnicalException("Failed to download " + filename, e);
         }
     }
@@ -120,7 +118,7 @@ public class Sftp {
             channelSftp.connect();
             setHomePath(channelSftp.getHome());
         } catch (JSchException | SftpException e) {
-            log.error(application + " failed to connect to " + host, e);
+            log.error(APPLICATION + " failed to connect to " + host, e);
             throw new SkanmotutgaaendeSftpTechnicalException("Failed to connect to " + host, e);
         }
     }
@@ -130,13 +128,13 @@ public class Sftp {
             try {
                 channelSftp.exit();
                 jschSession.disconnect();
-                log.info(application + " disconnected from " + host);
+                log.info(APPLICATION + " disconnected from " + host);
             } catch (Exception e) {
-                log.error(application + " failed tp disconnect from " + host, e);
+                log.error(APPLICATION + " failed tp disconnect from " + host, e);
                 throw new SkanmotutgaaendeSftpTechnicalException("Failed to connect to " + host, e);
             }
         } else {
-            log.warn(application + " tried to disconnect while not connected");
+            log.warn(APPLICATION + " tried to disconnect while not connected");
         }
     }
 
