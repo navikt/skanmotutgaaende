@@ -112,7 +112,7 @@ public class SftpITest {
             Assert.fail();
         } catch (SkanmotutgaaendeSftpTechnicalException e) {
             sftp.disconnect();
-            Assert.assertEquals("Failed to change directory, path: foo/bar/baz", e.getMessage());
+            Assert.assertEquals("Klarte ikke endre mappe, path: foo/bar/baz", e.getMessage());
         } catch (Exception e) {
             sftp.disconnect();
             Assert.fail();
@@ -147,7 +147,7 @@ public class SftpITest {
             Assert.fail();
         } catch (SkanmotutgaaendeSftpTechnicalException e) {
             sftp.disconnect();
-            Assert.assertEquals("Failed to download invalidFileName.zip", e.getMessage());
+            Assert.assertEquals("Klarte ikke laste ned invalidFileName.zip", e.getMessage());
         } catch (Exception e) {
             Assert.fail();
         }

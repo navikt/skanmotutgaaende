@@ -72,7 +72,7 @@ public class Sftp {
             channelSftp.cd(path);
         } catch (SftpException e) {
             log.error("{} klarte ikke å endre mappe, path: {}", APPLICATION, path, e);
-            throw new SkanmotutgaaendeSftpTechnicalException("Klarte ikke endre mappe, path: {}" + path, e);
+            throw new SkanmotutgaaendeSftpTechnicalException("Klarte ikke endre mappe, path: " + path, e);
         }
     }
 
