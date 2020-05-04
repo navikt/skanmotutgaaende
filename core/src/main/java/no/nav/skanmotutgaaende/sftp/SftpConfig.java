@@ -20,7 +20,7 @@ public class SftpConfig {
         try {
             return new Sftp(sftpHost, sftpUsername, sftpPort, privateKey, hostKey);
         } catch (Exception e) {
-            log.error("Failed to initialize SFTP");
+            log.error("Klarte ikke initialisere SFTP");
             throw e;
         }
     }

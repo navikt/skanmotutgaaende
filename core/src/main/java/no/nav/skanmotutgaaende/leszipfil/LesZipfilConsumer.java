@@ -3,41 +3,38 @@ package no.nav.skanmotutgaaende.leszipfil;
 import com.jcraft.jsch.SftpException;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotutgaaende.config.properties.SkanmotutgaaendeProperties;
+import no.nav.skanmotutgaaende.exceptions.functional.LesZipFilFuntionalException;
 import no.nav.skanmotutgaaende.sftp.Sftp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
 public class LesZipfilConsumer {
 
-    //private final String INBOUND_DIRECTORY = "/inbound/SKANMOTUTGAAENDE";
-
     private Sftp sftp;
     private String inboundDirectory;
 
     @Autowired
-    public LesZipfilConsumer(Sftp sftp, SkanmotutgaaendeProperties skanmotutgaaendeProperties){
+    public LesZipfilConsumer(Sftp sftp, SkanmotutgaaendeProperties skanmotutgaaendeProperties) {
         this.sftp = sftp;
         inboundDirectory = skanmotutgaaendeProperties.getFilomraade().getInbounddirectory();
     }
 
     public List<String> listZipFiles() {
-        try{
+        try {
             sftp.connect();
             sftp.changeDirectory(inboundDirectory);
-            log.info(sftp.getHomePath());
+            log.info("Skanmotutgaaende henter zipfiler fra {}", sftp.getHomePath());
             List<String> files = sftp.listFiles("*.zip");
             sftp.disconnect();
             return files;
-        } catch(Exception e) {
-            throw e;
+        } catch (Exception e) {
+            throw new LesZipFilFuntionalException("Skanmotutgaaende klarte ikke hente zipfiler", e);
         }
     }
 

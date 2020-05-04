@@ -7,8 +7,6 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
 import lombok.extern.slf4j.Slf4j;
-import no.nav.skanmotutgaaende.exceptions.functional.MottaDokumentUtgaaendeSkanningFunctionalException;
-import no.nav.skanmotutgaaende.exceptions.functional.SkanmotutgaaendeSftpFunctionalException;
 import no.nav.skanmotutgaaende.exceptions.functional.SkanmotutgaaendeUnzipperFunctionalException;
 import no.nav.skanmotutgaaende.exceptions.technical.SkanmotutgaaendeSftpTechnicalException;
 
@@ -48,55 +46,43 @@ public class Sftp {
     }
 
     public List<String> listFiles(String path) {
-        if (channelSftp == null || !channelSftp.isConnected()) {
-            log.error(APPLICATION + " must be connected to list files");
-            throw new MottaDokumentUtgaaendeSkanningFunctionalException("Must be connected to list files", new Exception());
-        }
+        checkSftpConnection();
         try {
             Vector<LsEntry> vector = channelSftp.ls(path);
             return vector.stream().map(ChannelSftp.LsEntry::getFilename).collect(Collectors.toList());
         } catch (SftpException e) {
-            log.error(APPLICATION + " failed to list files, path: " + path, e);
-            throw new SkanmotutgaaendeSftpTechnicalException("Failed to list files, path: " + path, e);
+            log.error("{} klarte ikke liste filene, path: {}", APPLICATION, path, e);
+            throw new SkanmotutgaaendeSftpTechnicalException("Klarte ikke liste filene, path: " + path, e);
         }
     }
 
     public String presentWorkingDirectory() {
-        if (channelSftp == null || !channelSftp.isConnected()) {
-            log.error(APPLICATION + " must be connected to get present working directory");
-            throw new SkanmotutgaaendeSftpFunctionalException("Must be connected to get present working directory");
-        }
+        checkSftpConnection();
         try {
             return channelSftp.pwd();
         } catch (SftpException e) {
-            log.error(APPLICATION + " failed to get present working directory", e);
-            throw new SkanmotutgaaendeSftpTechnicalException("Failed to get present working directory", e);
+            log.error("{} klarte ikke hente arbeidsmappe", APPLICATION, e);
+            throw new SkanmotutgaaendeSftpTechnicalException("Klarte ikke hente arbeidsmappe", e);
         }
     }
 
     public void changeDirectory(String path) {
-        if (channelSftp == null || !channelSftp.isConnected()) {
-            log.error(APPLICATION + " must be connected to change directory");
-            throw new SkanmotutgaaendeSftpFunctionalException("Must be connected to change directory");
-        }
+        checkSftpConnection();
         try {
             channelSftp.cd(path);
         } catch (SftpException e) {
-            log.error(APPLICATION + " failed to change directory, path: " + path, e);
-            throw new SkanmotutgaaendeSftpTechnicalException("Failed to change directory, path: " + path, e);
+            log.error("{} klarte ikke å endre mappe, path: {}", APPLICATION, path, e);
+            throw new SkanmotutgaaendeSftpTechnicalException("Klarte ikke endre mappe, path: {}" + path, e);
         }
     }
 
     public InputStream getFile(String filename) {
-        if (channelSftp == null || !channelSftp.isConnected()) {
-            log.error(APPLICATION + " must be connected to get file");
-            throw new SkanmotutgaaendeUnzipperFunctionalException("Must be connected to get file");
-        }
+        checkSftpConnection();
         try {
             return channelSftp.get(filename);
         } catch (SftpException e) {
-            log.error(APPLICATION + " failed to download " + filename, e);
-            throw new SkanmotutgaaendeSftpTechnicalException("Failed to download " + filename, e);
+            log.error("{} klarte ikke laste ned {} ", APPLICATION, filename, e);
+            throw new SkanmotutgaaendeSftpTechnicalException("Klarte ikke laste ned " + filename, e);
         }
     }
 
@@ -118,8 +104,8 @@ public class Sftp {
             channelSftp.connect();
             setHomePath(channelSftp.getHome());
         } catch (JSchException | SftpException e) {
-            log.error(APPLICATION + " failed to connect to " + host, e);
-            throw new SkanmotutgaaendeSftpTechnicalException("Failed to connect to " + host, e);
+            log.error("{} klarte ikke koble til {}", APPLICATION, host, e);
+            throw new SkanmotutgaaendeSftpTechnicalException("Klarte ikke koble til " + host, e);
         }
     }
 
@@ -128,13 +114,13 @@ public class Sftp {
             try {
                 channelSftp.exit();
                 jschSession.disconnect();
-                log.info(APPLICATION + " disconnected from " + host);
+                log.info("{} koblet fra {}", APPLICATION, host);
             } catch (Exception e) {
-                log.error(APPLICATION + " failed tp disconnect from " + host, e);
-                throw new SkanmotutgaaendeSftpTechnicalException("Failed to connect to " + host, e);
+                log.error("{} klarte ikke koble fra {}", APPLICATION, host, e);
+                throw new SkanmotutgaaendeSftpTechnicalException("Klarte ikke koble fra " + host, e);
             }
         } else {
-            log.warn(APPLICATION + " tried to disconnect while not connected");
+            log.warn("{} prøvde å koble fra sftp, men var ikke koblet til", APPLICATION);
         }
     }
 
@@ -150,6 +136,13 @@ public class Sftp {
             this.homePath = homePath.substring(2);
         } else {
             this.homePath = homePath;
+        }
+    }
+
+    private void checkSftpConnection() {
+        if (channelSftp == null || !channelSftp.isConnected()) {
+            log.error("{} er ikke tilkoblet sftp, men prøver å gjøre behandlinger", APPLICATION);
+            throw new SkanmotutgaaendeUnzipperFunctionalException("Er ikke tilkoblet sftp, men prøver å gjøre behandlinger");
         }
     }
 }

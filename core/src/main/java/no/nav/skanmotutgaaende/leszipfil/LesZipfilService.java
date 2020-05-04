@@ -1,6 +1,7 @@
 package no.nav.skanmotutgaaende.leszipfil;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.skanmotutgaaende.exceptions.functional.LesZipFilFuntionalException;
 import no.nav.skanmotutgaaende.exceptions.technical.SkanmotutgaaendeSftpTechnicalException;
 import org.springframework.stereotype.Service;
 
@@ -31,11 +32,14 @@ public class LesZipfilService {
                     files.put(filename, zipFile);
                 }
             }
-            log.info("Read " + fileNames.toString() + " from sftp");
+            log.info("Skanmotutgaaende leser filen {} fra sftp", fileNames.toString());
             return files;
+        } catch (LesZipFilFuntionalException e) {
+            log.warn("Skanmotutgaaende klarte ikke hente zipfiler");
+            throw e;
         } catch (Exception e) {
-            log.warn("failed to connect to sftp");
-            throw new SkanmotutgaaendeSftpTechnicalException("Failed to connect to sftp", e);
+            log.warn("Skanmotutgaaende klarte ikke koble til sftp");
+            throw new SkanmotutgaaendeSftpTechnicalException("Klarte ikke koble til sftp", e);
         }
     }
 
@@ -43,7 +47,7 @@ public class LesZipfilService {
         try {
             return lesZipfilConsumer.getFile(fileName);
         } catch (Exception e) {
-            log.error("Failed to get file " + fileName, e);
+            log.error("Skanmotutgaaende klarte ikke hente filen {}", fileName, e);
             return null;
         }
     }
