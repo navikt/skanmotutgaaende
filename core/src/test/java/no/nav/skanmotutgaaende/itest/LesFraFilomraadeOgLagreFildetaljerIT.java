@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -32,6 +33,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -46,6 +49,9 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @ExtendWith(SpringExtension.class)
@@ -58,7 +64,8 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
 
     private final String URL_DOKARKIV_JOURNALPOST_GEN = "/rest/intern/journalpostapi/v1/journalpost/\\d+/mottaDokumentUtgaaendeSkanning";
     private final String URL_DOKARKIV_JOURNALPOST_003 = "/rest/intern/journalpostapi/v1/journalpost/003/mottaDokumentUtgaaendeSkanning";
-    private static final String VALID_PUBLIC_KEY_PATH = "src/test/resources/sftp/itest_valid.pub";
+    private final String VALID_PUBLIC_KEY_PATH = "src/test/resources/sftp/itest_valid.pub";
+    private final String ZIP_FILE_LOCATION = "src/test/resources/__files/inbound/xml_pdf_pairs_testdata.zip";
 
     LesFraFilomraadeOgLagreFildetaljer lesFraFilomraadeOgLagreFildetaljer;
     LesZipfilService lesZipfilService;
@@ -69,7 +76,7 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
 
     @Autowired
     SkanmotutgaaendeProperties skanmotutgaaendeProperties;
-    @Autowired
+    @Mock
     Sftp sftp;
 
     @BeforeAll
@@ -94,6 +101,7 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
         lagreFildetaljerService = new LagreFildetaljerService(new LagreFildetaljerConsumer(new RestTemplateBuilder(), skanmotutgaaendeProperties));
         lesFraFilomraadeOgLagreFildetaljer = new LesFraFilomraadeOgLagreFildetaljer(lesZipfilService, lagreFildetaljerService);
         setUpStubs();
+        setUpMocks();
     }
 
     @AfterEach
@@ -110,6 +118,13 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
                         .withBody("{}")));
     }
 
+    private void setUpMocks() {
+        try {
+            when(sftp.listFiles("*.zip")).thenReturn(List.of("xml_pdf_pairs_testdata.zip"));
+            when(sftp.getFile(ZIP_FILE_LOCATION)).thenReturn(new FileInputStream(new File(ZIP_FILE_LOCATION)));
+        } catch (IOException e) {}
+    }
+
     @Test
     public void shouldLesOgLagreHappy() {
         assertDoesNotThrow(() -> lesFraFilomraadeOgLagreFildetaljer.lesOgLagre());
@@ -120,6 +135,7 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
     public void shouldContinueIfFailingToLagreFildetaljer() {
         stubFor(put(urlMatching(URL_DOKARKIV_JOURNALPOST_003))
                 .willReturn(aResponse().withStatus(HttpStatus.BAD_REQUEST.value())));
+
         List<List<LagreFildetaljerResponse>> responses = lesFraFilomraadeOgLagreFildetaljer.lesOgLagre();
         assertEquals(9, responses.get(0).size());
     }

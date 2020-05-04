@@ -1,7 +1,9 @@
-package no.nav.skanmotutgaaende.sftp;
+package no.nav.skanmotutgaaende.itest;
 
 import no.nav.skanmotutgaaende.exceptions.technical.SkanmotutgaaendeSftpTechnicalException;
 import no.nav.skanmotutgaaende.itest.config.TestConfig;
+import no.nav.skanmotutgaaende.sftp.Sftp;
+import no.nav.skanmotutgaaende.sftp.SftpConfig;
 import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.config.keys.AuthorizedKeysAuthenticator;
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
@@ -27,7 +29,7 @@ import java.util.List;
 @ActiveProfiles("itest")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = {TestConfig.class, SftpConfig.class})
-public class SftpITest {
+public class SftpIT {
 
     private static final String RESOURCE_FOLDER_PATH = "src/test/resources/__files/xml_pdf_pairs";
     private static final String ZIP_FILE_PATH = RESOURCE_FOLDER_PATH + "/xml_pdf_pairs_testdata.zip";
