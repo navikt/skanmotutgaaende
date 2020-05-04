@@ -110,7 +110,7 @@ public class Sftp {
     }
 
     public void disconnect() {
-        if (channelSftp.isConnected()) {
+        if (isConnected()) {
             try {
                 channelSftp.exit();
                 jschSession.disconnect();
@@ -140,7 +140,7 @@ public class Sftp {
     }
 
     private void checkSftpConnection() {
-        if (channelSftp == null || !channelSftp.isConnected()) {
+        if (channelSftp == null || !isConnected()) {
             log.error("{} er ikke tilkoblet sftp, men prøver å gjøre behandlinger", APPLICATION);
             throw new SkanmotutgaaendeUnzipperFunctionalException("Er ikke tilkoblet sftp, men prøver å gjøre behandlinger");
         }
