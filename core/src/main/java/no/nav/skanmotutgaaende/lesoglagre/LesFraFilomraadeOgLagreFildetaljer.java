@@ -41,31 +41,7 @@ public class LesFraFilomraadeOgLagreFildetaljer {
 
     @Scheduled(initialDelay = 3000, fixedDelay = 72 * HOUR)
     public void scheduledJob() {
-        tryToConnect();
         lesOgLagre();
-    }
-
-    public void tryToConnect() {
-        try {
-            log.info("Trying to connect");
-            Map<String, byte[]> zipFiles = lesZipfilService.getZipFiles();
-            zipFiles.keySet().stream()
-                    .map(zipFilename -> new ZipInputStream(new ByteArrayInputStream(zipFiles.get(zipFilename))))
-                    .forEach(this::logZipEntries);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void logZipEntries(ZipInputStream inputStream) {
-        ZipEntry entry;
-        try {
-            while ((entry = inputStream.getNextEntry()) != null) {
-                log.info("ZipEntry = " + entry.getName());
-            }
-        } catch (Exception e) {
-            log.error("//TODO");
-        }
     }
 
     public List<List<LagreFildetaljerResponse>> lesOgLagre() {
