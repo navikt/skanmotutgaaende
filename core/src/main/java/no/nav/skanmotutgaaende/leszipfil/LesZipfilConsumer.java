@@ -45,5 +45,4 @@ public class LesZipfilConsumer {
         sftp.disconnect();
         return file;
     }
-
 }
