@@ -23,6 +23,7 @@ public class LesZipfilService {
 
     public Map<String, byte[]> getZipFiles() throws SkanmotutgaaendeSftpTechnicalException {
         try {
+            lesZipfilConsumer.connectToSftp();
             List<String> fileNames = lesZipfilConsumer.listZipFiles();
             Map<String, byte[]> files = new HashMap<>();
 
@@ -32,7 +33,7 @@ public class LesZipfilService {
                     files.put(filename, zipFile);
                 }
             }
-            log.info("Skanmotutgaaende leser filen {} fra sftp", fileNames.toString());
+            log.info("Skanmotutgaaende leser {} fra sftp", fileNames.toString());
             return files;
         } catch (LesZipFilFuntionalException e) {
             log.warn("Skanmotutgaaende klarte ikke hente zipfiler");
@@ -40,6 +41,8 @@ public class LesZipfilService {
         } catch (Exception e) {
             log.warn("Skanmotutgaaende klarte ikke koble til sftp");
             throw new SkanmotutgaaendeSftpTechnicalException("Klarte ikke koble til sftp", e);
+        } finally {
+            lesZipfilConsumer.disconnectFromSftp();
         }
     }
 

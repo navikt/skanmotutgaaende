@@ -14,5 +14,8 @@ import javax.validation.constraints.NotEmpty;
 public class FilomraadeProperties {
 
     @NotEmpty
-    private String inbounddirectory;
+    private String inngaaendemappe;
+
+    @NotEmpty
+    private String utgaaendemappe;
 }

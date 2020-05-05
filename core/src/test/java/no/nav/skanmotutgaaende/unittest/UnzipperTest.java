@@ -31,10 +31,8 @@ public class UnzipperTest {
     private final String MOTTAKSKANAL = "SKAN_IM";
     private final long DATO_MOTTATT = ***gammelt_fnr***00L;
     private final String BATCH_NAVN = "xml_pdf_pairs_testdata.zip";
-    private final String FIL_NAVN = "data_005.pdf";
     private final String ENDORSERNR = "3110190003NAV743506";
-    private final String FYSISK_POSTBOKS = "1408";
-    private final String STREKKODE_POSTBOKS = "1408";
+    private final String POSTBOKS = "1408";
     private final byte CR = 13;
 
     @Test
@@ -52,10 +50,10 @@ public class UnzipperTest {
         assertEquals(MOTTAKSKANAL, journalpost.getMottakskanal());
         assertEquals(DATO_MOTTATT, journalpost.getDatoMottatt().getTime());
         assertEquals(BATCH_NAVN, journalpost.getBatchNavn());
-        assertEquals(FIL_NAVN, journalpost.getFilNavn());
+        assertEquals(ZIPPED_PDF_NAME, journalpost.getFilNavn());
         assertEquals(ENDORSERNR, journalpost.getEndorsernr());
-        assertEquals(FYSISK_POSTBOKS, skanningInfo.getFysiskPostboks());
-        assertEquals(STREKKODE_POSTBOKS, skanningInfo.getStrekkodePostboks());
+        assertEquals(POSTBOKS, skanningInfo.getFysiskPostboks());
+        assertEquals(POSTBOKS, skanningInfo.getStrekkodePostboks());
         assertArrayEqualsIgnoreCR(xml, pair.getXml());
         assertArrayEqualsIgnoreCR(pdf, pair.getPdf());
     }

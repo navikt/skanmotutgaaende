@@ -22,6 +22,9 @@ public class SkanmotutgaaendeProperties {
     private FilomraadeProperties filomraade;
 
     @NotNull
+    private SftpProperties sftp;
+
+    @NotNull
     private ServiceUserProperties serviceuser;
 }
 

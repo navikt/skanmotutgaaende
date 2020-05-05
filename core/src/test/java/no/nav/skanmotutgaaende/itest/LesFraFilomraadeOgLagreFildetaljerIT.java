@@ -10,7 +10,6 @@ import no.nav.skanmotutgaaende.lesoglagre.LesFraFilomraadeOgLagreFildetaljer;
 import no.nav.skanmotutgaaende.leszipfil.LesZipfilConsumer;
 import no.nav.skanmotutgaaende.leszipfil.LesZipfilService;
 import no.nav.skanmotutgaaende.sftp.Sftp;
-import no.nav.skanmotutgaaende.sftp.SftpConfig;
 import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.config.keys.AuthorizedKeysAuthenticator;
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
@@ -25,6 +24,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
@@ -55,7 +55,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @ExtendWith(SpringExtension.class)
-@SpringBootTest(classes = {TestConfig.class, SftpConfig.class},
+@SpringBootTest(classes = TestConfig.class,
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureWireMock(port = 0)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -64,8 +64,7 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
 
     private final String URL_DOKARKIV_JOURNALPOST_GEN = "/rest/intern/journalpostapi/v1/journalpost/\\d+/mottaDokumentUtgaaendeSkanning";
     private final String URL_DOKARKIV_JOURNALPOST_003 = "/rest/intern/journalpostapi/v1/journalpost/003/mottaDokumentUtgaaendeSkanning";
-    private final String VALID_PUBLIC_KEY_PATH = "src/test/resources/sftp/itest_valid.pub";
-    private final String ZIP_FILE_LOCATION = "src/test/resources/__files/inbound/xml_pdf_pairs_testdata.zip";
+    private static final String VALID_PUBLIC_KEY_PATH = "src/test/resources/sftp/itest_valid.pub";
 
     LesFraFilomraadeOgLagreFildetaljer lesFraFilomraadeOgLagreFildetaljer;
     LesZipfilService lesZipfilService;
@@ -73,11 +72,10 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
 
     private int PORT = 2222;
     private SshServer sshd = SshServer.setUpDefaultServer();
+    private Sftp sftp;
 
     @Autowired
     SkanmotutgaaendeProperties skanmotutgaaendeProperties;
-    @Mock
-    Sftp sftp;
 
     @BeforeAll
     void startSftpServer() throws IOException {
@@ -97,11 +95,11 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
 
     @BeforeEach
     void setUpServices() {
+        sftp = new Sftp(skanmotutgaaendeProperties);
         lesZipfilService = new LesZipfilService(new LesZipfilConsumer(sftp, skanmotutgaaendeProperties));
         lagreFildetaljerService = new LagreFildetaljerService(new LagreFildetaljerConsumer(new RestTemplateBuilder(), skanmotutgaaendeProperties));
         lesFraFilomraadeOgLagreFildetaljer = new LesFraFilomraadeOgLagreFildetaljer(lesZipfilService, lagreFildetaljerService);
         setUpStubs();
-        setUpMocks();
     }
 
     @AfterEach
@@ -118,13 +116,6 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
                         .withBody("{}")));
     }
 
-    private void setUpMocks() {
-        try {
-            when(sftp.listFiles("*.zip")).thenReturn(List.of("xml_pdf_pairs_testdata.zip"));
-            when(sftp.getFile(ZIP_FILE_LOCATION)).thenReturn(new FileInputStream(new File(ZIP_FILE_LOCATION)));
-        } catch (IOException e) {}
-    }
-
     @Test
     public void shouldLesOgLagreHappy() {
         assertDoesNotThrow(() -> lesFraFilomraadeOgLagreFildetaljer.lesOgLagre());
@@ -135,7 +126,6 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
     public void shouldContinueIfFailingToLagreFildetaljer() {
         stubFor(put(urlMatching(URL_DOKARKIV_JOURNALPOST_003))
                 .willReturn(aResponse().withStatus(HttpStatus.BAD_REQUEST.value())));
-
         List<List<LagreFildetaljerResponse>> responses = lesFraFilomraadeOgLagreFildetaljer.lesOgLagre();
         assertEquals(9, responses.get(0).size());
     }

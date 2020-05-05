@@ -58,10 +58,13 @@ public class LesFraFilomraadeOgLagreFildetaljer {
                 log.info("Skanmotutgaaende lagret fildetaljer fra zipfil {} i dokarkiv", zipname);
                 allResponses.add(responses);
             } catch (IOException e) {
+                // TODO: Håndter denne feilen skikkelig. Løses av MMA-4346
                 log.error("Skanmotutgaaende klarte ikke lese fra fil {}", zipname, e);
             } catch (SkanmotutgaaendeUnzipperFunctionalException e) {
+                // TODO: Håndter denne feilen skikkelig. Løses av MMA-4346
                 log.error("Skanmotutgaaende feilet i unzipping av fil {}", zipname, e);
             } catch (InvalidMetadataException e) {
+                // TODO: Håndter denne feilen skikkelig. Løses av MMA-4346
                 log.error("Skanningmetadata hadde ugyldige verdier i zipFil {}", zipname, e);
             }
         }

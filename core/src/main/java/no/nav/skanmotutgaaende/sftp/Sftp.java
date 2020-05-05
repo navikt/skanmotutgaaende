@@ -7,8 +7,10 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
 import lombok.extern.slf4j.Slf4j;
+import no.nav.skanmotutgaaende.config.properties.SkanmotutgaaendeProperties;
 import no.nav.skanmotutgaaende.exceptions.functional.SkanmotutgaaendeUnzipperFunctionalException;
 import no.nav.skanmotutgaaende.exceptions.technical.SkanmotutgaaendeSftpTechnicalException;
+import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
 import java.util.List;
@@ -17,8 +19,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-
 @Slf4j
+@Component
 public class Sftp {
 
     private final String APPLICATION = "skanmotutgaaende";
@@ -33,12 +35,12 @@ public class Sftp {
     private String privateKey;
     private String hostKey;
 
-    public Sftp(String host, String username, String port, String privateKey, String hostKey) {
-        this.host = host;
-        this.username = username;
-        this.port = port;
-        this.privateKey = privateKey;
-        this.hostKey = hostKey;
+    public Sftp(SkanmotutgaaendeProperties properties) {
+        this.host = properties.getSftp().getHost();
+        this.username = properties.getSftp().getUsername();
+        this.port = properties.getSftp().getPort();
+        this.privateKey = properties.getSftp().getPrivateKey();
+        this.hostKey = properties.getSftp().getHostKey();
     }
 
     public List<String> listFiles() {
@@ -91,7 +93,6 @@ public class Sftp {
     }
 
     public void connect() {
-
         try {
             JSch jsch = new JSch();
             jschSession = jsch.getSession(username, host, Integer.parseInt(port));

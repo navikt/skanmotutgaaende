@@ -1,9 +1,9 @@
 package no.nav.skanmotutgaaende.itest;
 
+import no.nav.skanmotutgaaende.config.properties.SkanmotutgaaendeProperties;
 import no.nav.skanmotutgaaende.exceptions.technical.SkanmotutgaaendeSftpTechnicalException;
 import no.nav.skanmotutgaaende.itest.config.TestConfig;
 import no.nav.skanmotutgaaende.sftp.Sftp;
-import no.nav.skanmotutgaaende.sftp.SftpConfig;
 import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.config.keys.AuthorizedKeysAuthenticator;
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
@@ -12,6 +12,7 @@ import org.apache.sshd.server.subsystem.sftp.SftpSubsystemFactory;
 import org.junit.Assert;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,7 @@ import java.util.List;
 
 @ActiveProfiles("itest")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@SpringBootTest(classes = {TestConfig.class, SftpConfig.class})
+@SpringBootTest(classes = TestConfig.class)
 public class SftpIT {
 
     private static final String RESOURCE_FOLDER_PATH = "src/test/resources/__files/xml_pdf_pairs";
@@ -40,8 +41,10 @@ public class SftpIT {
 
     private int PORT = 2222;
 
-    private SshServer sshd = SshServer.setUpDefaultServer();
     @Autowired
+    private SkanmotutgaaendeProperties skanmotutgaaendeProperties;
+
+    private SshServer sshd = SshServer.setUpDefaultServer();
     private Sftp sftp;
 
     @BeforeAll
@@ -58,6 +61,11 @@ public class SftpIT {
     void shutdownSftpServer() throws IOException {
         sshd.stop();
         sshd.close();
+    }
+
+    @BeforeEach
+    void setUpSftp() {
+        sftp = new Sftp(skanmotutgaaendeProperties);
     }
 
     @Test

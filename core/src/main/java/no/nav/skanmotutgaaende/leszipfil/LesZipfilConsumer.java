@@ -22,16 +22,13 @@ public class LesZipfilConsumer {
     @Autowired
     public LesZipfilConsumer(Sftp sftp, SkanmotutgaaendeProperties skanmotutgaaendeProperties) {
         this.sftp = sftp;
-        inboundDirectory = skanmotutgaaendeProperties.getFilomraade().getInbounddirectory();
+        inboundDirectory = skanmotutgaaendeProperties.getFilomraade().getInngaaendemappe();
     }
 
     public List<String> listZipFiles() {
         try {
-            sftp.connect();
-            sftp.changeDirectory(inboundDirectory);
-            log.info("Skanmotutgaaende henter zipfiler fra {}", sftp.getHomePath());
-            List<String> files = sftp.listFiles("*.zip");
-            sftp.disconnect();
+            log.info("Skanmotutgaaende henter zipfiler fra {}", sftp.getHomePath() + inboundDirectory);
+            List<String> files = sftp.listFiles(inboundDirectory + "/*.zip");
             return files;
         } catch (Exception e) {
             throw new LesZipFilFuntionalException("Skanmotutgaaende klarte ikke hente zipfiler", e);
@@ -39,10 +36,16 @@ public class LesZipfilConsumer {
     }
 
     public byte[] getFile(String filename) throws SftpException, IOException {
-        sftp.connect();
         InputStream fileStream = sftp.getFile(inboundDirectory + "/" + filename);
         byte[] file = fileStream.readAllBytes();
-        sftp.disconnect();
         return file;
+    }
+
+    public void connectToSftp() {
+        sftp.connect();
+    }
+
+    public void disconnectFromSftp() {
+        sftp.disconnect();
     }
 }
