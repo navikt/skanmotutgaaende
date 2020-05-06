@@ -68,7 +68,7 @@ public class UnzipSkanningmetadataUtils {
 
             return skanningmetadata;
         } catch (UnsupportedEncodingException | JAXBException e) {
-            throw new SkanmotutgaaendeUnzipperFunctionalException("Skanmotutgaaende klarte ikke lese metadata i zipfil", e);
+            throw new SkanmotutgaaendeUnzipperFunctionalException("Skanmotutgaaende klarte ikke unmarshalle skanningmetadata fra xml", e);
         }
     }
 
