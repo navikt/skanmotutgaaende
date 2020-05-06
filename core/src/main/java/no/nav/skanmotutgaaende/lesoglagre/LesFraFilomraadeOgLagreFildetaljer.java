@@ -81,7 +81,7 @@ public class LesFraFilomraadeOgLagreFildetaljer {
     private LagreFildetaljerResponse lagreFil(Filepair filepair) {
         LagreFildetaljerResponse response = null;
         FilepairWithMetadata filepairWithMetadata = extractMetadata(filepair);
-        if (filepair == null) {
+        if (filepairWithMetadata == null) {
             return null;
         }
         try {
