@@ -1,6 +1,7 @@
 package no.nav.skanmotutgaaende.lesoglagre;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.skanmotutgaaende.domain.Filepair;
 import no.nav.skanmotutgaaende.domain.FilepairWithMetadata;
 import no.nav.skanmotutgaaende.exceptions.functional.AbstractSkanmotutgaaendeFunctionalException;
 import no.nav.skanmotutgaaende.exceptions.functional.InvalidMetadataException;
@@ -10,6 +11,7 @@ import no.nav.skanmotutgaaende.exceptions.technical.SkanmotutgaaendeSftpTechnica
 import no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerService;
 import no.nav.skanmotutgaaende.lagrefildetaljer.data.LagreFildetaljerResponse;
 import no.nav.skanmotutgaaende.leszipfil.LesZipfilService;
+import no.nav.skanmotutgaaende.unzipskanningmetadata.UnzipSkanningmetadataUtils;
 import no.nav.skanmotutgaaende.unzipskanningmetadata.Unzipper;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -48,9 +50,9 @@ public class LesFraFilomraadeOgLagreFildetaljer {
         List<List<LagreFildetaljerResponse>> allResponses = new ArrayList<>();
         for (String zipname : zipfiles.keySet()) {
             try {
-                List<FilepairWithMetadata> filepairWithMetadataList = Unzipper.unzipXmlPdf(zipfiles.get(zipname));
+                List<Filepair> filepairList = Unzipper.unzipXmlPdf(zipfiles.get(zipname));
 
-                List<LagreFildetaljerResponse> responses = filepairWithMetadataList.stream()
+                List<LagreFildetaljerResponse> responses = filepairList.stream()
                         .map(filepair -> lagreFil(filepair))
                         .filter(response -> null != response)
                         .collect(Collectors.toList());
@@ -63,9 +65,6 @@ public class LesFraFilomraadeOgLagreFildetaljer {
             } catch (SkanmotutgaaendeUnzipperFunctionalException e) {
                 // TODO: Håndter denne feilen skikkelig. Løses av MMA-4346
                 log.error("Skanmotutgaaende feilet i unzipping av fil {}", zipname, e);
-            } catch (InvalidMetadataException e) {
-                // TODO: Håndter denne feilen skikkelig. Løses av MMA-4346
-                log.error("Skanningmetadata hadde ugyldige verdier i zipFil {}", zipname, e);
             }
         }
         return allResponses;
@@ -79,8 +78,12 @@ public class LesFraFilomraadeOgLagreFildetaljer {
         }
     }
 
-    private LagreFildetaljerResponse lagreFil(FilepairWithMetadata filepairWithMetadata) {
+    private LagreFildetaljerResponse lagreFil(Filepair filepair) {
         LagreFildetaljerResponse response = null;
+        FilepairWithMetadata filepairWithMetadata = extractMetadata(filepair);
+        if (filepair == null) {
+            return null;
+        }
         try {
             response = lagreFildetaljerService.lagreFildetaljer(filepairWithMetadata);
             log.info("Skanmotutgaaende lagret fildetaljer for journalpost med id {}", filepairWithMetadata.getSkanningmetadata().getJournalpost().getJournalpostId());
@@ -92,5 +95,14 @@ public class LesFraFilomraadeOgLagreFildetaljer {
             log.error("Skanmotutgaaende feilet teknisk med lagring av fildetaljer til journalpost med id {}", filepairWithMetadata.getSkanningmetadata().getJournalpost().getJournalpostId(), e);
         }
         return response;
+    }
+
+    private FilepairWithMetadata extractMetadata(Filepair filepair) {
+        try {
+            return UnzipSkanningmetadataUtils.extractMetadata(filepair);
+        } catch (InvalidMetadataException e) {
+            log.warn("Skanningmetadata hadde ugyldige verdier for fil {}", filepair.getName(), e);
+            return null;
+        }
     }
 }

@@ -1,19 +1,23 @@
 package no.nav.skanmotutgaaende.unittest;
 
+import no.nav.skanmotutgaaende.domain.Filepair;
 import no.nav.skanmotutgaaende.domain.FilepairWithMetadata;
 import no.nav.skanmotutgaaende.domain.Journalpost;
 import no.nav.skanmotutgaaende.domain.SkanningInfo;
 import no.nav.skanmotutgaaende.exceptions.functional.InvalidMetadataException;
 import no.nav.skanmotutgaaende.exceptions.functional.SkanmotutgaaendeUnzipperFunctionalException;
+import no.nav.skanmotutgaaende.unzipskanningmetadata.UnzipSkanningmetadataUtils;
 import no.nav.skanmotutgaaende.unzipskanningmetadata.Unzipper;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -40,7 +44,8 @@ public class UnzipperTest {
         File zip = Paths.get(ZIP_FILE_PATH).toFile();
         byte[] pdf = Files.readAllBytes(Path.of(PDF_PATH));
         byte[] xml = Files.readAllBytes(Path.of(XML_PATH));
-        List<FilepairWithMetadata> extracted = Unzipper.unzipXmlPdf(zip);
+        List<Filepair> filepairs = Unzipper.unzipXmlPdf(zip);
+        List<FilepairWithMetadata> extracted = filepairs.stream().map(filepair -> UnzipSkanningmetadataUtils.extractMetadata(filepair)).collect(Collectors.toList());
         FilepairWithMetadata pair = getSkanningmetadataPdfPairFromPdfName(extracted, ZIPPED_PDF_NAME);
         Journalpost journalpost = pair.getSkanningmetadata().getJournalpost();
         SkanningInfo skanningInfo = pair.getSkanningmetadata().getSkanningInfo();
@@ -59,15 +64,21 @@ public class UnzipperTest {
     }
 
     @Test
-    public void shouldThrowExceptionIfUnableToReadMetadata() {
+    public void shouldThrowExceptionIfUnableToReadMetadata() throws IOException {
         File zip = Paths.get(BROKEN_ZIP_FILE_PATH).toFile();
-        assertThrows(SkanmotutgaaendeUnzipperFunctionalException.class, () -> Unzipper.unzipXmlPdf(zip));
+        assertThrows(SkanmotutgaaendeUnzipperFunctionalException.class, () ->
+                Unzipper.unzipXmlPdf(zip).stream().map(filepair ->
+                        UnzipSkanningmetadataUtils.extractMetadata(filepair))
+                        .collect(Collectors.toList()));
     }
 
     @Test
     public void shouldThrowExceptionIfInvalidMetadata() {
         File zip = Paths.get(INVALID_ZIP_FILE_PATH).toFile();
-        assertThrows(InvalidMetadataException.class, () -> Unzipper.unzipXmlPdf(zip));
+        assertThrows(InvalidMetadataException.class, () ->
+                Unzipper.unzipXmlPdf(zip).stream().map(filepair ->
+                        UnzipSkanningmetadataUtils.extractMetadata(filepair))
+                        .collect(Collectors.toList()));
     }
 
     private void assertArrayEqualsIgnoreCR(byte[] expected, byte[] actual) {
