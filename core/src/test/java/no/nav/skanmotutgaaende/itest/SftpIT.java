@@ -39,6 +39,7 @@ public class SftpIT {
     private static final String INVALID_FOLDER_PATH = "foo/bar/baz";
     private static final String VALID_PUBLIC_KEY_PATH = "src/test/resources/sftp/itest_valid.pub";
 
+    //TODO: Gjør det mulig å bruke en random port
     private int PORT = 2222;
 
     @Autowired
