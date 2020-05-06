@@ -79,17 +79,19 @@ public class LesFraFilomraadeOgLagreFildetaljer {
     }
 
     private LagreFildetaljerResponse lagreFil(Filepair filepair) {
+        log.info("Skanmotutgaaende behandler fil {}", filepair.getName());
         LagreFildetaljerResponse response = null;
         FilepairWithMetadata filepairWithMetadata = extractMetadata(filepair);
         if (filepairWithMetadata == null) {
             return null;
         }
+        log.info("Fil med navn {} har jpid {}", filepair.getName(), filepairWithMetadata.getSkanningmetadata().getJournalpost().getJournalpostId());
         try {
             response = lagreFildetaljerService.lagreFildetaljer(filepairWithMetadata);
             log.info("Skanmotutgaaende lagret fildetaljer for journalpost med id {}", filepairWithMetadata.getSkanningmetadata().getJournalpost().getJournalpostId());
         } catch (AbstractSkanmotutgaaendeFunctionalException e) {
             // TODO: Feilhåndtering
-            log.error("Skanmotutgaaende feilet funskjonelt med lagring av fildetaljer til journalpost med id {}", filepairWithMetadata.getSkanningmetadata().getJournalpost().getJournalpostId(), e);
+            log.error("Skanmotutgaaende feilet funksjonelt med lagring av fildetaljer til journalpost med id {}", filepairWithMetadata.getSkanningmetadata().getJournalpost().getJournalpostId(), e);
         } catch (AbstractSkanmotutgaaendeTechnicalException e) {
             // TODO: Feilhåndtering
             log.error("Skanmotutgaaende feilet teknisk med lagring av fildetaljer til journalpost med id {}", filepairWithMetadata.getSkanningmetadata().getJournalpost().getJournalpostId(), e);
@@ -101,7 +103,7 @@ public class LesFraFilomraadeOgLagreFildetaljer {
         try {
             return UnzipSkanningmetadataUtils.extractMetadata(filepair);
         } catch (InvalidMetadataException e) {
-            log.warn("Skanningmetadata hadde ugyldige verdier for fil {}", filepair.getName(), e);
+            log.warn("Skanningmetadata hadde ugyldige verdier for fil {}. Skanmotutgaaende klarte ikke unmarshalle.", filepair.getName(), e);
             return null;
         }
     }

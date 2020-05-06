@@ -34,6 +34,7 @@ import static no.nav.skanmotutgaaende.metrics.MetricLabels.PROCESS_NAME;
 public class LagreFildetaljerConsumer {
 
     public static final String CORRELATION_HEADER = "X-Correlation-Id";
+    public static final String CONSUMER_ID = "skanmotutgaaende";
     private final String MOTTA_DOKUMENT_UTGAAENDE_SKANNING_TJENESTE = "mottaDokumentUtgaaendeSkanning";
 
     private final RestTemplate restTemplate;
@@ -85,6 +86,7 @@ public class LagreFildetaljerConsumer {
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         headers.add(CORRELATION_HEADER, MDC.get(MDCConstants.MDC_CALL_ID));
+        headers.add(MDCConstants.MDC_NAV_CONSUMER_ID, CONSUMER_ID);
         return headers;
     }
 }
