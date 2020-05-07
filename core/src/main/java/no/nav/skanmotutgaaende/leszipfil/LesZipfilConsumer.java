@@ -35,10 +35,14 @@ public class LesZipfilConsumer {
         }
     }
 
-    public byte[] getFile(String filename) throws SftpException, IOException {
+    public byte[] getFile(String filename) throws IOException {
         InputStream fileStream = sftp.getFile(inboundDirectory + "/" + filename);
         byte[] file = fileStream.readAllBytes();
         return file;
+    }
+
+    public void deleteFile(String filename) {
+        sftp.deleteFile(inboundDirectory, filename);
     }
 
     public void connectToSftp() {

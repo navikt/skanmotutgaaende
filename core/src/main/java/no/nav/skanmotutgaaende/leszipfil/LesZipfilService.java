@@ -46,6 +46,14 @@ public class LesZipfilService {
         }
     }
 
+    public void deleteZipFile(String filename) {
+        try {
+            lesZipfilConsumer.deleteFile(filename);
+        } catch (Exception e) {
+            log.error("Skanmotutgaaende klarte ikke slette fil {}", filename, e);
+        }
+    }
+
     private byte[] getZipFile(String fileName) {
         try {
             return lesZipfilConsumer.getFile(fileName);

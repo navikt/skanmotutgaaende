@@ -40,7 +40,8 @@ public class LesFraFilomraadeOgLagreFildetaljer {
 
     @Scheduled(initialDelay = 3000, fixedDelay = 72 * HOUR)
     public void scheduledJob() {
-        lesOgLagre();
+        //lesOgLagre();
+        lesZipfilService.deleteZipFile("batch20200506-1.zip");
     }
 
     public List<List<LagreFildetaljerResponse>> lesOgLagre() {
@@ -85,18 +86,18 @@ public class LesFraFilomraadeOgLagreFildetaljer {
         if (filepairWithMetadata == null) {
             return null;
         }
-        log.info("Filpar med navn {} gjelder journalpost med id {}", filepair.getName(), filepairWithMetadata.getSkanningmetadata().getJournalpost().getJournalpostId());
+        log.info("Filpar med navn {} er tilknyttet journalpost med id {}", filepair.getName(), filepairWithMetadata.getSkanningmetadata().getJournalpost().getJournalpostId());
         try {
             response = lagreFildetaljerService.lagreFildetaljer(filepairWithMetadata);
             log.info("Skanmotutgaaende lagret fildetaljer for journalpost med id {}", filepairWithMetadata.getSkanningmetadata().getJournalpost().getJournalpostId());
         } catch (AbstractSkanmotutgaaendeFunctionalException e) {
             // TODO: Feilhåndtering. Løses av MMA-4346
             log.error("Skanmotutgaaende feilet funksjonelt med lagring av fildetaljer til journalpost med id {}. Fil: {}. Feilmelding: {}",
-                    filepairWithMetadata.getSkanningmetadata().getJournalpost().getJournalpostId(), filepair.getName(), e.getMessage(), e);
+                    filepairWithMetadata.getSkanningmetadata().getJournalpost().getJournalpostId(), filepair.getName(), e.getLocalizedMessage(), e);
         } catch (AbstractSkanmotutgaaendeTechnicalException e) {
             // TODO: Feilhåndtering. Løses av MMA-4346
             log.error("Skanmotutgaaende feilet teknisk med lagring av fildetaljer til journalpost med id {}. Fil: {}. Feilmelding: {}",
-                    filepairWithMetadata.getSkanningmetadata().getJournalpost().getJournalpostId(), filepair.getName(), e.getMessage(), e);
+                    filepairWithMetadata.getSkanningmetadata().getJournalpost().getJournalpostId(), filepair.getName(), e.getLocalizedMessage(), e);
         }
         return response;
     }

@@ -38,6 +38,7 @@ public class SftpIT {
     private static final String DIR_TWO_FOLDER_PATH = "src/test/resources/sftp/dirTwo";
     private static final String INVALID_FOLDER_PATH = "foo/bar/baz";
     private static final String VALID_PUBLIC_KEY_PATH = "src/test/resources/sftp/itest_valid.pub";
+    private static final String TMP_FILE_NAME = "tmpfile.txt";
 
     //TODO: Gjør det mulig å bruke en random port
     private int PORT = 2222;
@@ -160,6 +161,26 @@ public class SftpIT {
             sftp.disconnect();
             Assert.assertEquals("Klarte ikke laste ned invalidFileName.zip", e.getMessage());
         } catch (Exception e) {
+            Assert.fail();
+        }
+    }
+
+    @Test
+    void shouldDeleteFile() {
+        File f = new File(RESOURCE_FOLDER_PATH + "/" + TMP_FILE_NAME);
+        try {
+            sftp.connect();
+            int initialNumberOfFiles = sftp.listFiles(RESOURCE_FOLDER_PATH).size();
+
+            f.createNewFile();
+            Assert.assertEquals(initialNumberOfFiles + 1, sftp.listFiles(RESOURCE_FOLDER_PATH).size());
+            sftp.deleteFile(RESOURCE_FOLDER_PATH, TMP_FILE_NAME);
+
+            Assert.assertEquals(initialNumberOfFiles, sftp.listFiles(RESOURCE_FOLDER_PATH).size());
+
+            sftp.disconnect();
+        } catch (Exception e) {
+            f.delete();
             Assert.fail();
         }
     }

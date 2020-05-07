@@ -8,6 +8,7 @@ import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotutgaaende.config.properties.SkanmotutgaaendeProperties;
+import no.nav.skanmotutgaaende.exceptions.functional.SkanmotutgaaendeSftpFunctionalException;
 import no.nav.skanmotutgaaende.exceptions.functional.SkanmotutgaaendeUnzipperFunctionalException;
 import no.nav.skanmotutgaaende.exceptions.technical.SkanmotutgaaendeSftpTechnicalException;
 import org.springframework.stereotype.Component;
@@ -85,6 +86,19 @@ public class Sftp {
         } catch (SftpException e) {
             log.error("{} klarte ikke laste ned {} ", APPLICATION, filename, e);
             throw new SkanmotutgaaendeSftpTechnicalException("Klarte ikke laste ned " + filename, e);
+        }
+    }
+
+    public void deleteFile(String directory, String filename) {
+        checkSftpConnection();
+        try {
+            if (!listFiles(directory).contains(filename)) {
+                throw new SkanmotutgaaendeSftpFunctionalException("Prøvde å slette " + filename + ", men finnes ikke på filområdet");
+            }
+            channelSftp.rm(directory + "/" + filename);
+        } catch (SftpException e) {
+            log.error("{} klarte ikke slette {}", APPLICATION, filename, e);
+            throw new SkanmotutgaaendeSftpTechnicalException("Klarte ikke slette " + filename, e);
         }
     }
 
