@@ -133,6 +133,7 @@ public class Sftp {
                     existingPath += subPath + "/";
                 } catch (SftpException delmappeFinnesIkke) {
                     try {
+                        log.info("Lagde en mappe da den ikke eksisterte: {}", existingPath + subPath);
                         channelSftp.mkdir(existingPath + subPath);
                         existingPath += subPath + "/";
                     } catch (SftpException e) {

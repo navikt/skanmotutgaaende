@@ -93,7 +93,7 @@ public class LesFraFilomraadeOgLagreFildetaljer {
         } catch (AbstractSkanmotutgaaendeFunctionalException e) {
             // TODO: Feilhåndtering. Løses av MMA-4346
             log.error("Skanmotutgaaende feilet funksjonelt med lagring av fildetaljer til journalpost med id {}. Fil: {}. Feilmelding: {}",
-                    filepairWithMetadata.getSkanningmetadata().getJournalpost().getJournalpostId(), filepair.getName(), e.getLocalizedMessage(), e);
+                    filepairWithMetadata.getSkanningmetadata().getJournalpost().getJournalpostId(), filepair.getName(), e.getCause().getMessage(), e);
             lastOppFilpar(filepairWithMetadata, zipname);
         } catch (AbstractSkanmotutgaaendeTechnicalException e) {
             // TODO: Feilhåndtering. Løses av MMA-4346
