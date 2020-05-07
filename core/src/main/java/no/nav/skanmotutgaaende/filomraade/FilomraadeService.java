@@ -6,6 +6,7 @@ import no.nav.skanmotutgaaende.exceptions.technical.SkanmotutgaaendeSftpTechnica
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
@@ -56,6 +57,10 @@ public class FilomraadeService {
         } finally {
             filomraadeConsumer.disconnectFromSftp();
         }
+    }
+
+    public void uploadFileToFeilomrade(byte[] file, String filename) {
+        uploadFileToFeilomrade(new ByteArrayInputStream(file), filename);
     }
 
     public void uploadFileToFeilomrade(InputStream file, String filename) {
