@@ -42,7 +42,9 @@ public class LesZipfilConsumer {
     }
 
     public void deleteFile(String filename) {
+        log.info("Skanmotutgaaende sletter fil {}", filename);
         sftp.deleteFile(inboundDirectory, filename);
+        log.info("Skanmotutgaaende slettet fil {}", filename);
     }
 
     public void connectToSftp() {

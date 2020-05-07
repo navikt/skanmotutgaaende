@@ -48,9 +48,12 @@ public class LesZipfilService {
 
     public void deleteZipFile(String filename) {
         try {
+            lesZipfilConsumer.connectToSftp();
             lesZipfilConsumer.deleteFile(filename);
         } catch (Exception e) {
             log.error("Skanmotutgaaende klarte ikke slette fil {}", filename, e);
+        } finally {
+            lesZipfilConsumer.disconnectFromSftp();
         }
     }
 
