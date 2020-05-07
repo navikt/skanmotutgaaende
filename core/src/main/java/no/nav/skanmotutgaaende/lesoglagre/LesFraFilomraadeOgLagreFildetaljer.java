@@ -8,9 +8,9 @@ import no.nav.skanmotutgaaende.exceptions.functional.InvalidMetadataException;
 import no.nav.skanmotutgaaende.exceptions.functional.SkanmotutgaaendeUnzipperFunctionalException;
 import no.nav.skanmotutgaaende.exceptions.technical.AbstractSkanmotutgaaendeTechnicalException;
 import no.nav.skanmotutgaaende.exceptions.technical.SkanmotutgaaendeSftpTechnicalException;
+import no.nav.skanmotutgaaende.filomraade.FilomraadeService;
 import no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerService;
 import no.nav.skanmotutgaaende.lagrefildetaljer.data.LagreFildetaljerResponse;
-import no.nav.skanmotutgaaende.filomraade.FilomraadeService;
 import no.nav.skanmotutgaaende.unzipskanningmetadata.UnzipSkanningmetadataUtils;
 import no.nav.skanmotutgaaende.unzipskanningmetadata.Unzipper;
 import no.nav.skanmotutgaaende.utils.Utils;
@@ -106,7 +106,7 @@ public class LesFraFilomraadeOgLagreFildetaljer {
     private void lastOppFilpar(FilepairWithMetadata filepairWithMetadata, String zipName) {
         String pdfName = filepairWithMetadata.getSkanningmetadata().getJournalpost().getFilNavn();
         String xmlName = Utils.changeFiletypeInFilename(pdfName, "xml");
-        String path = zipName + "/" + Utils.removeFileExtensionInFilename(pdfName);
+        String path = Utils.removeFileExtensionInFilename(zipName) + "/" + Utils.removeFileExtensionInFilename(pdfName);
         filomraadeService.uploadFileToFeilomrade(filepairWithMetadata.getPdf(), pdfName, path);
         filomraadeService.uploadFileToFeilomrade(filepairWithMetadata.getXml(), xmlName, path);
     }

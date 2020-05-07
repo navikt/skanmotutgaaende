@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,13 +59,9 @@ public class FilomraadeService {
     }
 
     public void uploadFileToFeilomrade(byte[] file, String filename, String path) {
-        uploadFileToFeilomrade(new ByteArrayInputStream(file), filename, path);
-    }
-
-    public void uploadFileToFeilomrade(InputStream file, String filename, String path) {
         try {
             filomraadeConsumer.connectToSftp();
-            filomraadeConsumer.uploadFileToFeilomrade(file, filename, path);
+            filomraadeConsumer.uploadFileToFeilomrade(new ByteArrayInputStream(file), filename, path);
         } catch (Exception e) {
             log.error("Skanmotutgaaende klarte ikke laste opp fil {}", filename, e);
         } finally {

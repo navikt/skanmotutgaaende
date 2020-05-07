@@ -69,6 +69,14 @@ public class Sftp {
         }
     }
 
+    public void createDirectory(String path) {
+        try {
+            channelSftp.mkdir(path);
+        } catch (SftpException e) {
+            // Mappe eksisterer allerede, ignorerer
+        }
+    }
+
     public void changeDirectory(String path) {
         checkSftpConnection();
         try {
@@ -102,13 +110,37 @@ public class Sftp {
         }
     }
 
-    public void uploadFile(InputStream file, String path) {
+    public void uploadFile(InputStream file, String path, String filename) {
         checkSftpConnection();
+        createDirectoryIfNotExisting(path);
         try {
-            channelSftp.put(file, path);
+            channelSftp.put(file, path + "/" + filename);
         } catch (SftpException e) {
-            log.error("{} klarte ikke laste opp fil", APPLICATION, e);
+            log.error("{} klarte ikke laste opp fil {} til {}", APPLICATION, filename, path, e);
             throw new SkanmotutgaaendeSftpTechnicalException("Klarte ikke laste opp fil", e);
+        }
+    }
+
+    private void createDirectoryIfNotExisting(String path) {
+        try {
+            channelSftp.lstat(path);
+        } catch (SftpException mappeFinnesIkke) {
+            // Path finnes ikke, så vi lager den. Kan bare lage en og en mappe
+            String existingPath = "";
+            for (String subPath : path.split("/")) {
+                try {
+                    channelSftp.lstat(existingPath + subPath);
+                    existingPath += subPath + "/";
+                } catch (SftpException delmappeFinnesIkke) {
+                    try {
+                        channelSftp.mkdir(existingPath + subPath);
+                        existingPath += subPath + "/";
+                    } catch (SftpException e) {
+                        log.error("{} klarte ikke lage en ny mappe: {}", APPLICATION, path, e);
+                        throw new SkanmotutgaaendeSftpTechnicalException("Klarte ikke lage en ny mappe: " + path, e);
+                    }
+                }
+            }
         }
     }
 

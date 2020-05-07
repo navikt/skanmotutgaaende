@@ -50,7 +50,7 @@ public class FilomraadeConsumer {
 
     public void uploadFileToFeilomrade(InputStream file, String filename, String path) {
         log.info("Skanmotutgaaende laster opp fil {} til feilområde", filename);
-        sftp.uploadFile(file, feilDirectory + path + "/" + filename);
+        sftp.uploadFile(file, feilDirectory + "/" + path, filename);
         log.info("Skanmotutgaaende lastet opp fil {} til feilområde", filename);
     }
 

@@ -19,6 +19,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import wiremock.org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -233,9 +234,28 @@ public class SftpIT {
 
             sftp.connect();
 
-            sftp.uploadFile(new FileInputStream(xmlFile), FEILOMRADE_FOLDER_PATH + "/" + filename);
+            sftp.uploadFile(new FileInputStream(xmlFile), FEILOMRADE_FOLDER_PATH, filename);
 
             Assert.assertTrue(sftp.listFiles(FEILOMRADE_FOLDER_PATH).contains(filename));
+
+            sftp.disconnect();
+        } catch (Exception e) {
+            Assert.fail();
+        }
+    }
+
+    @Test
+    void shouldUploadFileToNewDirectory() {
+        try {
+            cleanFolder(Path.of(FEILOMRADE_FOLDER_PATH));
+            File xmlFile = Paths.get(XML_FILE_PATH).toFile();
+            String filename = "uploadedFile.xml";
+
+            sftp.connect();
+
+            sftp.uploadFile(new FileInputStream(xmlFile), FEILOMRADE_FOLDER_PATH + "/newDirectory", filename);
+
+            Assert.assertTrue(sftp.listFiles(FEILOMRADE_FOLDER_PATH + "/newDirectory/").contains(filename));
 
             sftp.disconnect();
         } catch (Exception e) {
@@ -248,6 +268,8 @@ public class SftpIT {
             for (Path path : stream) {
                 if (Files.isRegularFile(path)) {
                     Files.delete(path);
+                } else {
+                    FileUtils.deleteDirectory(path.toFile());
                 }
             }
         }
