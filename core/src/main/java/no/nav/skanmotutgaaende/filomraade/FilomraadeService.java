@@ -59,14 +59,14 @@ public class FilomraadeService {
         }
     }
 
-    public void uploadFileToFeilomrade(byte[] file, String filename) {
-        uploadFileToFeilomrade(new ByteArrayInputStream(file), filename);
+    public void uploadFileToFeilomrade(byte[] file, String filename, String path) {
+        uploadFileToFeilomrade(new ByteArrayInputStream(file), filename, path);
     }
 
-    public void uploadFileToFeilomrade(InputStream file, String filename) {
+    public void uploadFileToFeilomrade(InputStream file, String filename, String path) {
         try {
             filomraadeConsumer.connectToSftp();
-            filomraadeConsumer.uploadFileToFeilomrade(file, filename);
+            filomraadeConsumer.uploadFileToFeilomrade(file, filename, path);
         } catch (Exception e) {
             log.error("Skanmotutgaaende klarte ikke laste opp fil {}", filename, e);
         } finally {

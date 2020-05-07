@@ -13,14 +13,11 @@ import no.nav.skanmotutgaaende.lagrefildetaljer.data.LagreFildetaljerResponse;
 import no.nav.skanmotutgaaende.filomraade.FilomraadeService;
 import no.nav.skanmotutgaaende.unzipskanningmetadata.UnzipSkanningmetadataUtils;
 import no.nav.skanmotutgaaende.unzipskanningmetadata.Unzipper;
+import no.nav.skanmotutgaaende.utils.Utils;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -57,7 +54,7 @@ public class LesFraFilomraadeOgLagreFildetaljer {
                 List<Filepair> filepairList = Unzipper.unzipXmlPdf(zipfiles.get(zipname));
 
                 List<LagreFildetaljerResponse> responses = filepairList.stream()
-                        .map(filepair -> lagreFil(filepair))
+                        .map(filepair -> lagreFil(filepair, zipname))
                         .filter(response -> null != response)
                         .collect(Collectors.toList());
 
@@ -82,7 +79,7 @@ public class LesFraFilomraadeOgLagreFildetaljer {
         }
     }
 
-    private LagreFildetaljerResponse lagreFil(Filepair filepair) {
+    private LagreFildetaljerResponse lagreFil(Filepair filepair, String zipname) {
         log.info("Skanmotutgaaende behandler fil {}", filepair.getName());
         LagreFildetaljerResponse response = null;
         FilepairWithMetadata filepairWithMetadata = extractMetadata(filepair);
@@ -97,13 +94,21 @@ public class LesFraFilomraadeOgLagreFildetaljer {
             // TODO: Feilhåndtering. Løses av MMA-4346
             log.error("Skanmotutgaaende feilet funksjonelt med lagring av fildetaljer til journalpost med id {}. Fil: {}. Feilmelding: {}",
                     filepairWithMetadata.getSkanningmetadata().getJournalpost().getJournalpostId(), filepair.getName(), e.getLocalizedMessage(), e);
-            filomraadeService.uploadFileToFeilomrade(filepair.getXml(), filepair.getName());
+            lastOppFilpar(filepairWithMetadata, zipname);
         } catch (AbstractSkanmotutgaaendeTechnicalException e) {
             // TODO: Feilhåndtering. Løses av MMA-4346
             log.error("Skanmotutgaaende feilet teknisk med lagring av fildetaljer til journalpost med id {}. Fil: {}. Feilmelding: {}",
                     filepairWithMetadata.getSkanningmetadata().getJournalpost().getJournalpostId(), filepair.getName(), e.getLocalizedMessage(), e);
         }
         return response;
+    }
+
+    private void lastOppFilpar(FilepairWithMetadata filepairWithMetadata, String zipName) {
+        String pdfName = filepairWithMetadata.getSkanningmetadata().getJournalpost().getFilNavn();
+        String xmlName = Utils.changeFiletypeInFilename(pdfName, "xml");
+        String path = zipName + "/" + Utils.removeFileExtensionInFilename(pdfName);
+        filomraadeService.uploadFileToFeilomrade(filepairWithMetadata.getPdf(), pdfName, path);
+        filomraadeService.uploadFileToFeilomrade(filepairWithMetadata.getXml(), xmlName, path);
     }
 
     private FilepairWithMetadata extractMetadata(Filepair filepair) {
