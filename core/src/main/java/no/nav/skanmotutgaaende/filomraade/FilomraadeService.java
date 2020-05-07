@@ -1,4 +1,4 @@
-package no.nav.skanmotutgaaende.leszipfil;
+package no.nav.skanmotutgaaende.filomraade;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotutgaaende.exceptions.functional.LesZipFilFuntionalException;
@@ -6,25 +6,26 @@ import no.nav.skanmotutgaaende.exceptions.technical.SkanmotutgaaendeSftpTechnica
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Slf4j
 @Service
-public class LesZipfilService {
+public class FilomraadeService {
 
-    private LesZipfilConsumer lesZipfilConsumer;
+    private FilomraadeConsumer filomraadeConsumer;
 
     @Inject
-    public LesZipfilService(LesZipfilConsumer lesZipfilConsumer) {
-        this.lesZipfilConsumer = lesZipfilConsumer;
+    public FilomraadeService(FilomraadeConsumer filomraadeConsumer) {
+        this.filomraadeConsumer = filomraadeConsumer;
     }
 
     public Map<String, byte[]> getZipFiles() throws SkanmotutgaaendeSftpTechnicalException {
         try {
-            lesZipfilConsumer.connectToSftp();
-            List<String> fileNames = lesZipfilConsumer.listZipFiles();
+            filomraadeConsumer.connectToSftp();
+            List<String> fileNames = filomraadeConsumer.listZipFiles();
             Map<String, byte[]> files = new HashMap<>();
 
             for (String filename : fileNames) {
@@ -42,24 +43,35 @@ public class LesZipfilService {
             log.warn("Skanmotutgaaende klarte ikke koble til sftp");
             throw new SkanmotutgaaendeSftpTechnicalException("Klarte ikke koble til sftp", e);
         } finally {
-            lesZipfilConsumer.disconnectFromSftp();
+            filomraadeConsumer.disconnectFromSftp();
         }
     }
 
     public void deleteZipFile(String filename) {
         try {
-            lesZipfilConsumer.connectToSftp();
-            lesZipfilConsumer.deleteFile(filename);
+            filomraadeConsumer.connectToSftp();
+            filomraadeConsumer.deleteFile(filename);
         } catch (Exception e) {
             log.error("Skanmotutgaaende klarte ikke slette fil {}", filename, e);
         } finally {
-            lesZipfilConsumer.disconnectFromSftp();
+            filomraadeConsumer.disconnectFromSftp();
+        }
+    }
+
+    public void uploadFileToFeilomrade(InputStream file, String filename) {
+        try {
+            filomraadeConsumer.connectToSftp();
+            filomraadeConsumer.uploadFileToFeilomrade(file, filename);
+        } catch (Exception e) {
+            log.error("Skanmotutgaaende klarte ikke laste opp fil {}", filename, e);
+        } finally {
+            filomraadeConsumer.disconnectFromSftp();
         }
     }
 
     private byte[] getZipFile(String fileName) {
         try {
-            return lesZipfilConsumer.getFile(fileName);
+            return filomraadeConsumer.getFile(fileName);
         } catch (Exception e) {
             log.error("Skanmotutgaaende klarte ikke hente filen {}", fileName, e);
             return null;

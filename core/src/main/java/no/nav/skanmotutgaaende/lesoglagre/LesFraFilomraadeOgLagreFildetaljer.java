@@ -10,13 +10,17 @@ import no.nav.skanmotutgaaende.exceptions.technical.AbstractSkanmotutgaaendeTech
 import no.nav.skanmotutgaaende.exceptions.technical.SkanmotutgaaendeSftpTechnicalException;
 import no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerService;
 import no.nav.skanmotutgaaende.lagrefildetaljer.data.LagreFildetaljerResponse;
-import no.nav.skanmotutgaaende.leszipfil.LesZipfilService;
+import no.nav.skanmotutgaaende.filomraade.FilomraadeService;
 import no.nav.skanmotutgaaende.unzipskanningmetadata.UnzipSkanningmetadataUtils;
 import no.nav.skanmotutgaaende.unzipskanningmetadata.Unzipper;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,21 +31,27 @@ import java.util.stream.Collectors;
 @Component
 public class LesFraFilomraadeOgLagreFildetaljer {
 
-    private final LesZipfilService lesZipfilService;
+    private final FilomraadeService filomraadeService;
     private final LagreFildetaljerService lagreFildetaljerService;
     private final int MINUTE = 60_000;
     private final int HOUR = 60 * MINUTE;
 
-    public LesFraFilomraadeOgLagreFildetaljer(LesZipfilService lesZipfilService,
+    public LesFraFilomraadeOgLagreFildetaljer(FilomraadeService filomraadeService,
                                               LagreFildetaljerService lagreFildetaljerService) {
-        this.lesZipfilService = lesZipfilService;
+        this.filomraadeService = filomraadeService;
         this.lagreFildetaljerService = lagreFildetaljerService;
     }
 
     @Scheduled(initialDelay = 3000, fixedDelay = 72 * HOUR)
     public void scheduledJob() {
         //lesOgLagre();
-        lesZipfilService.deleteZipFile("batch20200506-1.zip");
+        //lesZipfilService.deleteZipFile("batch20200506-1.zip");
+        try {
+            InputStream fil = new FileInputStream(new File("src/main/resources/tmp/__files/data_005.xml"));
+            filomraadeService.uploadFileToFeilomrade(fil, "testFil.xml");
+        } catch (FileNotFoundException e) {
+            log.warn("Fant ikke fil");
+        }
     }
 
     public List<List<LagreFildetaljerResponse>> lesOgLagre() {
@@ -73,7 +83,7 @@ public class LesFraFilomraadeOgLagreFildetaljer {
 
     private Map<String, byte[]> lesFil() {
         try {
-            return lesZipfilService.getZipFiles();
+            return filomraadeService.getZipFiles();
         } catch (SkanmotutgaaendeSftpTechnicalException e) {
             return new HashMap<>();
         }

@@ -1,6 +1,7 @@
 package no.nav.skanmotutgaaende.itest;
 
 import no.nav.skanmotutgaaende.config.properties.SkanmotutgaaendeProperties;
+import no.nav.skanmotutgaaende.exceptions.functional.SkanmotutgaaendeSftpFunctionalException;
 import no.nav.skanmotutgaaende.exceptions.technical.SkanmotutgaaendeSftpTechnicalException;
 import no.nav.skanmotutgaaende.itest.config.TestConfig;
 import no.nav.skanmotutgaaende.sftp.Sftp;
@@ -23,6 +24,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -33,10 +36,13 @@ import java.util.List;
 public class SftpIT {
 
     private static final String RESOURCE_FOLDER_PATH = "src/test/resources/__files/xml_pdf_pairs";
+    private static final String FEILOMRADE_FOLDER_PATH = "src/test/resources/__files/feil";
     private static final String ZIP_FILE_PATH = RESOURCE_FOLDER_PATH + "/xml_pdf_pairs_testdata.zip";
+    private static final String XML_FILE_PATH = RESOURCE_FOLDER_PATH + "/data_005.xml";
     private static final String DIR_ONE_FOLDER_PATH = "src/test/resources/sftp/dirOne";
     private static final String DIR_TWO_FOLDER_PATH = "src/test/resources/sftp/dirTwo";
     private static final String INVALID_FOLDER_PATH = "foo/bar/baz";
+    private static final String INVALID_FILE_NAME = "invalidFilename.zip";
     private static final String VALID_PUBLIC_KEY_PATH = "src/test/resources/sftp/itest_valid.pub";
     private static final String TMP_FILE_NAME = "tmpfile.txt";
 
@@ -51,6 +57,7 @@ public class SftpIT {
 
     @BeforeAll
     void startSftpServer() throws IOException {
+        skanmotutgaaendeProperties.getSftp().setPort(Integer.toString(PORT));
         sshd.setPort(PORT);
         sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider(Path.of("src/test/resources/sftp/itest.ser")));
         sshd.setCommandFactory(new ScpCommandFactory());
@@ -66,8 +73,9 @@ public class SftpIT {
     }
 
     @BeforeEach
-    void setUpSftp() {
+    void setUp() throws IOException {
         sftp = new Sftp(skanmotutgaaendeProperties);
+        cleanFolder(Path.of(FEILOMRADE_FOLDER_PATH));
     }
 
     @Test
@@ -124,7 +132,7 @@ public class SftpIT {
             Assert.fail();
         } catch (SkanmotutgaaendeSftpTechnicalException e) {
             sftp.disconnect();
-            Assert.assertEquals("Klarte ikke endre mappe, path: foo/bar/baz", e.getMessage());
+            Assert.assertEquals("Klarte ikke endre mappe, path: " + INVALID_FOLDER_PATH, e.getMessage());
         } catch (Exception e) {
             sftp.disconnect();
             Assert.fail();
@@ -154,12 +162,12 @@ public class SftpIT {
             sftp.connect();
 
             sftp.changeDirectory(RESOURCE_FOLDER_PATH);
-            sftp.getFile("invalidFileName.zip");
+            sftp.getFile(INVALID_FILE_NAME);
 
             Assert.fail();
         } catch (SkanmotutgaaendeSftpTechnicalException e) {
             sftp.disconnect();
-            Assert.assertEquals("Klarte ikke laste ned invalidFileName.zip", e.getMessage());
+            Assert.assertEquals("Klarte ikke laste ned " + INVALID_FILE_NAME, e.getMessage());
         } catch (Exception e) {
             Assert.fail();
         }
@@ -182,6 +190,66 @@ public class SftpIT {
         } catch (Exception e) {
             f.delete();
             Assert.fail();
+        }
+    }
+
+    @Test
+    void shouldFailToDeleteNonExistingFile() {
+        try {
+            sftp.connect();
+
+            sftp.deleteFile(RESOURCE_FOLDER_PATH, INVALID_FILE_NAME);
+
+            Assert.fail();
+        } catch (SkanmotutgaaendeSftpFunctionalException e) {
+            sftp.disconnect();
+            Assert.assertEquals("Prøvde å slette " + INVALID_FILE_NAME + ", men finnes ikke på filområdet", e.getMessage());
+        } catch (Exception e) {
+            Assert.fail();
+        }
+    }
+
+    @Test
+    void shouldFailToDeleteNonExistingPath() {
+        try {
+            sftp.connect();
+
+            sftp.deleteFile(INVALID_FOLDER_PATH, INVALID_FILE_NAME);
+
+            Assert.fail();
+        } catch (SkanmotutgaaendeSftpTechnicalException e) {
+            sftp.disconnect();
+            Assert.assertEquals("Klarte ikke liste filene, path: " + INVALID_FOLDER_PATH, e.getMessage());
+        } catch (Exception e) {
+            Assert.fail();
+        }
+    }
+
+    @Test
+    void shouldUploadFile() {
+        try {
+            File xmlFile = Paths.get(XML_FILE_PATH).toFile();
+            String filename = "uploadedFile.xml";
+
+            sftp.connect();
+
+            sftp.uploadFile(new FileInputStream(xmlFile), FEILOMRADE_FOLDER_PATH + "/" + filename);
+
+            Assert.assertTrue(sftp.listFiles(FEILOMRADE_FOLDER_PATH).contains(filename));
+
+            sftp.disconnect();
+        } catch (Exception e) {
+            Assert.fail();
+        }
+    }
+
+    private void cleanFolder(Path dir) throws IOException {
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir)) {
+            for (Path path : stream) {
+                if (Files.isRegularFile(path)) {
+                    Files.delete(path);
+                }
+            }
         }
     }
 }

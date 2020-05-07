@@ -102,6 +102,16 @@ public class Sftp {
         }
     }
 
+    public void uploadFile(InputStream file, String path) {
+        checkSftpConnection();
+        try {
+            channelSftp.put(file, path);
+        } catch (SftpException e) {
+            log.error("{} klarte ikke laste opp fil", APPLICATION, e);
+            throw new SkanmotutgaaendeSftpTechnicalException("Klarte ikke laste opp fil", e);
+        }
+    }
+
     public boolean isConnected() {
         return channelSftp.isConnected();
     }

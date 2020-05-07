@@ -1,6 +1,5 @@
-package no.nav.skanmotutgaaende.leszipfil;
+package no.nav.skanmotutgaaende.filomraade;
 
-import com.jcraft.jsch.SftpException;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotutgaaende.config.properties.SkanmotutgaaendeProperties;
 import no.nav.skanmotutgaaende.exceptions.functional.LesZipFilFuntionalException;
@@ -14,15 +13,17 @@ import java.util.List;
 
 @Slf4j
 @Component
-public class LesZipfilConsumer {
+public class FilomraadeConsumer {
 
     private Sftp sftp;
     private String inboundDirectory;
+    private String feilDirectory;
 
     @Autowired
-    public LesZipfilConsumer(Sftp sftp, SkanmotutgaaendeProperties skanmotutgaaendeProperties) {
+    public FilomraadeConsumer(Sftp sftp, SkanmotutgaaendeProperties skanmotutgaaendeProperties) {
         this.sftp = sftp;
         inboundDirectory = skanmotutgaaendeProperties.getFilomraade().getInngaaendemappe();
+        feilDirectory = skanmotutgaaendeProperties.getFilomraade().getFeilmappe();
     }
 
     public List<String> listZipFiles() {
@@ -45,6 +46,12 @@ public class LesZipfilConsumer {
         log.info("Skanmotutgaaende sletter fil {}", filename);
         sftp.deleteFile(inboundDirectory, filename);
         log.info("Skanmotutgaaende slettet fil {}", filename);
+    }
+
+    public void uploadFileToFeilomrade(InputStream file, String filename) {
+        log.info("Skanmotutgaaende laster opp fil {} til feilområde", filename);
+        sftp.uploadFile(file, feilDirectory + "/" + filename);
+        log.info("Skanmotutgaaende lastet opp fil {} til feilområde", filename);
     }
 
     public void connectToSftp() {
