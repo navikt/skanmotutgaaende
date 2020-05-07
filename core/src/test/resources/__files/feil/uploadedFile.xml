@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<skanningmetadata>
+    <journalpost>
+        <journalpostId>005</journalpostId>
+        <mottakskanal>SKAN_IM</mottakskanal>
+        <datoMottatt>2019-10-31</datoMottatt>
+        <batchNavn>xml_pdf_pairs_testdata.zip</batchNavn>
+        <filNavn>data_005.pdf</filNavn>
+        <endorsernr>3110190003NAV743506</endorsernr>
+    </journalpost>
+    <skanningInfo>
+        <fysiskPostboks>1408</fysiskPostboks>
+        <strekkodePostboks>1408</strekkodePostboks>
+    </skanningInfo>
+</skanningmetadata>

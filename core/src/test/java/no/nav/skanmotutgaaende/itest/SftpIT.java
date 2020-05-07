@@ -75,7 +75,6 @@ public class SftpIT {
     @BeforeEach
     void setUp() throws IOException {
         sftp = new Sftp(skanmotutgaaendeProperties);
-        cleanFolder(Path.of(FEILOMRADE_FOLDER_PATH));
     }
 
     @Test
@@ -228,6 +227,7 @@ public class SftpIT {
     @Test
     void shouldUploadFile() {
         try {
+            cleanFolder(Path.of(FEILOMRADE_FOLDER_PATH));
             File xmlFile = Paths.get(XML_FILE_PATH).toFile();
             String filename = "uploadedFile.xml";
 
