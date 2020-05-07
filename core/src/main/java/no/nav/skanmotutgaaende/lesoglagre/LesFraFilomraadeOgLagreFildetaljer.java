@@ -56,19 +56,13 @@ public class LesFraFilomraadeOgLagreFildetaljer {
             try {
                 List<Filepair> filepairList = Unzipper.unzipXmlPdf(zipfiles.get(zipname));
 
-                /* FOR TEST */
-                filomraadeService.uploadFileToFeilomrade(filepairList.get(0).getXml(), filepairList.get(0).getName());
-                return null;
-                /* FOR TEST END */
-
-                /*
                 List<LagreFildetaljerResponse> responses = filepairList.stream()
                         .map(filepair -> lagreFil(filepair))
                         .filter(response -> null != response)
                         .collect(Collectors.toList());
 
                 log.info("Skanmotutgaaende lagret fildetaljer fra zipfil {} i dokarkiv", zipname);
-                allResponses.add(responses);*/
+                allResponses.add(responses);
             } catch (IOException e) {
                 // TODO: Håndter denne feilen skikkelig. Løses av MMA-4346
                 log.error("Skanmotutgaaende klarte ikke lese fra fil {}", zipname, e);
@@ -103,6 +97,7 @@ public class LesFraFilomraadeOgLagreFildetaljer {
             // TODO: Feilhåndtering. Løses av MMA-4346
             log.error("Skanmotutgaaende feilet funksjonelt med lagring av fildetaljer til journalpost med id {}. Fil: {}. Feilmelding: {}",
                     filepairWithMetadata.getSkanningmetadata().getJournalpost().getJournalpostId(), filepair.getName(), e.getLocalizedMessage(), e);
+            filomraadeService.uploadFileToFeilomrade(filepair.getXml(), filepair.getName());
         } catch (AbstractSkanmotutgaaendeTechnicalException e) {
             // TODO: Feilhåndtering. Løses av MMA-4346
             log.error("Skanmotutgaaende feilet teknisk med lagring av fildetaljer til journalpost med id {}. Fil: {}. Feilmelding: {}",
