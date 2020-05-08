@@ -79,10 +79,12 @@ public class LesFraFilomraadeOgLagreFildetaljer {
         }
     }
 
-    private LagreFildetaljerResponse lagreFil(Filepair filepair, String zipname) {
+    private LagreFildetaljerResponse lagreFil(Filepair filepair, String zipName) {
         log.info("Skanmotutgaaende behandler fil {}", filepair.getName());
         LagreFildetaljerResponse response = null;
-        FilepairWithMetadata filepairWithMetadata = extractMetadata(filepair);
+
+        FilepairWithMetadata filepairWithMetadata = extractMetadata(filepair, zipName);
+
         if (filepairWithMetadata == null) {
             return null;
         }
@@ -91,31 +93,31 @@ public class LesFraFilomraadeOgLagreFildetaljer {
             response = lagreFildetaljerService.lagreFildetaljer(filepairWithMetadata);
             log.info("Skanmotutgaaende lagret fildetaljer for journalpost med id {}", filepairWithMetadata.getSkanningmetadata().getJournalpost().getJournalpostId());
         } catch (AbstractSkanmotutgaaendeFunctionalException e) {
-            // TODO: Feilhåndtering. Løses av MMA-4346
             log.error("Skanmotutgaaende feilet funksjonelt med lagring av fildetaljer til journalpost med id {}. Fil: {}. Feilmelding: {}",
                     filepairWithMetadata.getSkanningmetadata().getJournalpost().getJournalpostId(), filepair.getName(), e.getMessage(), e);
-            lastOppFilpar(filepairWithMetadata, zipname);
+            lastOppFilpar(filepair, zipName);
         } catch (AbstractSkanmotutgaaendeTechnicalException e) {
-            // TODO: Feilhåndtering. Løses av MMA-4346
             log.error("Skanmotutgaaende feilet teknisk med lagring av fildetaljer til journalpost med id {}. Fil: {}. Feilmelding: {}",
                     filepairWithMetadata.getSkanningmetadata().getJournalpost().getJournalpostId(), filepair.getName(), e.getLocalizedMessage(), e);
+            lastOppFilpar(filepair, zipName);
         }
         return response;
     }
 
-    private void lastOppFilpar(FilepairWithMetadata filepairWithMetadata, String zipName) {
-        String pdfName = filepairWithMetadata.getSkanningmetadata().getJournalpost().getFilNavn();
-        String xmlName = Utils.changeFiletypeInFilename(pdfName, "xml");
-        String path = Utils.removeFileExtensionInFilename(zipName) + "/" + Utils.removeFileExtensionInFilename(pdfName);
-        filomraadeService.uploadFileToFeilomrade(filepairWithMetadata.getPdf(), pdfName, path);
-        filomraadeService.uploadFileToFeilomrade(filepairWithMetadata.getXml(), xmlName, path);
+    private void lastOppFilpar(Filepair filepair, String zipName) {
+        String pdfName = filepair.getName() + ".pdf";
+        String xmlName = filepair.getName() + ".xml";
+        String path = Utils.removeFileExtensionInFilename(zipName) + "/" + filepair.getName();
+        filomraadeService.uploadFileToFeilomrade(filepair.getPdf(), pdfName, path);
+        filomraadeService.uploadFileToFeilomrade(filepair.getXml(), xmlName, path);
     }
 
-    private FilepairWithMetadata extractMetadata(Filepair filepair) {
+    private FilepairWithMetadata extractMetadata(Filepair filepair, String zipName) {
         try {
             return UnzipSkanningmetadataUtils.extractMetadata(filepair);
         } catch (InvalidMetadataException e) {
             log.warn("Skanningmetadata hadde ugyldige verdier for fil {}. Skanmotutgaaende klarte ikke unmarshalle.", filepair.getName(), e);
+            lastOppFilpar(filepair, zipName);
             return null;
         }
     }

@@ -127,14 +127,12 @@ public class Sftp {
         } catch (SftpException mappeFinnesIkke) {
             // Path finnes ikke, så vi lager den. Kan bare lage en og en mappe
             String existingPath = "";
-            log.info("Path {} finnes ikke. Består av submappene {}", path, path.split("/"));
             for (String subPath : path.split("/")) {
                 try {
                     channelSftp.lstat(existingPath + subPath);
                     existingPath += subPath + "/";
                 } catch (SftpException delmappeFinnesIkke) {
                     try {
-                        log.info("Lagde en mappe da den ikke eksisterte: {}", existingPath + subPath);
                         channelSftp.mkdir(existingPath + subPath);
                         existingPath += subPath + "/";
                     } catch (SftpException e) {
