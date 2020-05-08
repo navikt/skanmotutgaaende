@@ -45,29 +45,34 @@ public class LesFraFilomraadeOgLagreFildetaljer {
     }
 
     public List<List<LagreFildetaljerResponse>> lesOgLagre() {
+        List<List<LagreFildetaljerResponse>> allResponses = new ArrayList<>();
+        List<String> readZipFiles = new ArrayList<>();
+
         Map<String, byte[]> zipfiles = lesFil();
+
         log.info("Skanmotutgaaende leste fra filområde og fant {} zipfiler", zipfiles.size());
 
-        List<List<LagreFildetaljerResponse>> allResponses = new ArrayList<>();
-        for (String zipname : zipfiles.keySet()) {
+        for (String zipName : zipfiles.keySet()) {
             try {
-                List<Filepair> filepairList = Unzipper.unzipXmlPdf(zipfiles.get(zipname));
+                List<Filepair> filepairList = Unzipper.unzipXmlPdf(zipfiles.get(zipName));
 
                 List<LagreFildetaljerResponse> responses = filepairList.stream()
-                        .map(filepair -> lagreFil(filepair, zipname))
+                        .map(filepair -> lagreFil(filepair, zipName))
                         .filter(response -> null != response)
                         .collect(Collectors.toList());
 
-                log.info("Skanmotutgaaende lagret fildetaljer fra zipfil {} i dokarkiv", zipname);
+                log.info("Skanmotutgaaende lagret fildetaljer fra zipfil {} i dokarkiv", zipName);
+                readZipFiles.add(zipName);
                 allResponses.add(responses);
             } catch (IOException e) {
-                // TODO: Håndter denne feilen skikkelig. Løses av MMA-4346
-                log.error("Skanmotutgaaende klarte ikke lese fra fil {}", zipname, e);
+                log.error("Skanmotutgaaende klarte ikke lese fra fil {}", zipName, e);
             } catch (SkanmotutgaaendeUnzipperFunctionalException e) {
-                // TODO: Håndter denne feilen skikkelig. Løses av MMA-4346
-                log.error("Skanmotutgaaende feilet i unzipping av fil {}", zipname, e);
+                log.error("Skanmotutgaaende feilet i unzipping av fil {}", zipName, e);
             }
         }
+
+        slettZipfiler(readZipFiles);
+
         return allResponses;
     }
 
@@ -110,6 +115,10 @@ public class LesFraFilomraadeOgLagreFildetaljer {
         String path = Utils.removeFileExtensionInFilename(zipName) + "/" + filepair.getName();
         filomraadeService.uploadFileToFeilomrade(filepair.getPdf(), pdfName, path);
         filomraadeService.uploadFileToFeilomrade(filepair.getXml(), xmlName, path);
+    }
+
+    private void slettZipfiler(List<String> readZipFiles) {
+        filomraadeService.deleteZipFiles(readZipFiles);
     }
 
     private FilepairWithMetadata extractMetadata(Filepair filepair, String zipName) {

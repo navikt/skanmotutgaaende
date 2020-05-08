@@ -1,5 +1,6 @@
 package no.nav.skanmotutgaaende.filomraade;
 
+import com.jcraft.jsch.SftpException;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotutgaaende.exceptions.functional.LesZipFilFuntionalException;
 import no.nav.skanmotutgaaende.exceptions.technical.SkanmotutgaaendeSftpTechnicalException;
@@ -47,17 +48,6 @@ public class FilomraadeService {
         }
     }
 
-    public void deleteZipFile(String filename) {
-        try {
-            filomraadeConsumer.connectToSftp();
-            filomraadeConsumer.deleteFile(filename);
-        } catch (Exception e) {
-            log.error("Skanmotutgaaende klarte ikke slette fil {}", filename, e);
-        } finally {
-            filomraadeConsumer.disconnectFromSftp();
-        }
-    }
-
     public void uploadFileToFeilomrade(byte[] file, String filename, String path) {
         try {
             filomraadeConsumer.connectToSftp();
@@ -66,6 +56,23 @@ public class FilomraadeService {
             log.error("Skanmotutgaaende klarte ikke laste opp fil {}", filename, e);
         } finally {
             filomraadeConsumer.disconnectFromSftp();
+        }
+    }
+
+    public void deleteZipFiles(List<String> readZipFiles) {
+            filomraadeConsumer.connectToSftp();
+
+            readZipFiles.stream().forEach(this::deleteZipFile);
+
+
+            filomraadeConsumer.disconnectFromSftp();
+    }
+
+    private void deleteZipFile(String filename) {
+        try {
+            filomraadeConsumer.deleteFile(filename);
+        } catch (Exception e) {
+            log.error("Skanmotutgaaende klarte ikke slette fil {}", filename, e);
         }
     }
 
