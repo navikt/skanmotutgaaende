@@ -93,11 +93,11 @@ public class LesFraFilomraadeOgLagreFildetaljer {
             response = lagreFildetaljerService.lagreFildetaljer(filepairWithMetadata);
             log.info("Skanmotutgaaende lagret fildetaljer for journalpost med id {}", filepairWithMetadata.getSkanningmetadata().getJournalpost().getJournalpostId());
         } catch (AbstractSkanmotutgaaendeFunctionalException e) {
-            log.error("Skanmotutgaaende feilet funksjonelt med lagring av fildetaljer til journalpost med id {}. Fil: {}. Feilmelding: {}",
+            log.warn("Skanmotutgaaende feilet funksjonelt med lagring av fildetaljer til journalpost med id {}. Fil: {}. Feilmelding: {}",
                     filepairWithMetadata.getSkanningmetadata().getJournalpost().getJournalpostId(), filepair.getName(), e.getMessage(), e);
             lastOppFilpar(filepair, zipName);
         } catch (AbstractSkanmotutgaaendeTechnicalException e) {
-            log.error("Skanmotutgaaende feilet teknisk med lagring av fildetaljer til journalpost med id {}. Fil: {}. Feilmelding: {}",
+            log.warn("Skanmotutgaaende feilet teknisk med lagring av fildetaljer til journalpost med id {}. Fil: {}. Feilmelding: {}",
                     filepairWithMetadata.getSkanningmetadata().getJournalpost().getJournalpostId(), filepair.getName(), e.getLocalizedMessage(), e);
             lastOppFilpar(filepair, zipName);
         }
