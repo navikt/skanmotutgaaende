@@ -36,10 +36,11 @@ import java.util.List;
 @SpringBootTest(classes = TestConfig.class)
 public class SftpIT {
 
-    private static final String RESOURCE_FOLDER_PATH = "src/test/resources/__files/xml_pdf_pairs";
-    private static final String FEILOMRADE_FOLDER_PATH = "src/test/resources/__files/feil";
-    private static final String ZIP_FILE_PATH = RESOURCE_FOLDER_PATH + "/xml_pdf_pairs_testdata.zip";
-    private static final String XML_FILE_PATH = RESOURCE_FOLDER_PATH + "/data_005.xml";
+    private static final String FILES_FOLDER_PATH = "src/test/resources/__files";
+    private static final String PAIR_FOLDER_PATH = FILES_FOLDER_PATH + "/xml_pdf_pairs";
+    private static final String FEILOMRADE_FOLDER_PATH = "src/test/resources/inbound/SKANMOTUTGAAENDE_FEIL";
+    private static final String ZIP_FILE_PATH = PAIR_FOLDER_PATH + "/xml_pdf_pairs_testdata.zip";
+    private static final String XML_FILE_PATH = FILES_FOLDER_PATH + "/data_005.xml";
     private static final String DIR_ONE_FOLDER_PATH = "src/test/resources/sftp/dirOne";
     private static final String DIR_TWO_FOLDER_PATH = "src/test/resources/sftp/dirTwo";
     private static final String INVALID_FOLDER_PATH = "foo/bar/baz";
@@ -108,8 +109,8 @@ public class SftpIT {
             Assert.assertTrue(sftp.presentWorkingDirectory().endsWith(homePath + DIR_TWO_FOLDER_PATH));
             Assert.assertTrue(sftp.listFiles().contains("fileTwo"));
 
-            sftp.changeDirectory(homePath + RESOURCE_FOLDER_PATH);
-            Assert.assertTrue(sftp.presentWorkingDirectory().endsWith(homePath + RESOURCE_FOLDER_PATH));
+            sftp.changeDirectory(homePath + PAIR_FOLDER_PATH);
+            Assert.assertTrue(sftp.presentWorkingDirectory().endsWith(homePath + PAIR_FOLDER_PATH));
             Assert.assertTrue(sftp.listFiles().containsAll(
                     List.of(
                             "xml_pdf_pairs_invalid_testdata.zip",
@@ -145,7 +146,7 @@ public class SftpIT {
             File zipFile = Paths.get(ZIP_FILE_PATH).toFile();
 
             sftp.connect();
-            sftp.changeDirectory(RESOURCE_FOLDER_PATH);
+            sftp.changeDirectory(PAIR_FOLDER_PATH);
 
             InputStream inputStream = sftp.getFile("xml_pdf_pairs_testdata.zip");
             Assert.assertArrayEquals(inputStream.readAllBytes(), new FileInputStream(zipFile).readAllBytes());
@@ -161,7 +162,7 @@ public class SftpIT {
         try {
             sftp.connect();
 
-            sftp.changeDirectory(RESOURCE_FOLDER_PATH);
+            sftp.changeDirectory(FILES_FOLDER_PATH);
             sftp.getFile(INVALID_FILE_NAME);
 
             Assert.fail();
@@ -175,16 +176,16 @@ public class SftpIT {
 
     @Test
     void shouldDeleteFile() {
-        File f = new File(RESOURCE_FOLDER_PATH + "/" + TMP_FILE_NAME);
+        File f = new File(FILES_FOLDER_PATH + "/" + TMP_FILE_NAME);
         try {
             sftp.connect();
-            int initialNumberOfFiles = sftp.listFiles(RESOURCE_FOLDER_PATH).size();
+            int initialNumberOfFiles = sftp.listFiles(FILES_FOLDER_PATH).size();
 
             f.createNewFile();
-            Assert.assertEquals(initialNumberOfFiles + 1, sftp.listFiles(RESOURCE_FOLDER_PATH).size());
-            sftp.deleteFile(RESOURCE_FOLDER_PATH, TMP_FILE_NAME);
+            Assert.assertEquals(initialNumberOfFiles + 1, sftp.listFiles(FILES_FOLDER_PATH).size());
+            sftp.deleteFile(FILES_FOLDER_PATH, TMP_FILE_NAME);
 
-            Assert.assertEquals(initialNumberOfFiles, sftp.listFiles(RESOURCE_FOLDER_PATH).size());
+            Assert.assertEquals(initialNumberOfFiles, sftp.listFiles(FILES_FOLDER_PATH).size());
 
             sftp.disconnect();
         } catch (Exception e) {
@@ -198,7 +199,7 @@ public class SftpIT {
         try {
             sftp.connect();
 
-            sftp.deleteFile(RESOURCE_FOLDER_PATH, INVALID_FILE_NAME);
+            sftp.deleteFile(FILES_FOLDER_PATH, INVALID_FILE_NAME);
 
             Assert.fail();
         } catch (SkanmotutgaaendeSftpFunctionalException e) {

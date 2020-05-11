@@ -15,6 +15,7 @@ import org.apache.sshd.server.config.keys.AuthorizedKeysAuthenticator;
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
 import org.apache.sshd.server.scp.ScpCommandFactory;
 import org.apache.sshd.server.subsystem.sftp.SftpSubsystemFactory;
+import org.junit.BeforeClass;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -26,11 +27,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import wiremock.org.apache.commons.io.FileUtils;
 
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
@@ -61,7 +63,6 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
     private final String URL_DOKARKIV_JOURNALPOST_GEN = "/rest/intern/journalpostapi/v1/journalpost/\\d+/mottaDokumentUtgaaendeSkanning";
     private final String URL_DOKARKIV_JOURNALPOST_003 = "/rest/intern/journalpostapi/v1/journalpost/003/mottaDokumentUtgaaendeSkanning";
     private final String VALID_PUBLIC_KEY_PATH = "src/test/resources/sftp/itest_valid.pub";
-    private final String FEILOMRAADE_PATH = "src/test/resources/__files/feil";
 
     LesFraFilomraadeOgLagreFildetaljer lesFraFilomraadeOgLagreFildetaljer;
     FilomraadeService filomraadeService;
@@ -70,18 +71,27 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
     private int PORT = 2222;
     private SshServer sshd = SshServer.setUpDefaultServer();
     private Sftp sftp;
+    private final Path skanmotutgaaendeFolder = Path.of("src/test/resources/inbound/SKANMOTUTGAAENDE");
+    private final Path skanmotutgaaendeFeilFolder = Path.of("src/test/resources/inbound/SKANMOTUTGAAENDE_FEIL");
 
     @Autowired
     SkanmotutgaaendeProperties skanmotutgaaendeProperties;
 
+    @BeforeClass
+    public static void setupTempFolders() throws IOException {
+    }
+
     @BeforeAll
-    void startSftpServer() throws IOException {
+    void startSftpServer() throws Exception {
         sshd.setPort(PORT);
         sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider(Path.of("src/test/resources/sftp/itest.ser")));
         sshd.setCommandFactory(new ScpCommandFactory());
         sshd.setSubsystemFactories(List.of(new SftpSubsystemFactory()));
         sshd.setPublickeyAuthenticator(new AuthorizedKeysAuthenticator(Paths.get(VALID_PUBLIC_KEY_PATH)));
         sshd.start();
+
+        cleanFolder(skanmotutgaaendeFolder);
+        cleanFolder(skanmotutgaaendeFeilFolder);
     }
 
     @AfterAll
@@ -91,13 +101,12 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
     }
 
     @BeforeEach
-    void setUpServices() throws IOException {
+    void setUpServices() {
         sftp = new Sftp(skanmotutgaaendeProperties);
         filomraadeService = new FilomraadeService(new FilomraadeConsumer(sftp, skanmotutgaaendeProperties));
         lagreFildetaljerService = new LagreFildetaljerService(new LagreFildetaljerConsumer(new RestTemplateBuilder(), skanmotutgaaendeProperties));
         lesFraFilomraadeOgLagreFildetaljer = new LesFraFilomraadeOgLagreFildetaljer(filomraadeService, lagreFildetaljerService);
         setUpStubs();
-        cleanFolder(Path.of(FEILOMRAADE_PATH));
     }
 
     @AfterEach
@@ -115,19 +124,25 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
     }
 
     @Test
-    public void shouldLesOgLagreHappy() {
+    public void shouldLesOgLagreHappy() throws IOException {
+        copyFileToSkanmotutgaaendeFolder("__files/xml_pdf_pairs/xml_pdf_pairs_testdata.zip");
+
         assertDoesNotThrow(() -> lesFraFilomraadeOgLagreFildetaljer.lesOgLagre());
         verify(exactly(10), putRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
     }
 
     @Test
-    public void shouldAddFileToFeilOmraadeWhenFailing() {
+    public void shouldAddFileToFeilOmraadeWhenFailing() throws IOException {
+        cleanFolder(skanmotutgaaendeFeilFolder);
+        copyFileToSkanmotutgaaendeFolder("__files/xml_pdf_pairs/xml_pdf_pairs_testdata.zip");
         stubFor(put(urlMatching(URL_DOKARKIV_JOURNALPOST_003))
                 .willReturn(aResponse().withStatus(HttpStatus.BAD_REQUEST.value())));
+
         List<List<LagreFildetaljerResponse>> responses = lesFraFilomraadeOgLagreFildetaljer.lesOgLagre();
+
         assertEquals(9, responses.get(0).size());
         sftp.connect();
-        assertEquals(4, sftp.listFiles(FEILOMRAADE_PATH + "/xml_pdf_pairs_testdata/data_003").size());
+        assertEquals(4, sftp.listFiles("src/test/resources/inbound/SKANMOTUTGAAENDE_FEIL/xml_pdf_pairs_testdata/data_003").size());
         sftp.disconnect();
     }
 
@@ -136,10 +151,19 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
             for (Path path : stream) {
                 if (Files.isRegularFile(path)) {
                     Files.delete(path);
-                } else {
-                    FileUtils.deleteDirectory(path.toFile());
                 }
             }
         }
+    }
+
+    private Path copyFileToSkanmotutgaaendeFolder(String relativePath) throws IOException {
+        Path source = getPathFromRelativePath(relativePath);
+        Path dest = Path.of(skanmotutgaaendeFolder.toAbsolutePath() + "/" + source.getFileName());
+        return Files.copy(source, dest);
+    }
+
+    private Path getPathFromRelativePath(String relativePath) throws IOException {
+        Resource onClasspath = new ClassPathResource(relativePath);
+        return Paths.get(onClasspath.getFile().getAbsolutePath());
     }
 }

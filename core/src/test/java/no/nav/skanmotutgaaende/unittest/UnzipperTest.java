@@ -12,7 +12,6 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -28,8 +27,9 @@ public class UnzipperTest {
     private final String ZIP_FILE_PATH = "src/test/resources/__files/xml_pdf_pairs/xml_pdf_pairs_testdata.zip";
     private final String BROKEN_ZIP_FILE_PATH = "src/test/resources/__files/xml_pdf_pairs/xml_pdf_pairs_broken_testdata.zip";
     private final String INVALID_ZIP_FILE_PATH = "src/test/resources/__files/xml_pdf_pairs/xml_pdf_pairs_invalid_testdata.zip";
-    private final String PDF_PATH = "src/test/resources/__files/xml_pdf_pairs/data_005.pdf";
-    private final String XML_PATH = "src/test/resources/__files/xml_pdf_pairs/data_005.xml";
+    private final String PDF_PATH = "src/test/resources/__files/data_005.pdf";
+    private final String XML_PATH = "src/test/resources/__files/data_005.xml";
+
     private final String ZIPPED_PDF_NAME = "data_005.pdf";
     private final String JOURNALPOST_ID = "005";
     private final String MOTTAKSKANAL = "SKAN_IM";
