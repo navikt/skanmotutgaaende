@@ -142,14 +142,14 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
 
         assertEquals(9, responses.get(0).size());
         sftp.connect();
-        assertEquals(4, sftp.listFiles("src/test/resources/inbound/SKANMOTUTGAAENDE_FEIL/xml_pdf_pairs_testdata/data_003").size());
+        assertEquals(4, sftp.listFiles("src/test/resources/inbound/SKANMOTUTGAAENDE_FEIL/xml_pdf_pairs_testdata").size());
         sftp.disconnect();
     }
 
     private void cleanFolder(Path dir) throws IOException {
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir)) {
             for (Path path : stream) {
-                if (Files.isRegularFile(path)) {
+                if (Files.isRegularFile(path) && !path.getFileName().toString().equals("dummy")) {
                     Files.delete(path);
                 }
             }

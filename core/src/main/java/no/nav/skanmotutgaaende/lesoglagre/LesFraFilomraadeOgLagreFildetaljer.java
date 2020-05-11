@@ -112,7 +112,7 @@ public class LesFraFilomraadeOgLagreFildetaljer {
     private void lastOppFilpar(Filepair filepair, String zipName) {
         String pdfName = filepair.getName() + ".pdf";
         String xmlName = filepair.getName() + ".xml";
-        String path = Utils.removeFileExtensionInFilename(zipName) + "/" + filepair.getName();
+        String path = Utils.removeFileExtensionInFilename(zipName);
         filomraadeService.uploadFileToFeilomrade(filepair.getPdf(), pdfName, path);
         filomraadeService.uploadFileToFeilomrade(filepair.getXml(), xmlName, path);
     }
