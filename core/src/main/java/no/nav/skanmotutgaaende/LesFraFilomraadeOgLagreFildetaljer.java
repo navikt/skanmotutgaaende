@@ -5,6 +5,7 @@ import no.nav.skanmotutgaaende.domain.Filepair;
 import no.nav.skanmotutgaaende.domain.FilepairWithMetadata;
 import no.nav.skanmotutgaaende.exceptions.functional.AbstractSkanmotutgaaendeFunctionalException;
 import no.nav.skanmotutgaaende.exceptions.functional.InvalidMetadataException;
+import no.nav.skanmotutgaaende.exceptions.functional.LesZipFilFuntionalException;
 import no.nav.skanmotutgaaende.exceptions.functional.SkanmotutgaaendeUnzipperFunctionalException;
 import no.nav.skanmotutgaaende.exceptions.technical.AbstractSkanmotutgaaendeTechnicalException;
 import no.nav.skanmotutgaaende.exceptions.technical.SkanmotutgaaendeSftpTechnicalException;
@@ -30,8 +31,6 @@ public class LesFraFilomraadeOgLagreFildetaljer {
 
     private final FilomraadeService filomraadeService;
     private final LagreFildetaljerService lagreFildetaljerService;
-    private final int MINUTE = 60_000;
-    private final int HOUR = 60 * MINUTE;
 
     public LesFraFilomraadeOgLagreFildetaljer(FilomraadeService filomraadeService,
                                               LagreFildetaljerService lagreFildetaljerService) {
@@ -39,14 +38,14 @@ public class LesFraFilomraadeOgLagreFildetaljer {
         this.lagreFildetaljerService = lagreFildetaljerService;
     }
 
-    @Scheduled(initialDelay = 3000, fixedDelay = 72 * HOUR)
+    @Scheduled(cron = "0 0 6,7,16,17,21 * * ?")
     public void scheduledJob() {
         lesOgLagre();
     }
 
     public List<List<LagreFildetaljerResponse>> lesOgLagre() {
         List<List<LagreFildetaljerResponse>> allResponses = new ArrayList<>();
-        List<String> readZipFiles = new ArrayList<>();
+        List<String> processedZipFiles = new ArrayList<>();
 
         Map<String, byte[]> zipfiles = lesFil();
 
@@ -62,7 +61,7 @@ public class LesFraFilomraadeOgLagreFildetaljer {
                         .collect(Collectors.toList());
 
                 log.info("Skanmotutgaaende lagret fildetaljer fra zipfil {} i dokarkiv", zipName);
-                readZipFiles.add(zipName);
+                processedZipFiles.add(zipName);
                 allResponses.add(responses);
             } catch (IOException e) {
                 log.error("Skanmotutgaaende klarte ikke lese fra fil {}", zipName, e);
@@ -71,7 +70,7 @@ public class LesFraFilomraadeOgLagreFildetaljer {
             }
         }
 
-        slettZipfiler(readZipFiles);
+        slettZipfiler(processedZipFiles);
 
         return allResponses;
     }
@@ -79,7 +78,7 @@ public class LesFraFilomraadeOgLagreFildetaljer {
     private Map<String, byte[]> lesFil() {
         try {
             return filomraadeService.getZipFiles();
-        } catch (SkanmotutgaaendeSftpTechnicalException e) {
+        } catch (SkanmotutgaaendeSftpTechnicalException | LesZipFilFuntionalException e) {
             return new HashMap<>();
         }
     }

@@ -15,7 +15,6 @@ import org.apache.sshd.server.config.keys.AuthorizedKeysAuthenticator;
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
 import org.apache.sshd.server.scp.ScpCommandFactory;
 import org.apache.sshd.server.subsystem.sftp.SftpSubsystemFactory;
-import org.junit.BeforeClass;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -63,6 +62,8 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
     private final String URL_DOKARKIV_JOURNALPOST_GEN = "/rest/intern/journalpostapi/v1/journalpost/\\d+/mottaDokumentUtgaaendeSkanning";
     private final String URL_DOKARKIV_JOURNALPOST_003 = "/rest/intern/journalpostapi/v1/journalpost/003/mottaDokumentUtgaaendeSkanning";
     private final String VALID_PUBLIC_KEY_PATH = "src/test/resources/sftp/itest_valid.pub";
+    private final Path SKANMOTUTGAAENDE_PATH = Path.of("src/test/resources/inbound/SKANMOTUTGAAENDE");
+    private final Path SKANMOTUTGAAENDE_FEIL_PATH = Path.of("src/test/resources/inbound/SKANMOTUTGAAENDE_FEIL");
 
     LesFraFilomraadeOgLagreFildetaljer lesFraFilomraadeOgLagreFildetaljer;
     FilomraadeService filomraadeService;
@@ -71,15 +72,9 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
     private int PORT = 2222;
     private SshServer sshd = SshServer.setUpDefaultServer();
     private Sftp sftp;
-    private final Path skanmotutgaaendeFolder = Path.of("src/test/resources/inbound/SKANMOTUTGAAENDE");
-    private final Path skanmotutgaaendeFeilFolder = Path.of("src/test/resources/inbound/SKANMOTUTGAAENDE_FEIL");
 
     @Autowired
     SkanmotutgaaendeProperties skanmotutgaaendeProperties;
-
-    @BeforeClass
-    public static void setupTempFolders() throws IOException {
-    }
 
     @BeforeAll
     void startSftpServer() throws Exception {
@@ -90,8 +85,8 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
         sshd.setPublickeyAuthenticator(new AuthorizedKeysAuthenticator(Paths.get(VALID_PUBLIC_KEY_PATH)));
         sshd.start();
 
-        cleanFolder(skanmotutgaaendeFolder);
-        cleanFolder(skanmotutgaaendeFeilFolder);
+        cleanFolder(SKANMOTUTGAAENDE_PATH);
+        cleanFolder(SKANMOTUTGAAENDE_FEIL_PATH);
     }
 
     @AfterAll
@@ -133,7 +128,7 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
 
     @Test
     public void shouldAddFileToFeilOmraadeWhenFailing() throws IOException {
-        cleanFolder(skanmotutgaaendeFeilFolder);
+        cleanFolder(SKANMOTUTGAAENDE_FEIL_PATH);
         copyFileToSkanmotutgaaendeFolder("__files/xml_pdf_pairs/xml_pdf_pairs_testdata.zip");
         stubFor(put(urlMatching(URL_DOKARKIV_JOURNALPOST_003))
                 .willReturn(aResponse().withStatus(HttpStatus.BAD_REQUEST.value())));
@@ -158,7 +153,7 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
 
     private Path copyFileToSkanmotutgaaendeFolder(String relativePath) throws IOException {
         Path source = getPathFromRelativePath(relativePath);
-        Path dest = Path.of(skanmotutgaaendeFolder.toAbsolutePath() + "/" + source.getFileName());
+        Path dest = Path.of(SKANMOTUTGAAENDE_PATH.toAbsolutePath() + "/" + source.getFileName());
         return Files.copy(source, dest);
     }
 

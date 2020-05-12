@@ -31,7 +31,7 @@ public class FilomraadeService {
 
             for (String filename : fileNames) {
                 byte[] zipFile = getZipFile(filename);
-                if (null != zipFile) {
+                if (zipFile != null) {
                     files.put(filename, zipFile);
                 }
             }
@@ -40,9 +40,9 @@ public class FilomraadeService {
         } catch (LesZipFilFuntionalException e) {
             log.warn("Skanmotutgaaende klarte ikke hente zipfiler");
             throw e;
-        } catch (Exception e) {
+        } catch (SkanmotutgaaendeSftpTechnicalException e) {
             log.warn("Skanmotutgaaende klarte ikke koble til sftp");
-            throw new SkanmotutgaaendeSftpTechnicalException("Klarte ikke koble til sftp", e);
+            throw e;
         } finally {
             filomraadeConsumer.disconnectFromSftp();
         }

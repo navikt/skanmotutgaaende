@@ -69,14 +69,6 @@ public class Sftp {
         }
     }
 
-    public void createDirectory(String path) {
-        try {
-            channelSftp.mkdir(path);
-        } catch (SftpException e) {
-            // Mappe eksisterer allerede, ignorerer
-        }
-    }
-
     public void changeDirectory(String path) {
         checkSftpConnection();
         try {
@@ -99,14 +91,12 @@ public class Sftp {
 
     public void deleteFile(String directory, String filename) {
         checkSftpConnection();
+        String filePath = directory + "/" + filename;
         try {
-            if (!listFiles(directory).contains(filename)) {
-                throw new SkanmotutgaaendeSftpFunctionalException("Prøvde å slette " + filename + ", men finnes ikke på filområdet");
-            }
-            channelSftp.rm(directory + "/" + filename);
+            channelSftp.rm(filePath);
         } catch (SftpException e) {
-            log.error("{} klarte ikke slette {}", APPLICATION, filename, e);
-            throw new SkanmotutgaaendeSftpTechnicalException("Klarte ikke slette " + filename, e);
+            log.error("{} klarte ikke slette {}", APPLICATION, filePath, e);
+            throw new SkanmotutgaaendeSftpTechnicalException("Klarte ikke slette " + filePath, e);
         }
     }
 
@@ -136,11 +126,14 @@ public class Sftp {
                         channelSftp.mkdir(existingPath + subPath);
                         existingPath += subPath + "/";
                     } catch (SftpException e) {
-                        log.error("{} klarte ikke lage en ny mappe: {}", APPLICATION, existingPath + subPath, e);
+                        log.error("{} klarte ikke lage en ny mappe: {}", APPLICATION, path, e);
                         throw new SkanmotutgaaendeSftpTechnicalException("Klarte ikke lage en ny mappe: " + path, e);
                     }
                 }
             }
+        } catch (Exception e) {
+            log.error("{} klarte ikke lage en ny mappe: {}", APPLICATION, path, e);
+            throw new SkanmotutgaaendeSftpTechnicalException("Klarte ikke lage en ny mappe: " + path, e);
         }
     }
 

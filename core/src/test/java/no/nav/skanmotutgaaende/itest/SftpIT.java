@@ -202,9 +202,9 @@ public class SftpIT {
             sftp.deleteFile(FILES_FOLDER_PATH, INVALID_FILE_NAME);
 
             Assert.fail();
-        } catch (SkanmotutgaaendeSftpFunctionalException e) {
+        } catch (SkanmotutgaaendeSftpTechnicalException e) {
             sftp.disconnect();
-            Assert.assertEquals("Prøvde å slette " + INVALID_FILE_NAME + ", men finnes ikke på filområdet", e.getMessage());
+            Assert.assertEquals("Klarte ikke slette " + FILES_FOLDER_PATH + "/" + INVALID_FILE_NAME, e.getMessage());
         } catch (Exception e) {
             Assert.fail();
         }
@@ -220,7 +220,7 @@ public class SftpIT {
             Assert.fail();
         } catch (SkanmotutgaaendeSftpTechnicalException e) {
             sftp.disconnect();
-            Assert.assertEquals("Klarte ikke liste filene, path: " + INVALID_FOLDER_PATH, e.getMessage());
+            Assert.assertEquals("Klarte ikke slette " + INVALID_FOLDER_PATH + "/" + INVALID_FILE_NAME, e.getMessage());
         } catch (Exception e) {
             Assert.fail();
         }
