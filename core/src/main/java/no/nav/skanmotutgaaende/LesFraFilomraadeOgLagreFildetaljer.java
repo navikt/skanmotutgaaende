@@ -1,4 +1,4 @@
-package no.nav.skanmotutgaaende.lesoglagre;
+package no.nav.skanmotutgaaende;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotutgaaende.domain.Filepair;

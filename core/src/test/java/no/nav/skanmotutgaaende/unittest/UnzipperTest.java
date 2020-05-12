@@ -64,7 +64,7 @@ public class UnzipperTest {
     }
 
     @Test
-    public void shouldThrowExceptionIfUnableToReadMetadata() throws IOException {
+    public void shouldThrowExceptionIfUnableToReadMetadata() {
         File zip = Paths.get(BROKEN_ZIP_FILE_PATH).toFile();
         assertThrows(SkanmotutgaaendeUnzipperFunctionalException.class, () ->
                 Unzipper.unzipXmlPdf(zip).stream().map(filepair ->
