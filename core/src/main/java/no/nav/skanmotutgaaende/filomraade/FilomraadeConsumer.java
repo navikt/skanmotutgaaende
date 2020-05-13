@@ -54,6 +54,14 @@ public class FilomraadeConsumer {
         log.info("Skanmotutgaaende lastet opp fil {} til feilområde", filename);
     }
 
+    public void moveFile(String from, String to, String newFilename) {
+        String fromPath = inboundDirectory + "/" + from;
+        String toPath = inboundDirectory + "/" + to;
+        log.info("Skanmotutgaaende flytter fil {} til {}", fromPath, toPath);
+        sftp.moveFile(fromPath, toPath, newFilename);
+        log.info("Skanmotutgaende flyttet fil {} til {}", fromPath, toPath);
+    }
+
     public void connectToSftp() {
         sftp.connect();
     }

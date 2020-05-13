@@ -59,13 +59,18 @@ public class FilomraadeService {
         }
     }
 
-    public void deleteZipFiles(List<String> readZipFiles) {
-            filomraadeConsumer.connectToSftp();
+    public void deleteZipFiles(List<String> zipFiles) {
+        filomraadeConsumer.connectToSftp();
+        zipFiles.stream().forEach(this::deleteZipFile);
+        filomraadeConsumer.disconnectFromSftp();
+    }
 
-            readZipFiles.stream().forEach(this::deleteZipFile);
-
-
-            filomraadeConsumer.disconnectFromSftp();
+    public void moveZipFiles(List<String> files, String destination) {
+        filomraadeConsumer.connectToSftp();
+        files.stream().forEach(file -> {
+            moveFile(file, destination, file + ".processed");
+        });
+        filomraadeConsumer.disconnectFromSftp();
     }
 
     private void deleteZipFile(String filename) {
@@ -73,6 +78,14 @@ public class FilomraadeService {
             filomraadeConsumer.deleteFile(filename);
         } catch (Exception e) {
             log.error("Skanmotutgaaende klarte ikke slette fil {}", filename, e);
+        }
+    }
+
+    private void moveFile(String from, String to, String newFilename) {
+        try {
+            filomraadeConsumer.moveFile(from, to, newFilename);
+        } catch (Exception e) {
+            log.error("Skanmotutgaaende klarte ikke flytte fil {} til {}/{}", from, to, newFilename);
         }
     }
 

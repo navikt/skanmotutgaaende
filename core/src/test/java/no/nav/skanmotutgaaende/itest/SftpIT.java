@@ -264,6 +264,27 @@ public class SftpIT {
         }
     }
 
+    @Test
+    void shouldMoveFile() {
+        String tempFile = FILES_FOLDER_PATH + "/" + TMP_FILE_NAME;
+        File f = new File(tempFile);
+        //File f = new File(FILES_FOLDER_PATH + "/" + TMP_FILE_NAME);
+        try {
+            cleanFolder(Path.of(FEILOMRADE_FOLDER_PATH));
+            f.createNewFile();
+
+            sftp.connect();
+
+            sftp.moveFile(tempFile, FEILOMRADE_FOLDER_PATH, "movedFile.txt");
+            //sftp.moveFile(FILES_FOLDER_PATH + "/" + TMP_FILE_NAME, FEILOMRADE_FOLDER_PATH, "movedFile.txt");
+            Assert.assertTrue(sftp.listFiles(FEILOMRADE_FOLDER_PATH).contains("movedFile.txt"));
+
+            sftp.disconnect();
+        } catch (Exception e) {
+            Assert.fail();
+        }
+    }
+
     private void cleanFolder(Path dir) throws IOException {
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir)) {
             for (Path path : stream) {

@@ -111,6 +111,17 @@ public class Sftp {
         }
     }
 
+    public void moveFile(String from, String to, String newFilename) {
+        checkSftpConnection();
+        try {
+            createDirectoryIfNotExisting(to);
+            channelSftp.rename(from, to + "/" + newFilename);
+        } catch (SftpException e) {
+            log.error("{} klarte ikke flytte fil {} til {}", APPLICATION, from ,to);
+            throw new SkanmotutgaaendeSftpTechnicalException("Klarte ikke flytte fil", e);
+        }
+    }
+
     private void createDirectoryIfNotExisting(String path) {
         try {
             channelSftp.lstat(path);

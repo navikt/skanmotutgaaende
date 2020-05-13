@@ -33,6 +33,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -49,6 +50,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @ExtendWith(SpringExtension.class)
@@ -77,16 +80,13 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
     SkanmotutgaaendeProperties skanmotutgaaendeProperties;
 
     @BeforeAll
-    void startSftpServer() throws Exception {
+    void startSftpServer() throws IOException {
         sshd.setPort(PORT);
         sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider(Path.of("src/test/resources/sftp/itest.ser")));
         sshd.setCommandFactory(new ScpCommandFactory());
         sshd.setSubsystemFactories(List.of(new SftpSubsystemFactory()));
         sshd.setPublickeyAuthenticator(new AuthorizedKeysAuthenticator(Paths.get(VALID_PUBLIC_KEY_PATH)));
         sshd.start();
-
-        cleanFolder(SKANMOTUTGAAENDE_PATH);
-        cleanFolder(SKANMOTUTGAAENDE_FEIL_PATH);
     }
 
     @AfterAll
@@ -96,12 +96,14 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
     }
 
     @BeforeEach
-    void setUpServices() {
+    void setUpServices() throws IOException {
         sftp = new Sftp(skanmotutgaaendeProperties);
         filomraadeService = new FilomraadeService(new FilomraadeConsumer(sftp, skanmotutgaaendeProperties));
         lagreFildetaljerService = new LagreFildetaljerService(new LagreFildetaljerConsumer(new RestTemplateBuilder(), skanmotutgaaendeProperties));
         lesFraFilomraadeOgLagreFildetaljer = new LesFraFilomraadeOgLagreFildetaljer(filomraadeService, lagreFildetaljerService);
         setUpStubs();
+        cleanFolder(SKANMOTUTGAAENDE_PATH);
+        cleanFolder(SKANMOTUTGAAENDE_FEIL_PATH);
     }
 
     @AfterEach
@@ -127,6 +129,16 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
     }
 
     @Test
+    public void shouldMoveZipAfterRead() throws IOException {
+        copyFileToSkanmotutgaaendeFolder("__files/xml_pdf_pairs/xml_pdf_pairs_testdata.zip");
+        File movedFile = new File(Path.of(SKANMOTUTGAAENDE_PATH.toString(), "/processed/xml_pdf_pairs_testdata.zip.processed").toString());
+
+        assertFalse(movedFile.exists());
+        lesFraFilomraadeOgLagreFildetaljer.lesOgLagre();
+        assertTrue(movedFile.exists());
+    }
+
+    @Test
     public void shouldAddFileToFeilOmraadeWhenFailing() throws IOException {
         cleanFolder(SKANMOTUTGAAENDE_FEIL_PATH);
         copyFileToSkanmotutgaaendeFolder("__files/xml_pdf_pairs/xml_pdf_pairs_testdata.zip");
@@ -144,7 +156,10 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
     private void cleanFolder(Path dir) throws IOException {
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir)) {
             for (Path path : stream) {
-                if (Files.isRegularFile(path) && !path.getFileName().toString().equals("dummy")) {
+                if (Files.isDirectory(path)) {
+                    cleanFolder(path);
+                }
+                else if (!path.getFileName().toString().equals("dummy")) {
                     Files.delete(path);
                 }
             }

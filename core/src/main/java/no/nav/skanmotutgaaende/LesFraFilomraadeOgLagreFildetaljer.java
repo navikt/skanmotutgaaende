@@ -38,7 +38,7 @@ public class LesFraFilomraadeOgLagreFildetaljer {
         this.lagreFildetaljerService = lagreFildetaljerService;
     }
 
-    @Scheduled(cron = "0 0 6,7,16,17,21 * * ?")
+    @Scheduled(initialDelay = 5000, cron = "0 0 6,7,16,17,21 * * ?")
     public void scheduledJob() {
         lesOgLagre();
     }
@@ -70,7 +70,9 @@ public class LesFraFilomraadeOgLagreFildetaljer {
             }
         }
 
-        slettZipfiler(processedZipFiles);
+        // Flytter prosesserte zipfiler til "/processed" i stedet for å slette dem enn så lenge
+        //slettZipfiler(processedZipFiles);
+        filomraadeService.moveZipFiles(processedZipFiles, "processed");
 
         return allResponses;
     }
@@ -116,8 +118,8 @@ public class LesFraFilomraadeOgLagreFildetaljer {
         filomraadeService.uploadFileToFeilomrade(filepair.getXml(), xmlName, path);
     }
 
-    private void slettZipfiler(List<String> readZipFiles) {
-        filomraadeService.deleteZipFiles(readZipFiles);
+    private void slettZipfiler(List<String> zipFiles) {
+        filomraadeService.deleteZipFiles(zipFiles);
     }
 
     private FilepairWithMetadata extractMetadata(Filepair filepair, String zipName) {
