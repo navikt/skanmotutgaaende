@@ -18,6 +18,7 @@ import no.nav.skanmotutgaaende.utils.Utils;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,8 +39,13 @@ public class LesFraFilomraadeOgLagreFildetaljer {
         this.lagreFildetaljerService = lagreFildetaljerService;
     }
 
-    @Scheduled(initialDelay = 5000, cron = "0 0 6,7,16,17,21 * * ?")
+    @Scheduled(cron = "0 0 6,7,16,17,21 * * ?")
     public void scheduledJob() {
+        lesOgLagre();
+    }
+
+    @PostConstruct
+    void postConstruct(){
         lesOgLagre();
     }
 
