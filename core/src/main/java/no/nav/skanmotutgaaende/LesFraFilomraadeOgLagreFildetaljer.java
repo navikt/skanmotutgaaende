@@ -39,7 +39,8 @@ public class LesFraFilomraadeOgLagreFildetaljer {
         this.lagreFildetaljerService = lagreFildetaljerService;
     }
 
-    @Scheduled(cron = "0 0 6,7,16,17,21 * * ?")
+    //@Scheduled(cron = "0 0 6,7,16,17,21 * * ?")
+    @Scheduled(initialDelay = 3000, fixedDelay = 1_800_000) //Kjører hvert 30 min. For tidlig testing
     public void scheduledJob() {
         lesOgLagre();
     }
