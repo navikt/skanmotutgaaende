@@ -40,10 +40,10 @@ public class Unzipper {
                 byteArrayOutputStream.write(buffer, 0, len);
             }
             if ("xml".equals(UnzipSkanningmetadataUtils.getFileType(zipEntry))) {
-                xmls.put(zipEntry.getName(), byteArrayOutputStream.toByteArray());
+                xmls.put(zipEntry.getName().toLowerCase(), byteArrayOutputStream.toByteArray());
             }
-            if ("pdf".equals(UnzipSkanningmetadataUtils.getFileType(zipEntry))) {
-                pdfs.put(zipEntry.getName(), byteArrayOutputStream.toByteArray());
+            else if ("pdf".equals(UnzipSkanningmetadataUtils.getFileType(zipEntry))) {
+                pdfs.put(zipEntry.getName().toLowerCase(), byteArrayOutputStream.toByteArray());
             }
             byteArrayOutputStream.close();
             zipEntry = zipInputStream.getNextZipEntry();

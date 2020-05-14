@@ -67,6 +67,7 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
     private final String VALID_PUBLIC_KEY_PATH = "src/test/resources/sftp/itest_valid.pub";
     private final Path SKANMOTUTGAAENDE_PATH = Path.of("src/test/resources/inbound/SKANMOTUTGAAENDE");
     private final Path SKANMOTUTGAAENDE_FEIL_PATH = Path.of("src/test/resources/inbound/SKANMOTUTGAAENDE_FEIL");
+    private final String HAPPY_ZIP_PATH = "__files/xml_pdf_pairs/xml_pdf_pairs_testdata.zip";
 
     LesFraFilomraadeOgLagreFildetaljer lesFraFilomraadeOgLagreFildetaljer;
     FilomraadeService filomraadeService;
@@ -122,7 +123,7 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
 
     @Test
     public void shouldLesOgLagreHappy() throws IOException {
-        copyFileToSkanmotutgaaendeFolder("__files/xml_pdf_pairs/xml_pdf_pairs_testdata.zip");
+        copyFileToSkanmotutgaaendeFolder(HAPPY_ZIP_PATH);
 
         assertDoesNotThrow(() -> lesFraFilomraadeOgLagreFildetaljer.lesOgLagre());
         verify(exactly(10), putRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
@@ -130,7 +131,7 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
 
     @Test
     public void shouldMoveZipAfterRead() throws IOException {
-        copyFileToSkanmotutgaaendeFolder("__files/xml_pdf_pairs/xml_pdf_pairs_testdata.zip");
+        copyFileToSkanmotutgaaendeFolder(HAPPY_ZIP_PATH);
         File movedFile = new File(Path.of(SKANMOTUTGAAENDE_PATH.toString(), "/processed/xml_pdf_pairs_testdata.zip.processed").toString());
 
         assertFalse(movedFile.exists());
@@ -141,7 +142,7 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
     @Test
     public void shouldAddFileToFeilOmraadeWhenFailing() throws IOException {
         cleanFolder(SKANMOTUTGAAENDE_FEIL_PATH);
-        copyFileToSkanmotutgaaendeFolder("__files/xml_pdf_pairs/xml_pdf_pairs_testdata.zip");
+        copyFileToSkanmotutgaaendeFolder(HAPPY_ZIP_PATH);
         stubFor(put(urlMatching(URL_DOKARKIV_JOURNALPOST_003))
                 .willReturn(aResponse().withStatus(HttpStatus.BAD_REQUEST.value())));
 

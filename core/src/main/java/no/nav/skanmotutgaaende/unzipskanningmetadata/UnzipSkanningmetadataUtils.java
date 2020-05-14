@@ -69,10 +69,12 @@ public class UnzipSkanningmetadataUtils {
             return skanningmetadata;
         } catch (UnsupportedEncodingException | JAXBException e) {
             throw new SkanmotutgaaendeUnzipperFunctionalException("Skanmotutgaaende klarte ikke unmarshalle skanningmetadata fra xml", e);
+        } catch (NullPointerException e) {
+            throw new SkanmotutgaaendeUnzipperFunctionalException("Xml fil mangler");
         }
     }
 
     public static String getFileType(ZipEntry file) {
-        return file.getName().substring(file.getName().lastIndexOf(".") + 1);
+        return file.getName().substring(file.getName().lastIndexOf(".") + 1).toLowerCase();
     }
 }
