@@ -33,4 +33,6 @@ public class Journalpost {
 
     @XmlElement(required = true)
     private String endorsernr;
+
+    private String antallSider;
 }

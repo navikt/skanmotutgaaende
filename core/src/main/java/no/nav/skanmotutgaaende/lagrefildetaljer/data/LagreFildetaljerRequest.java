@@ -21,6 +21,7 @@ public class LagreFildetaljerRequest {
     public static final String FILTYPE_XML = "XML";
     public static final String VARIANTFORMAT_ARKIV = "ARKIV";
     public static final String VARIANTFORMAT_SKANNING_META = "SKANNING_META";
+    public static final String ANTALL_SIDER = "antallSider";
 
 
     @JsonFormat(pattern="yyyy-MM-dd")
