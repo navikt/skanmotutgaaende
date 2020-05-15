@@ -18,4 +18,7 @@ public class FilomraadeProperties {
 
     @NotEmpty
     private String utgaaendemappe;
+
+    @NotEmpty
+    private String feilmappe;
 }

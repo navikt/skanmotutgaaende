@@ -21,7 +21,7 @@ public class Journalpost {
     @XmlElement(required = true)
     private String mottakskanal;
 
-    @XmlElement(required = true)
+    @XmlElement
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
     private Date datoMottatt;
 
@@ -33,4 +33,7 @@ public class Journalpost {
 
     @XmlElement(required = true)
     private String endorsernr;
+
+    @XmlElement
+    private String antallSider;
 }

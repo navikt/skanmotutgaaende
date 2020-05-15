@@ -8,6 +8,7 @@ import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotutgaaende.config.properties.SkanmotutgaaendeProperties;
+import no.nav.skanmotutgaaende.exceptions.functional.SkanmotutgaaendeSftpFunctionalException;
 import no.nav.skanmotutgaaende.exceptions.functional.SkanmotutgaaendeUnzipperFunctionalException;
 import no.nav.skanmotutgaaende.exceptions.technical.SkanmotutgaaendeSftpTechnicalException;
 import org.springframework.stereotype.Component;
@@ -88,6 +89,65 @@ public class Sftp {
         }
     }
 
+    public void deleteFile(String directory, String filename) {
+        checkSftpConnection();
+        String filePath = directory + "/" + filename;
+        try {
+            channelSftp.rm(filePath);
+        } catch (SftpException e) {
+            log.error("{} klarte ikke slette {}", APPLICATION, filePath, e);
+            throw new SkanmotutgaaendeSftpTechnicalException("Klarte ikke slette " + filePath, e);
+        }
+    }
+
+    public void uploadFile(InputStream file, String path, String filename) {
+        checkSftpConnection();
+        createDirectoryIfNotExisting(path);
+        try {
+            channelSftp.put(file, path + "/" + filename);
+        } catch (SftpException e) {
+            log.error("{} klarte ikke laste opp fil {} til {}", APPLICATION, filename, path, e);
+            throw new SkanmotutgaaendeSftpTechnicalException("Klarte ikke laste opp fil", e);
+        }
+    }
+
+    public void moveFile(String from, String to, String newFilename) {
+        checkSftpConnection();
+        try {
+            createDirectoryIfNotExisting(to);
+            channelSftp.rename(from, to + "/" + newFilename);
+        } catch (SftpException e) {
+            log.error("{} klarte ikke flytte fil {} til {}", APPLICATION, from ,to);
+            throw new SkanmotutgaaendeSftpTechnicalException("Klarte ikke flytte fil", e);
+        }
+    }
+
+    private void createDirectoryIfNotExisting(String path) {
+        try {
+            channelSftp.lstat(path);
+        } catch (SftpException mappeFinnesIkke) {
+            // Path finnes ikke, så vi lager den. Kan bare lage en og en mappe
+            String existingPath = "";
+            for (String subPath : path.split("/")) {
+                try {
+                    channelSftp.lstat(existingPath + subPath);
+                    existingPath += subPath + "/";
+                } catch (SftpException delmappeFinnesIkke) {
+                    try {
+                        channelSftp.mkdir(existingPath + subPath);
+                        existingPath += subPath + "/";
+                    } catch (SftpException e) {
+                        log.error("{} klarte ikke lage en ny mappe: {}", APPLICATION, path, e);
+                        throw new SkanmotutgaaendeSftpTechnicalException("Klarte ikke lage en ny mappe: " + path, e);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("{} klarte ikke lage en ny mappe: {}", APPLICATION, path, e);
+            throw new SkanmotutgaaendeSftpTechnicalException("Klarte ikke lage en ny mappe: " + path, e);
+        }
+    }
+
     public boolean isConnected() {
         return channelSftp.isConnected();
     }
@@ -104,6 +164,7 @@ public class Sftp {
             channelSftp = (ChannelSftp) jschSession.openChannel("sftp");
             channelSftp.connect();
             setHomePath(channelSftp.getHome());
+            log.info("{} koblet til {}", APPLICATION, host);
         } catch (JSchException | SftpException e) {
             log.error("{} klarte ikke koble til {}", APPLICATION, host, e);
             throw new SkanmotutgaaendeSftpTechnicalException("Klarte ikke koble til " + host, e);

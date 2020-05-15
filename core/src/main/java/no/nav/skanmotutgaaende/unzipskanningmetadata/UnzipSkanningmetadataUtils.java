@@ -38,13 +38,13 @@ public class UnzipSkanningmetadataUtils {
     }
 
     public static List<Filepair> pairFiles(Map<String, byte[]> pdfs, Map<String, byte[]> xmls) {
-        return pdfs.keySet().stream().map(pdfName ->
+        return pdfs.keySet().stream().map(key ->
                 Filepair.builder()
-                        .name(Utils.removeFileExtensionInFilename(pdfName))
-                        .pdf(pdfs.get(pdfName))
-                        .xml(xmls.get(Utils.changeFiletypeInFilename(pdfName, "xml")))
-                        .build()
-        ).collect(Collectors.toList());
+                        .name(key)
+                        .pdf(pdfs.get(key))
+                        .xml(xmls.get(key))
+                        .build())
+                .collect(Collectors.toList());
     }
 
     public static FilepairWithMetadata extractMetadata(Filepair filepair) {
@@ -69,10 +69,12 @@ public class UnzipSkanningmetadataUtils {
             return skanningmetadata;
         } catch (UnsupportedEncodingException | JAXBException e) {
             throw new SkanmotutgaaendeUnzipperFunctionalException("Skanmotutgaaende klarte ikke unmarshalle skanningmetadata fra xml", e);
+        } catch (NullPointerException e) {
+            throw new SkanmotutgaaendeUnzipperFunctionalException("Xml fil mangler");
         }
     }
 
     public static String getFileType(ZipEntry file) {
-        return file.getName().substring(file.getName().lastIndexOf(".") + 1);
+        return file.getName().substring(file.getName().lastIndexOf(".") + 1).toLowerCase();
     }
 }

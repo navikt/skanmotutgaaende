@@ -2,6 +2,7 @@ package no.nav.skanmotutgaaende.unzipskanningmetadata;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotutgaaende.domain.Filepair;
+import no.nav.skanmotutgaaende.utils.Utils;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 
@@ -40,10 +41,10 @@ public class Unzipper {
                 byteArrayOutputStream.write(buffer, 0, len);
             }
             if ("xml".equals(UnzipSkanningmetadataUtils.getFileType(zipEntry))) {
-                xmls.put(zipEntry.getName(), byteArrayOutputStream.toByteArray());
+                xmls.put(Utils.removeFileExtensionInFilename(zipEntry.getName()), byteArrayOutputStream.toByteArray());
             }
-            if ("pdf".equals(UnzipSkanningmetadataUtils.getFileType(zipEntry))) {
-                pdfs.put(zipEntry.getName(), byteArrayOutputStream.toByteArray());
+            else if ("pdf".equals(UnzipSkanningmetadataUtils.getFileType(zipEntry))) {
+                pdfs.put(Utils.removeFileExtensionInFilename(zipEntry.getName()), byteArrayOutputStream.toByteArray());
             }
             byteArrayOutputStream.close();
             zipEntry = zipInputStream.getNextZipEntry();

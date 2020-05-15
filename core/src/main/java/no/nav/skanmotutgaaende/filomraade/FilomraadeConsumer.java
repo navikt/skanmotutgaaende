@@ -1,6 +1,5 @@
-package no.nav.skanmotutgaaende.leszipfil;
+package no.nav.skanmotutgaaende.filomraade;
 
-import com.jcraft.jsch.SftpException;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotutgaaende.config.properties.SkanmotutgaaendeProperties;
 import no.nav.skanmotutgaaende.exceptions.functional.LesZipFilFuntionalException;
@@ -14,15 +13,17 @@ import java.util.List;
 
 @Slf4j
 @Component
-public class LesZipfilConsumer {
+public class FilomraadeConsumer {
 
     private Sftp sftp;
     private String inboundDirectory;
+    private String feilDirectory;
 
     @Autowired
-    public LesZipfilConsumer(Sftp sftp, SkanmotutgaaendeProperties skanmotutgaaendeProperties) {
+    public FilomraadeConsumer(Sftp sftp, SkanmotutgaaendeProperties skanmotutgaaendeProperties) {
         this.sftp = sftp;
         inboundDirectory = skanmotutgaaendeProperties.getFilomraade().getInngaaendemappe();
+        feilDirectory = skanmotutgaaendeProperties.getFilomraade().getFeilmappe();
     }
 
     public List<String> listZipFiles() {
@@ -35,10 +36,30 @@ public class LesZipfilConsumer {
         }
     }
 
-    public byte[] getFile(String filename) throws SftpException, IOException {
+    public byte[] getFile(String filename) throws IOException {
         InputStream fileStream = sftp.getFile(inboundDirectory + "/" + filename);
         byte[] file = fileStream.readAllBytes();
         return file;
+    }
+
+    public void deleteFile(String filename) {
+        log.info("Skanmotutgaaende sletter fil {}", filename);
+        sftp.deleteFile(inboundDirectory, filename);
+        log.info("Skanmotutgaaende slettet fil {}", filename);
+    }
+
+    public void uploadFileToFeilomrade(InputStream file, String filename, String path) {
+        log.info("Skanmotutgaaende laster opp fil {} til feilområde", filename);
+        sftp.uploadFile(file, feilDirectory + "/" + path, filename);
+        log.info("Skanmotutgaaende lastet opp fil {} til feilområde", filename);
+    }
+
+    public void moveFile(String from, String to, String newFilename) {
+        String fromPath = inboundDirectory + "/" + from;
+        String toPath = inboundDirectory + "/" + to;
+        log.info("Skanmotutgaaende flytter fil {} til {}", fromPath, toPath);
+        sftp.moveFile(fromPath, toPath, newFilename);
+        log.info("Skanmotutgaende flyttet fil {} til {}", fromPath, toPath);
     }
 
     public void connectToSftp() {

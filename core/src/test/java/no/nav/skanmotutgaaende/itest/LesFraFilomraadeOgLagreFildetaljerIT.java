@@ -2,13 +2,13 @@ package no.nav.skanmotutgaaende.itest;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import no.nav.skanmotutgaaende.config.properties.SkanmotutgaaendeProperties;
+import no.nav.skanmotutgaaende.filomraade.FilomraadeConsumer;
+import no.nav.skanmotutgaaende.filomraade.FilomraadeService;
 import no.nav.skanmotutgaaende.itest.config.TestConfig;
 import no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerConsumer;
 import no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerService;
 import no.nav.skanmotutgaaende.lagrefildetaljer.data.LagreFildetaljerResponse;
-import no.nav.skanmotutgaaende.lesoglagre.LesFraFilomraadeOgLagreFildetaljer;
-import no.nav.skanmotutgaaende.leszipfil.LesZipfilConsumer;
-import no.nav.skanmotutgaaende.leszipfil.LesZipfilService;
+import no.nav.skanmotutgaaende.LesFraFilomraadeOgLagreFildetaljer;
 import no.nav.skanmotutgaaende.sftp.Sftp;
 import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.config.keys.AuthorizedKeysAuthenticator;
@@ -22,20 +22,21 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -49,9 +50,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @ExtendWith(SpringExtension.class)
@@ -64,10 +64,13 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
 
     private final String URL_DOKARKIV_JOURNALPOST_GEN = "/rest/intern/journalpostapi/v1/journalpost/\\d+/mottaDokumentUtgaaendeSkanning";
     private final String URL_DOKARKIV_JOURNALPOST_003 = "/rest/intern/journalpostapi/v1/journalpost/003/mottaDokumentUtgaaendeSkanning";
-    private static final String VALID_PUBLIC_KEY_PATH = "src/test/resources/sftp/itest_valid.pub";
+    private final String VALID_PUBLIC_KEY_PATH = "src/test/resources/sftp/itest_valid.pub";
+    private final Path SKANMOTUTGAAENDE_PATH = Path.of("src/test/resources/inbound/SKANMOTUTGAAENDE");
+    private final Path SKANMOTUTGAAENDE_FEIL_PATH = Path.of("src/test/resources/inbound/SKANMOTUTGAAENDE_FEIL");
+    private final String HAPPY_ZIP_PATH = "__files/xml_pdf_pairs/xml_pdf_pairs_testdata.zip";
 
     LesFraFilomraadeOgLagreFildetaljer lesFraFilomraadeOgLagreFildetaljer;
-    LesZipfilService lesZipfilService;
+    FilomraadeService filomraadeService;
     LagreFildetaljerService lagreFildetaljerService;
 
     private int PORT = 2222;
@@ -94,12 +97,14 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
     }
 
     @BeforeEach
-    void setUpServices() {
+    void setUpServices() throws IOException {
         sftp = new Sftp(skanmotutgaaendeProperties);
-        lesZipfilService = new LesZipfilService(new LesZipfilConsumer(sftp, skanmotutgaaendeProperties));
+        filomraadeService = new FilomraadeService(new FilomraadeConsumer(sftp, skanmotutgaaendeProperties));
         lagreFildetaljerService = new LagreFildetaljerService(new LagreFildetaljerConsumer(new RestTemplateBuilder(), skanmotutgaaendeProperties));
-        lesFraFilomraadeOgLagreFildetaljer = new LesFraFilomraadeOgLagreFildetaljer(lesZipfilService, lagreFildetaljerService);
+        lesFraFilomraadeOgLagreFildetaljer = new LesFraFilomraadeOgLagreFildetaljer(filomraadeService, lagreFildetaljerService);
         setUpStubs();
+        cleanFolder(SKANMOTUTGAAENDE_PATH);
+        cleanFolder(SKANMOTUTGAAENDE_FEIL_PATH);
     }
 
     @AfterEach
@@ -117,16 +122,59 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
     }
 
     @Test
-    public void shouldLesOgLagreHappy() {
+    public void shouldLesOgLagreHappy() throws IOException {
+        copyFileToSkanmotutgaaendeFolder(HAPPY_ZIP_PATH);
+
         assertDoesNotThrow(() -> lesFraFilomraadeOgLagreFildetaljer.lesOgLagre());
         verify(exactly(10), putRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
     }
 
     @Test
-    public void shouldContinueIfFailingToLagreFildetaljer() {
+    public void shouldMoveZipAfterRead() throws IOException {
+        copyFileToSkanmotutgaaendeFolder(HAPPY_ZIP_PATH);
+        File movedFile = new File(Path.of(SKANMOTUTGAAENDE_PATH.toString(), "/processed/xml_pdf_pairs_testdata.zip.processed").toString());
+
+        assertFalse(movedFile.exists());
+        lesFraFilomraadeOgLagreFildetaljer.lesOgLagre();
+        assertTrue(movedFile.exists());
+    }
+
+    @Test
+    public void shouldAddFileToFeilOmraadeWhenFailing() throws IOException {
+        cleanFolder(SKANMOTUTGAAENDE_FEIL_PATH);
+        copyFileToSkanmotutgaaendeFolder(HAPPY_ZIP_PATH);
         stubFor(put(urlMatching(URL_DOKARKIV_JOURNALPOST_003))
                 .willReturn(aResponse().withStatus(HttpStatus.BAD_REQUEST.value())));
+
         List<List<LagreFildetaljerResponse>> responses = lesFraFilomraadeOgLagreFildetaljer.lesOgLagre();
+
         assertEquals(9, responses.get(0).size());
+        sftp.connect();
+        assertEquals(4, sftp.listFiles("src/test/resources/inbound/SKANMOTUTGAAENDE_FEIL/xml_pdf_pairs_testdata").size());
+        sftp.disconnect();
+    }
+
+    private void cleanFolder(Path dir) throws IOException {
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir)) {
+            for (Path path : stream) {
+                if (Files.isDirectory(path)) {
+                    cleanFolder(path);
+                }
+                else if (!path.getFileName().toString().equals("dummy")) {
+                    Files.delete(path);
+                }
+            }
+        }
+    }
+
+    private Path copyFileToSkanmotutgaaendeFolder(String relativePath) throws IOException {
+        Path source = getPathFromRelativePath(relativePath);
+        Path dest = Path.of(SKANMOTUTGAAENDE_PATH.toAbsolutePath() + "/" + source.getFileName());
+        return Files.copy(source, dest);
+    }
+
+    private Path getPathFromRelativePath(String relativePath) throws IOException {
+        Resource onClasspath = new ClassPathResource(relativePath);
+        return Paths.get(onClasspath.getFile().getAbsolutePath());
     }
 }
