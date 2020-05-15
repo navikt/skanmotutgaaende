@@ -13,7 +13,7 @@ public class JournalpostValidator {
     }
 
     public boolean isValidDatoMottatt(Date datoMottatt) {
-        return null != datoMottatt;
+        return true; // No current restrictions
     }
 
     public boolean isValidBatchNavn(String batchnavn) {

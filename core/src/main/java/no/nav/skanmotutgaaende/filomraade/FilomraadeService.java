@@ -48,12 +48,18 @@ public class FilomraadeService {
         }
     }
 
-    public void uploadFileToFeilomrade(byte[] file, String filename, String path) {
+    public void uploadFileToFeilomrade(byte[] file, String filename, String path, String backupFilename) {
         try {
             filomraadeConsumer.connectToSftp();
             filomraadeConsumer.uploadFileToFeilomrade(new ByteArrayInputStream(file), filename, path);
-        } catch (Exception e) {
-            log.error("Skanmotutgaaende klarte ikke laste opp fil {}", filename, e);
+        } catch (Exception muligensFeilNavn) {
+            try {
+                // TODO: dette er en hacky løsning for å akseptere både .xml og .XML, burde gjøres bedre
+                log.warn("Skanmotutgaaende klarte ikke laste opp fil {}, prøver {}", filename, backupFilename, muligensFeilNavn);
+                filomraadeConsumer.uploadFileToFeilomrade(new ByteArrayInputStream(file), backupFilename, path);
+            } catch (Exception e) {
+                log.error("Skanmotutgaaende klarte ikke laste opp fil {}", filename, e);
+            }
         } finally {
             filomraadeConsumer.disconnectFromSftp();
         }

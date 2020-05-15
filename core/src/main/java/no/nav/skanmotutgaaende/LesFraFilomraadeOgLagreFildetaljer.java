@@ -1,5 +1,6 @@
 package no.nav.skanmotutgaaende;
 
+import com.jcraft.jsch.SftpException;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotutgaaende.domain.Filepair;
 import no.nav.skanmotutgaaende.domain.FilepairWithMetadata;
@@ -112,11 +113,10 @@ public class LesFraFilomraadeOgLagreFildetaljer {
     }
 
     private void lastOppFilpar(Filepair filepair, String zipName) {
-        String pdfName = filepair.getName() + ".pdf";
-        String xmlName = filepair.getName() + ".xml";
+        String name = filepair.getName();
         String path = Utils.removeFileExtensionInFilename(zipName);
-        filomraadeService.uploadFileToFeilomrade(filepair.getPdf(), pdfName, path);
-        filomraadeService.uploadFileToFeilomrade(filepair.getXml(), xmlName, path);
+        filomraadeService.uploadFileToFeilomrade(filepair.getPdf(), name + ".pdf", path, name + ".PDF");
+        filomraadeService.uploadFileToFeilomrade(filepair.getXml(), name + ".xml", path, name + ".XML");
     }
 
     private void slettZipfiler(List<String> zipFiles) {
