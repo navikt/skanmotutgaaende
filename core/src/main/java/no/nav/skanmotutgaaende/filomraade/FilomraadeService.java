@@ -37,10 +37,10 @@ public class FilomraadeService {
             log.info("Skanmotutgaaende leser {} fra sftp", fileNames.toString());
             return files;
         } catch (LesZipFilFuntionalException e) {
-            log.warn("Skanmotutgaaende klarte ikke hente zipfiler");
+            log.warn("Skanmotutgaaende klarte ikke hente zipfiler", e);
             throw e;
         } catch (SkanmotutgaaendeSftpTechnicalException e) {
-            log.warn("Skanmotutgaaende klarte ikke koble til sftp");
+            log.warn("Skanmotutgaaende klarte ikke koble til sftp", e);
             throw e;
         } finally {
             filomraadeConsumer.disconnectFromSftp();
@@ -84,7 +84,7 @@ public class FilomraadeService {
         try {
             filomraadeConsumer.moveFile(from, to, newFilename);
         } catch (Exception e) {
-            log.error("Skanmotutgaaende klarte ikke flytte fil {} til {}/{}", from, to, newFilename);
+            log.error("Skanmotutgaaende klarte ikke flytte fil {} til {}/{}", from, to, newFilename, e);
         }
     }
 
