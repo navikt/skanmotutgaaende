@@ -164,6 +164,7 @@ public class Sftp {
             channelSftp = (ChannelSftp) jschSession.openChannel("sftp");
             channelSftp.connect();
             setHomePath(channelSftp.getHome());
+            log.info("{} koblet til {}", APPLICATION, host);
         } catch (JSchException | SftpException e) {
             log.error("{} klarte ikke koble til {}", APPLICATION, host, e);
             throw new SkanmotutgaaendeSftpTechnicalException("Klarte ikke koble til " + host, e);

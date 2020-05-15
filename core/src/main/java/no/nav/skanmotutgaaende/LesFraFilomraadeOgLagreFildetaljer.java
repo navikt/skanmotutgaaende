@@ -113,10 +113,9 @@ public class LesFraFilomraadeOgLagreFildetaljer {
     }
 
     private void lastOppFilpar(Filepair filepair, String zipName) {
-        String name = filepair.getName();
         String path = Utils.removeFileExtensionInFilename(zipName);
-        filomraadeService.uploadFileToFeilomrade(filepair.getPdf(), name + ".pdf", path, name + ".PDF");
-        filomraadeService.uploadFileToFeilomrade(filepair.getXml(), name + ".xml", path, name + ".XML");
+        filomraadeService.uploadFileToFeilomrade(filepair.getPdf(), filepair.getName() + ".pdf", path);
+        filomraadeService.uploadFileToFeilomrade(filepair.getXml(), filepair.getName() + ".xml", path);
     }
 
     private void slettZipfiler(List<String> zipFiles) {

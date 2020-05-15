@@ -1,6 +1,5 @@
 package no.nav.skanmotutgaaende.filomraade;
 
-import com.jcraft.jsch.SftpException;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotutgaaende.exceptions.functional.LesZipFilFuntionalException;
 import no.nav.skanmotutgaaende.exceptions.technical.SkanmotutgaaendeSftpTechnicalException;
@@ -48,18 +47,12 @@ public class FilomraadeService {
         }
     }
 
-    public void uploadFileToFeilomrade(byte[] file, String filename, String path, String backupFilename) {
+    public void uploadFileToFeilomrade(byte[] file, String filename, String path) {
         try {
             filomraadeConsumer.connectToSftp();
             filomraadeConsumer.uploadFileToFeilomrade(new ByteArrayInputStream(file), filename, path);
-        } catch (Exception muligensFeilNavn) {
-            try {
-                // TODO: dette er en hacky løsning for å akseptere både .xml og .XML, burde gjøres bedre
-                log.warn("Skanmotutgaaende klarte ikke laste opp fil {}, prøver {}", filename, backupFilename, muligensFeilNavn);
-                filomraadeConsumer.uploadFileToFeilomrade(new ByteArrayInputStream(file), backupFilename, path);
-            } catch (Exception e) {
-                log.error("Skanmotutgaaende klarte ikke laste opp fil {}", filename, e);
-            }
+        } catch (Exception e) {
+            log.error("Skanmotutgaaende klarte ikke laste opp fil {}", filename, e);
         } finally {
             filomraadeConsumer.disconnectFromSftp();
         }
