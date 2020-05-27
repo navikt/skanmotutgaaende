@@ -40,10 +40,10 @@ public class Unzipper {
             while ((len = zipInputStream.read(buffer)) > 0) {
                 byteArrayOutputStream.write(buffer, 0, len);
             }
-            if ("xml".equals(UnzipSkanningmetadataUtils.getFileType(zipEntry))) {
+            if ("xml".equalsIgnoreCase(UnzipSkanningmetadataUtils.getFileType(zipEntry))) {
                 xmls.put(Utils.removeFileExtensionInFilename(zipEntry.getName()), byteArrayOutputStream.toByteArray());
             }
-            else if ("pdf".equals(UnzipSkanningmetadataUtils.getFileType(zipEntry))) {
+            else if ("pdf".equalsIgnoreCase(UnzipSkanningmetadataUtils.getFileType(zipEntry))) {
                 pdfs.put(Utils.removeFileExtensionInFilename(zipEntry.getName()), byteArrayOutputStream.toByteArray());
             }
             byteArrayOutputStream.close();
