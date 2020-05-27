@@ -1,6 +1,5 @@
 package no.nav.skanmotutgaaende;
 
-import com.jcraft.jsch.SftpException;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotutgaaende.domain.Filepair;
 import no.nav.skanmotutgaaende.domain.FilepairWithMetadata;
@@ -63,12 +62,14 @@ public class LesFraFilomraadeOgLagreFildetaljer {
                         .collect(Collectors.toList());
 
                 log.info("Skanmotutgaaende lagret fildetaljer fra zipfil {} i dokarkiv", zipName);
-                processedZipFiles.add(zipName);
                 allResponses.add(responses);
             } catch (IOException e) {
                 log.error("Skanmotutgaaende klarte ikke lese fra fil {}", zipName, e);
+                lastOppZipfilTilFeilomrade(zipfiles.get(zipName), zipName);
             } catch (SkanmotutgaaendeUnzipperFunctionalException e) {
                 log.error("Skanmotutgaaende feilet i unzipping av fil {}", zipName, e);
+            } finally {
+                processedZipFiles.add(zipName);
             }
         }
 
@@ -116,6 +117,11 @@ public class LesFraFilomraadeOgLagreFildetaljer {
         String path = Utils.removeFileExtensionInFilename(zipName);
         filomraadeService.uploadFileToFeilomrade(filepair.getPdf(), filepair.getName() + ".pdf", path);
         filomraadeService.uploadFileToFeilomrade(filepair.getXml(), filepair.getName() + ".xml", path);
+    }
+
+    private void lastOppZipfilTilFeilomrade(byte[] zipFile, String zipName){
+        String path = Utils.removeFileExtensionInFilename(zipName);
+        filomraadeService.uploadFileToFeilomrade(zipFile, zipName, path);
     }
 
     private void slettZipfiler(List<String> zipFiles) {
