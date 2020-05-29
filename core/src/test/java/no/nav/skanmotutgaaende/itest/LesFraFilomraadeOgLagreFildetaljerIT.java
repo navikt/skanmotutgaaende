@@ -141,7 +141,6 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
 
     @Test
     public void shouldAddFileToFeilOmraadeWhenFailing() throws IOException {
-        cleanFolder(SKANMOTUTGAAENDE_FEIL_PATH);
         copyFileToSkanmotutgaaendeFolder(HAPPY_ZIP_PATH);
         stubFor(put(urlMatching(URL_DOKARKIV_JOURNALPOST_003))
                 .willReturn(aResponse().withStatus(HttpStatus.BAD_REQUEST.value())));
@@ -149,8 +148,8 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
         List<List<LagreFildetaljerResponse>> responses = lesFraFilomraadeOgLagreFildetaljer.lesOgLagre();
 
         assertEquals(9, responses.get(0).size());
-        sftp.connect();
-        assertEquals(4, sftp.listFiles("src/test/resources/inbound/SKANMOTUTGAAENDE_FEIL/xml_pdf_pairs_testdata").size());
+        assertEquals(2, new File("src/test/resources/inbound/SKANMOTUTGAAENDE_FEIL/xml_pdf_pairs_testdata").listFiles().length);
+
         sftp.disconnect();
     }
 
@@ -158,7 +157,11 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir)) {
             for (Path path : stream) {
                 if (Files.isDirectory(path)) {
-                    cleanFolder(path);
+                    if (path.toFile().list().length == 0) {
+                        Files.delete(path);
+                    } else {
+                        cleanFolder(path);
+                    }
                 }
                 else if (!path.getFileName().toString().equals("dummy")) {
                     Files.delete(path);

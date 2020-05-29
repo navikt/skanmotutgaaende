@@ -24,7 +24,6 @@ public class FilomraadeService {
 
     public Map<String, byte[]> getZipFiles() throws SkanmotutgaaendeSftpTechnicalException {
         try {
-            filomraadeConsumer.connectToSftp();
             List<String> fileNames = filomraadeConsumer.listZipFiles();
             Map<String, byte[]> files = new HashMap<>();
 
@@ -42,33 +41,36 @@ public class FilomraadeService {
         } catch (SkanmotutgaaendeSftpTechnicalException e) {
             log.warn("Skanmotutgaaende klarte ikke koble til sftp", e);
             throw e;
-        } finally {
-            filomraadeConsumer.disconnectFromSftp();
         }
     }
 
     public void uploadFileToFeilomrade(byte[] file, String filename, String path) {
         try {
-            filomraadeConsumer.connectToSftp();
             filomraadeConsumer.uploadFileToFeilomrade(new ByteArrayInputStream(file), filename, path);
         } catch (Exception e) {
-            log.error("Skanmotutgaaende klarte ikke laste opp fil {}", filename, e);
-        } finally {
-            filomraadeConsumer.disconnectFromSftp();
+            log.warn("Skanmotutgaaende klarte ikke laste opp fil {} til feilområde", filename, e);
+        }
+    }
+
+    public void cleanDirtyFeilomrade(String folderName) {
+        try {
+            filomraadeConsumer.cleanDirtyFeilomrade(folderName);
+        } catch (Exception e) {
+            log.warn("Skanmotutgaaende klarte ikke bytte navn på mappe {}", folderName);
         }
     }
 
     public void deleteZipFiles(List<String> zipFiles) {
-        filomraadeConsumer.connectToSftp();
         zipFiles.stream().forEach(this::deleteZipFile);
-        filomraadeConsumer.disconnectFromSftp();
     }
 
     public void moveZipFiles(List<String> files, String destination) {
-        filomraadeConsumer.connectToSftp();
         files.stream().forEach(file -> {
             moveFile(file, destination, file + ".processed");
         });
+    }
+
+    public void disconnect() {
         filomraadeConsumer.disconnectFromSftp();
     }
 

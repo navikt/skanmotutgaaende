@@ -82,7 +82,7 @@ public class SftpIT {
     @Test
     public void shouldConnectToSftp() {
         try {
-            sftp.connect();
+            sftp.connectIfNotConnected();
 
             Assert.assertTrue(sftp.isConnected());
             Assert.assertEquals(1, sshd.getActiveSessions().size());
@@ -97,8 +97,6 @@ public class SftpIT {
     @Test
     void shouldChangeDirectoryAndListFiles() {
         try {
-
-            sftp.connect();
             String homePath = sftp.getHomePath() + "/";
 
             sftp.changeDirectory(homePath + DIR_ONE_FOLDER_PATH);
@@ -127,8 +125,6 @@ public class SftpIT {
     @Test
     public void shouldFailToChangeDirectoryToInvalidPath() {
         try {
-            sftp.connect();
-
             sftp.changeDirectory(INVALID_FOLDER_PATH);
             Assert.fail();
         } catch (SkanmotutgaaendeSftpTechnicalException e) {
@@ -145,7 +141,6 @@ public class SftpIT {
         try {
             File zipFile = Paths.get(ZIP_FILE_PATH).toFile();
 
-            sftp.connect();
             sftp.changeDirectory(PAIR_FOLDER_PATH);
 
             InputStream inputStream = sftp.getFile("xml_pdf_pairs_testdata.zip");
@@ -160,8 +155,6 @@ public class SftpIT {
     @Test
     void shouldFailToGetFileWhenFileNameIsInvalid() {
         try {
-            sftp.connect();
-
             sftp.changeDirectory(FILES_FOLDER_PATH);
             sftp.getFile(INVALID_FILE_NAME);
 
@@ -178,7 +171,6 @@ public class SftpIT {
     void shouldDeleteFile() {
         File f = new File(FILES_FOLDER_PATH + "/" + TMP_FILE_NAME);
         try {
-            sftp.connect();
             int initialNumberOfFiles = sftp.listFiles(FILES_FOLDER_PATH).size();
 
             f.createNewFile();
@@ -197,8 +189,6 @@ public class SftpIT {
     @Test
     void shouldFailToDeleteNonExistingFile() {
         try {
-            sftp.connect();
-
             sftp.deleteFile(FILES_FOLDER_PATH, INVALID_FILE_NAME);
 
             Assert.fail();
@@ -213,8 +203,6 @@ public class SftpIT {
     @Test
     void shouldFailToDeleteNonExistingPath() {
         try {
-            sftp.connect();
-
             sftp.deleteFile(INVALID_FOLDER_PATH, INVALID_FILE_NAME);
 
             Assert.fail();
@@ -233,8 +221,6 @@ public class SftpIT {
             File xmlFile = Paths.get(XML_FILE_PATH).toFile();
             String filename = "uploadedFile.xml";
 
-            sftp.connect();
-
             sftp.uploadFile(new FileInputStream(xmlFile), FEILOMRADE_FOLDER_PATH, filename);
 
             Assert.assertTrue(sftp.listFiles(FEILOMRADE_FOLDER_PATH).contains(filename));
@@ -252,8 +238,6 @@ public class SftpIT {
             File xmlFile = Paths.get(XML_FILE_PATH).toFile();
             String filename = "uploadedFile.xml";
 
-            sftp.connect();
-
             sftp.uploadFile(new FileInputStream(xmlFile), FEILOMRADE_FOLDER_PATH + "/newDirectory", filename);
 
             Assert.assertTrue(sftp.listFiles(FEILOMRADE_FOLDER_PATH + "/newDirectory/").contains(filename));
@@ -268,15 +252,12 @@ public class SftpIT {
     void shouldMoveFile() {
         String tempFile = FILES_FOLDER_PATH + "/" + TMP_FILE_NAME;
         File f = new File(tempFile);
-        //File f = new File(FILES_FOLDER_PATH + "/" + TMP_FILE_NAME);
         try {
             cleanFolder(Path.of(FEILOMRADE_FOLDER_PATH));
             f.createNewFile();
 
-            sftp.connect();
-
             sftp.moveFile(tempFile, FEILOMRADE_FOLDER_PATH, "movedFile.txt");
-            //sftp.moveFile(FILES_FOLDER_PATH + "/" + TMP_FILE_NAME, FEILOMRADE_FOLDER_PATH, "movedFile.txt");
+
             Assert.assertTrue(sftp.listFiles(FEILOMRADE_FOLDER_PATH).contains("movedFile.txt"));
 
             sftp.disconnect();

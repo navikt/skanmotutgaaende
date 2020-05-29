@@ -32,6 +32,8 @@ public class LesFraFilomraadeOgLagreFildetaljer {
     private final FilomraadeService filomraadeService;
     private final LagreFildetaljerService lagreFildetaljerService;
 
+    private boolean isFeilomraadeDirty = false;
+
     public LesFraFilomraadeOgLagreFildetaljer(FilomraadeService filomraadeService,
                                               LagreFildetaljerService lagreFildetaljerService) {
         this.filomraadeService = filomraadeService;
@@ -50,9 +52,10 @@ public class LesFraFilomraadeOgLagreFildetaljer {
 
         Map<String, byte[]> zipfiles = lesFil();
 
-        log.info("Skanmotutgaaende leste fra filområde og fant {} zipfiler", zipfiles.size());
+        log.info("Skanmotutgaaende leste fra filområde og fant {} zipfiler: {}", zipfiles.size(), zipfiles);
 
         for (String zipName : zipfiles.keySet()) {
+            isFeilomraadeDirty = false;
             try {
                 List<Filepair> filepairList = Unzipper.unzipXmlPdf(zipfiles.get(zipName));
 
@@ -70,12 +73,14 @@ public class LesFraFilomraadeOgLagreFildetaljer {
                 log.error("Skanmotutgaaende feilet i unzipping av fil {}", zipName, e);
             } finally {
                 processedZipFiles.add(zipName);
+                cleanUplastOppZipfilTilFeilomrade(zipName);
             }
         }
 
         // Flytter prosesserte zipfiler til "/processed" i stedet for å slette dem enn så lenge
         //slettZipfiler(processedZipFiles);
         filomraadeService.moveZipFiles(processedZipFiles, "processed");
+        filomraadeService.disconnect();
 
         return allResponses;
     }
@@ -117,11 +122,18 @@ public class LesFraFilomraadeOgLagreFildetaljer {
         String path = Utils.removeFileExtensionInFilename(zipName);
         filomraadeService.uploadFileToFeilomrade(filepair.getPdf(), filepair.getName() + ".pdf", path);
         filomraadeService.uploadFileToFeilomrade(filepair.getXml(), filepair.getName() + ".xml", path);
+        isFeilomraadeDirty = true;
     }
 
-    private void lastOppZipfilTilFeilomrade(byte[] zipFile, String zipName){
+    private void lastOppZipfilTilFeilomrade(byte[] zipFile, String zipName) {
         String path = Utils.removeFileExtensionInFilename(zipName);
         filomraadeService.uploadFileToFeilomrade(zipFile, zipName, path);
+    }
+
+    private void cleanUplastOppZipfilTilFeilomrade(String zipName) {
+        if (isFeilomraadeDirty) {
+            filomraadeService.cleanDirtyFeilomrade(Utils.removeFileExtensionInFilename(zipName));
+        }
     }
 
     private void slettZipfiler(List<String> zipFiles) {
