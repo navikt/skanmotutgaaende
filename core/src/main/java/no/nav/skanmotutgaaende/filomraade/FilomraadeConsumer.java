@@ -64,7 +64,7 @@ public class FilomraadeConsumer {
     public void moveFile(String from, String to, String newFilename) {
         String fromPath = inboundDirectory + "/" + from;
         String toPath = inboundDirectory + "/" + to;
-        log.info("Skanmotutgaende flytter fil {} til {}", fromPath, toPath);
+        log.info("Skanmotutgaaende flytter fil {} til {}", fromPath, toPath);
         sftp.moveFile(fromPath, toPath, newFilename);
     }
 
