@@ -35,7 +35,9 @@ spec:
     cpuThresholdPercentage: 50
   resources:
     limits:
-      cpu: 1500m
+      cpu: 2000m
+      memory: 1332Mi
+    requests:
       memory: 1024Mi
   vault:
     enabled: true
