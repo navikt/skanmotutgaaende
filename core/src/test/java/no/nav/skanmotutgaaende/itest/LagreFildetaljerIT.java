@@ -5,8 +5,10 @@ import no.nav.skanmotutgaaende.config.properties.SkanmotutgaaendeProperties;
 import no.nav.skanmotutgaaende.exceptions.functional.MottaDokumentUtgaaendeSkanningFunctionalException;
 import no.nav.skanmotutgaaende.itest.config.TestConfig;
 import no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerConsumer;
+import no.nav.skanmotutgaaende.lagrefildetaljer.data.DokumentVariant;
 import no.nav.skanmotutgaaende.lagrefildetaljer.data.LagreFildetaljerRequest;
 import no.nav.skanmotutgaaende.lagrefildetaljer.data.LagreFildetaljerResponse;
+import no.nav.skanmotutgaaende.lagrefildetaljer.data.Tilleggsopplysning;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,6 +28,9 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.put;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
+import static no.nav.skanmotutgaaende.lagrefildetaljer.data.Tilleggsopplysning.ENDORSER_NR;
+import static no.nav.skanmotutgaaende.lagrefildetaljer.data.Tilleggsopplysning.FYSISK_POSTBOKS;
+import static no.nav.skanmotutgaaende.lagrefildetaljer.data.Tilleggsopplysning.STREKKODE_POSTBOKS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -85,27 +90,27 @@ public class LagreFildetaljerIT {
                 .datoMottatt(new Date())
                 .batchnavn("xml_pdf_pairs_testdata.zip")
                 .tilleggsopplysninger(Arrays.asList(
-                        LagreFildetaljerRequest.Tilleggsopplysninger.builder()
-                                .nokkel(LagreFildetaljerRequest.ENDORSER_NR)
+                        Tilleggsopplysning.builder()
+                                .nokkel(ENDORSER_NR)
                                 .verdi("3110190003NAV743506")
                                 .build(),
-                        LagreFildetaljerRequest.Tilleggsopplysninger.builder()
-                                .nokkel(LagreFildetaljerRequest.FYSISK_POSTBOKS)
+                        Tilleggsopplysning.builder()
+                                .nokkel(FYSISK_POSTBOKS)
                                 .verdi("1408")
                                 .build(),
-                        LagreFildetaljerRequest.Tilleggsopplysninger.builder()
-                                .nokkel(LagreFildetaljerRequest.STREKKODE_POSTBOKS)
+                        Tilleggsopplysning.builder()
+                                .nokkel(STREKKODE_POSTBOKS)
                                 .verdi("1408")
                                 .build()
                 ))
                 .dokumentvarianter(Arrays.asList(
-                        LagreFildetaljerRequest.Dokumentvariant.builder()
+                        DokumentVariant.builder()
                                 .filtype("pdf")
                                 .variantformat("ARKIV")
                                 .fysiskDokument(DUMMY_FILE)
                                 .filnavn("data_005.pdf")
                                 .build(),
-                        LagreFildetaljerRequest.Dokumentvariant.builder()
+                        DokumentVariant.builder()
                                 .filtype("xml")
                                 .variantformat("ORIGINAL")
                                 .fysiskDokument(DUMMY_FILE)

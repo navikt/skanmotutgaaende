@@ -9,7 +9,6 @@ import no.nav.skanmotutgaaende.utils.Utils;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
@@ -21,7 +20,7 @@ public class UnzipSkanningmetadataUtils {
 
     public static List<FilepairWithMetadata> pairFiles(List<Skanningmetadata> skanningmetadataList, Map<String, byte[]> pdfs, Map<String, byte[]> xmls) {
         return skanningmetadataList.stream().map(metadata -> {
-            String pdfFilnavn = metadata.getJournalpost().getFilNavn();
+            String pdfFilnavn = metadata.getJournalpost().getFilnavn();
             String xmlFilnavn = Utils.changeFiletypeInFilename(pdfFilnavn, "xml");
             if (!pdfs.containsKey(pdfFilnavn)) {
                 throw new SkanmotutgaaendeUnzipperFunctionalException("Skanmotutgaaende fant ikke tilhørende pdf-fil til journalpost " + metadata.getJournalpost().getJournalpostId());
@@ -49,6 +48,7 @@ public class UnzipSkanningmetadataUtils {
 
     public static FilepairWithMetadata extractMetadata(Filepair filepair) {
         return FilepairWithMetadata.builder()
+                .name(filepair.getName())
                 .skanningmetadata(bytesToSkanningmetadata(filepair.getXml()))
                 .pdf(filepair.getPdf())
                 .xml(filepair.getXml())

@@ -40,7 +40,7 @@ public class SftpIT {
     private static final String PAIR_FOLDER_PATH = FILES_FOLDER_PATH + "/xml_pdf_pairs";
     private static final String FEILOMRADE_FOLDER_PATH = "src/test/resources/inbound/SKANMOTUTGAAENDE_FEIL";
     private static final String ZIP_FILE_PATH = PAIR_FOLDER_PATH + "/xml_pdf_pairs_testdata.zip";
-    private static final String XML_FILE_PATH = FILES_FOLDER_PATH + "/data_005.xml";
+    private static final String XML_FILE_PATH = FILES_FOLDER_PATH + "/data_002.xml";
     private static final String DIR_ONE_FOLDER_PATH = "src/test/resources/sftp/dirOne";
     private static final String DIR_TWO_FOLDER_PATH = "src/test/resources/sftp/dirTwo";
     private static final String INVALID_FOLDER_PATH = "foo/bar/baz";

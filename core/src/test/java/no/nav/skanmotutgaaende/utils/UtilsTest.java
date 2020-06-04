@@ -1,4 +1,4 @@
-package no.nav.skanmotutgaaende.unittest;
+package no.nav.skanmotutgaaende.utils;
 
 import no.nav.skanmotutgaaende.utils.Utils;
 import org.junit.Test;

@@ -1,4 +1,4 @@
-package no.nav.skanmotutgaaende.unittest;
+package no.nav.skanmotutgaaende.validator;
 
 import no.nav.skanmotutgaaende.domain.Journalpost;
 import no.nav.skanmotutgaaende.domain.SkanningInfo;
@@ -44,8 +44,8 @@ public class SkanningmetadataValidatorTest {
                                 .journalpostId(JPID_VALID)
                                 .mottakskanal("SKAN_IM")
                                 .datoMottatt(new Date())
-                                .batchNavn("test.zip")
-                                .filNavn(FILE_NAME_VALID)
+                                .batchnavn("test.zip")
+                                .filnavn(FILE_NAME_VALID)
                                 .endorsernr("00001111NAV22")
                                 .build())
                         .build()));
@@ -61,8 +61,8 @@ public class SkanningmetadataValidatorTest {
                         .journalpostId(journalpostId)
                         .mottakskanal("SKAN_IM")
                         .datoMottatt(new Date())
-                        .batchNavn("test.zip")
-                        .filNavn(filNavn)
+                        .batchnavn("test.zip")
+                        .filnavn(filNavn)
                         .endorsernr("00001111NAV22")
                         .build())
                 .skanningInfo(SkanningInfo.builder()

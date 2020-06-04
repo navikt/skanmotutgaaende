@@ -15,10 +15,12 @@ import java.util.Arrays;
 public class LagreFildetaljerService {
 
     private LagreFildetaljerConsumer lagreFildetaljerConsumer;
+    private LagreFildetaljerRequestMapper lagreFildetaljerRequestMapper;
 
     @Inject
     public LagreFildetaljerService(LagreFildetaljerConsumer lagreFildetaljerConsumer) {
         this.lagreFildetaljerConsumer = lagreFildetaljerConsumer;
+        this.lagreFildetaljerRequestMapper = new LagreFildetaljerRequestMapper();
     }
 
     public LagreFildetaljerResponse lagreFildetaljer(LagreFildetaljerRequest request, String journalpostId) {
@@ -26,49 +28,8 @@ public class LagreFildetaljerService {
     }
 
     public LagreFildetaljerResponse lagreFildetaljer(FilepairWithMetadata filepairWithMetadata) {
-        LagreFildetaljerRequest request = extractLagreFildetaljerRequestFromSkanningmetadata(filepairWithMetadata);
+        LagreFildetaljerRequest request = lagreFildetaljerRequestMapper.mapMetadataToOpprettJournalpostRequest(filepairWithMetadata);
         return lagreFildetaljer(request, filepairWithMetadata.getSkanningmetadata().getJournalpost().getJournalpostId());
-    }
-
-    public static LagreFildetaljerRequest extractLagreFildetaljerRequestFromSkanningmetadata(FilepairWithMetadata filepairWithMetadata) {
-        Journalpost journalpost = filepairWithMetadata.getSkanningmetadata().getJournalpost();
-        SkanningInfo skanningInfo = filepairWithMetadata.getSkanningmetadata().getSkanningInfo();
-        return LagreFildetaljerRequest.builder()
-                .datoMottatt(journalpost.getDatoMottatt())
-                .batchnavn(journalpost.getBatchNavn())
-                .mottakskanal(journalpost.getMottakskanal())
-                .tilleggsopplysninger(Arrays.asList(
-                        LagreFildetaljerRequest.Tilleggsopplysninger.builder()
-                                .nokkel(LagreFildetaljerRequest.FYSISK_POSTBOKS)
-                                .verdi(skanningInfo.getFysiskPostboks())
-                                .build(),
-                        LagreFildetaljerRequest.Tilleggsopplysninger.builder()
-                                .nokkel(LagreFildetaljerRequest.STREKKODE_POSTBOKS)
-                                .verdi(skanningInfo.getStrekkodePostboks())
-                                .build(),
-                        LagreFildetaljerRequest.Tilleggsopplysninger.builder()
-                                .nokkel(LagreFildetaljerRequest.ENDORSER_NR)
-                                .verdi(journalpost.getEndorsernr())
-                                .build(),
-                        LagreFildetaljerRequest.Tilleggsopplysninger.builder()
-                                .nokkel(LagreFildetaljerRequest.ANTALL_SIDER)
-                                .verdi(journalpost.getAntallSider())
-                                .build()
-                ))
-                .dokumentvarianter(Arrays.asList(
-                        LagreFildetaljerRequest.Dokumentvariant.builder()
-                                .filtype(LagreFildetaljerRequest.FILTYPE_PDFA)
-                                .variantformat(LagreFildetaljerRequest.VARIANTFORMAT_ARKIV)
-                                .fysiskDokument(filepairWithMetadata.getPdf())
-                                .filnavn(journalpost.getFilNavn())
-                                .build(),
-                        LagreFildetaljerRequest.Dokumentvariant.builder()
-                                .filtype(LagreFildetaljerRequest.FILTYPE_XML)
-                                .variantformat(LagreFildetaljerRequest.VARIANTFORMAT_SKANNING_META)
-                                .fysiskDokument(filepairWithMetadata.getXml())
-                                .filnavn(Utils.changeFiletypeInFilename(journalpost.getFilNavn(), "xml"))
-                                .build()))
-                .build();
     }
 
 }

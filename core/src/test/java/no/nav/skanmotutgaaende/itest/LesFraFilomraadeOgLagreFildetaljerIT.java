@@ -63,7 +63,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public class LesFraFilomraadeOgLagreFildetaljerIT {
 
     private final String URL_DOKARKIV_JOURNALPOST_GEN = "/rest/intern/journalpostapi/v1/journalpost/\\d+/mottaDokumentUtgaaendeSkanning";
-    private final String URL_DOKARKIV_JOURNALPOST_003 = "/rest/intern/journalpostapi/v1/journalpost/003/mottaDokumentUtgaaendeSkanning";
+    private final String URL_DOKARKIV_JOURNALPOST_001 = "/rest/intern/journalpostapi/v1/journalpost/001/mottaDokumentUtgaaendeSkanning";
     private final String VALID_PUBLIC_KEY_PATH = "src/test/resources/sftp/itest_valid.pub";
     private final Path SKANMOTUTGAAENDE_PATH = Path.of("src/test/resources/inbound/SKANMOTUTGAAENDE");
     private final Path SKANMOTUTGAAENDE_FEIL_PATH = Path.of("src/test/resources/inbound/SKANMOTUTGAAENDE_FEIL");
@@ -126,7 +126,7 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
         copyFileToSkanmotutgaaendeFolder(HAPPY_ZIP_PATH);
 
         assertDoesNotThrow(() -> lesFraFilomraadeOgLagreFildetaljer.lesOgLagre());
-        verify(exactly(10), putRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
+        verify(exactly(4), putRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
     }
 
     @Test
@@ -142,12 +142,12 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
     @Test
     public void shouldAddFileToFeilOmraadeWhenFailing() throws IOException {
         copyFileToSkanmotutgaaendeFolder(HAPPY_ZIP_PATH);
-        stubFor(put(urlMatching(URL_DOKARKIV_JOURNALPOST_003))
+        stubFor(put(urlMatching(URL_DOKARKIV_JOURNALPOST_001))
                 .willReturn(aResponse().withStatus(HttpStatus.BAD_REQUEST.value())));
 
         List<List<LagreFildetaljerResponse>> responses = lesFraFilomraadeOgLagreFildetaljer.lesOgLagre();
 
-        assertEquals(9, responses.get(0).size());
+        assertEquals(3, responses.get(0).size());
         assertEquals(2, new File("src/test/resources/inbound/SKANMOTUTGAAENDE_FEIL/xml_pdf_pairs_testdata").listFiles().length);
 
         sftp.disconnect();
