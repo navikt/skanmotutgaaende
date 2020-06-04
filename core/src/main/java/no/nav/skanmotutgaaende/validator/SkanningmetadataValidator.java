@@ -37,14 +37,14 @@ public class SkanningmetadataValidator {
         if (!journalpostValidator.isValidDatoMottatt(journalpost.getDatoMottatt())) {
             throw new InvalidMetadataException("DatoMottatt is not valid: " + journalpost.getDatoMottatt());
         }
-        if (!journalpostValidator.isValidBatchNavn(journalpost.getBatchNavn())) {
-            throw new InvalidMetadataException("Batchnavn is not valid: " + journalpost.getBatchNavn());
+        if (!journalpostValidator.isValidBatchNavn(journalpost.getBatchnavn())) {
+            throw new InvalidMetadataException("Batchnavn is not valid: " + journalpost.getBatchnavn());
         }
-        if (!journalpostValidator.isValidFilnavn(journalpost.getFilNavn())) {
-            throw new InvalidMetadataException("Filnavn is not valid: " + journalpost.getFilNavn());
+        if (!journalpostValidator.isValidFilnavn(journalpost.getFilnavn())) {
+            throw new InvalidMetadataException("Filnavn is not valid: " + journalpost.getFilnavn());
         }
         if (!journalpostValidator.isValidEndorsernr(journalpost.getEndorsernr())) {
-            log.warn("Skanmotovrig Endorsernr is not valid, endorsernr={}, fil={}", journalpost.getEndorsernr(), journalpost.getFilNavn());
+            log.warn("Skanmotutgaaende Endorsernr is not valid but saving journalpost anyway, endorsernr={}, fil={}", journalpost.getEndorsernr(), journalpost.getFilnavn());
         }
     }
 
@@ -53,10 +53,10 @@ public class SkanningmetadataValidator {
             throw new InvalidMetadataException("SkanningInfo is null");
         }
         if (!skanningInfoValidator.isValidFysiskPostboks(skanningInfo.getFysiskPostboks())) {
-            throw new InvalidMetadataException("FysiskPostboks is not valid: " + skanningInfo.getFysiskPostboks());
+            log.warn("Skanmotutgaaende FysiskPostboks is not valid but saving journalpost anyway, fysiskPostboks={}", skanningInfo.getFysiskPostboks());
         }
         if (!skanningInfoValidator.isValidStrekkodePostboks(skanningInfo.getStrekkodePostboks())) {
-            throw new   InvalidMetadataException("StrekkodePostboks is not valid: " + skanningInfo.getStrekkodePostboks());
+            log.warn("Skanmotutgaaende StrekkodePostboks is not valid but saving journalpost anyway, strekkodePostboks={}", skanningInfo.getStrekkodePostboks());
         }
     }
 }

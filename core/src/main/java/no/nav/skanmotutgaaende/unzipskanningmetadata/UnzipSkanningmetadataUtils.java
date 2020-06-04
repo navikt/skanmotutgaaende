@@ -1,15 +1,16 @@
 package no.nav.skanmotutgaaende.unzipskanningmetadata;
 
+import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotutgaaende.domain.Filepair;
 import no.nav.skanmotutgaaende.domain.FilepairWithMetadata;
 import no.nav.skanmotutgaaende.domain.Skanningmetadata;
 import no.nav.skanmotutgaaende.exceptions.functional.SkanmotutgaaendeUnzipperFunctionalException;
+import no.nav.skanmotutgaaende.exceptions.technical.SkanmotutgaaendeUnzipperTechnicalException;
 import no.nav.skanmotutgaaende.utils.Utils;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
@@ -17,25 +18,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 
+@Slf4j
 public class UnzipSkanningmetadataUtils {
-
-    public static List<FilepairWithMetadata> pairFiles(List<Skanningmetadata> skanningmetadataList, Map<String, byte[]> pdfs, Map<String, byte[]> xmls) {
-        return skanningmetadataList.stream().map(metadata -> {
-            String pdfFilnavn = metadata.getJournalpost().getFilNavn();
-            String xmlFilnavn = Utils.changeFiletypeInFilename(pdfFilnavn, "xml");
-            if (!pdfs.containsKey(pdfFilnavn)) {
-                throw new SkanmotutgaaendeUnzipperFunctionalException("Skanmotutgaaende fant ikke tilhørende pdf-fil til journalpost " + metadata.getJournalpost().getJournalpostId());
-            }
-            if (!xmls.containsKey(xmlFilnavn)) {
-                throw new SkanmotutgaaendeUnzipperFunctionalException("Skanmotutgaaende fant ikke tilhørende xml-fil til journalpost " + metadata.getJournalpost().getJournalpostId());
-            }
-            return FilepairWithMetadata.builder()
-                    .skanningmetadata(metadata)
-                    .pdf(pdfs.get(pdfFilnavn))
-                    .xml(xmls.get(xmlFilnavn))
-                    .build();
-        }).collect(Collectors.toList());
-    }
 
     public static List<Filepair> pairFiles(Map<String, byte[]> pdfs, Map<String, byte[]> xmls) {
         return pdfs.keySet().stream().map(key ->
@@ -49,6 +33,7 @@ public class UnzipSkanningmetadataUtils {
 
     public static FilepairWithMetadata extractMetadata(Filepair filepair) {
         return FilepairWithMetadata.builder()
+                .name(filepair.getName())
                 .skanningmetadata(bytesToSkanningmetadata(filepair.getXml()))
                 .pdf(filepair.getPdf())
                 .xml(filepair.getXml())
@@ -68,7 +53,8 @@ public class UnzipSkanningmetadataUtils {
 
             return skanningmetadata;
         } catch (UnsupportedEncodingException | JAXBException e) {
-            throw new SkanmotutgaaendeUnzipperFunctionalException("Skanmotutgaaende klarte ikke unmarshalle skanningmetadata fra xml", e);
+            log.error("Skanmotutgaaende klarte ikke lese metadata i fil, feilmelding={}", e.getMessage(), e);
+            throw new SkanmotutgaaendeUnzipperTechnicalException("Skanmotutgaaende klarte ikke unmarshalle skanningmetadata fra xml", e);
         } catch (NullPointerException e) {
             throw new SkanmotutgaaendeUnzipperFunctionalException("Xml fil mangler");
         }

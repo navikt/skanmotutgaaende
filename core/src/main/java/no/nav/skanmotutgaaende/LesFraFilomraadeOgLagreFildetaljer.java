@@ -2,28 +2,24 @@ package no.nav.skanmotutgaaende;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotutgaaende.domain.Filepair;
-import no.nav.skanmotutgaaende.domain.FilepairWithMetadata;
-import no.nav.skanmotutgaaende.exceptions.functional.AbstractSkanmotutgaaendeFunctionalException;
+import no.nav.skanmotutgaaende.domain.Skanningmetadata;
 import no.nav.skanmotutgaaende.exceptions.functional.InvalidMetadataException;
-import no.nav.skanmotutgaaende.exceptions.functional.LesZipFilFuntionalException;
 import no.nav.skanmotutgaaende.exceptions.functional.SkanmotutgaaendeUnzipperFunctionalException;
-import no.nav.skanmotutgaaende.exceptions.technical.AbstractSkanmotutgaaendeTechnicalException;
-import no.nav.skanmotutgaaende.exceptions.technical.SkanmotutgaaendeSftpTechnicalException;
+import no.nav.skanmotutgaaende.exceptions.technical.SkanmotutgaaendeUnzipperTechnicalException;
 import no.nav.skanmotutgaaende.filomraade.FilomraadeService;
 import no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerService;
 import no.nav.skanmotutgaaende.lagrefildetaljer.data.LagreFildetaljerResponse;
+import no.nav.skanmotutgaaende.mdc.MDCGenerate;
 import no.nav.skanmotutgaaende.unzipskanningmetadata.UnzipSkanningmetadataUtils;
 import no.nav.skanmotutgaaende.unzipskanningmetadata.Unzipper;
 import no.nav.skanmotutgaaende.utils.Utils;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
 @Component
@@ -43,82 +39,71 @@ public class LesFraFilomraadeOgLagreFildetaljer {
     //@Scheduled(cron = "0 0 6,7,16,17,21 * * ?")
     //@Scheduled(initialDelay = 10_000, fixedDelay = 1_800_000) //Kjører hvert 30 min. For tidlig testing
     public void scheduledJob() {
-        lesOgLagre();
+        lesOgLagreZipfiler();
     }
 
-    public List<List<LagreFildetaljerResponse>> lesOgLagre() {
-        List<List<LagreFildetaljerResponse>> allResponses = new ArrayList<>();
+    public void lesOgLagreZipfiler() {
         List<String> processedZipFiles = new ArrayList<>();
+        try {
+            List<String> zipFileNames = filomraadeService.getFileNames();
+            log.info("Skanmotutgaaende fant {} zipfiler på sftp server: {}", processedZipFiles.size(), processedZipFiles);
 
-        Map<String, byte[]> zipfiles = lesFil();
+            for (String zipName : zipFileNames) {
+                setUpMDCforZip(zipName);
+                AtomicBoolean safeToDeleteZipFile = new AtomicBoolean(true);
+                isFeilomraadeDirty = false;
 
-        log.info("Skanmotutgaaende leste fra filområde og fant {} zipfiler: {}", zipfiles.size(), zipfiles);
+                log.info("Skanmotutgaaende laster ned {} fra sftp server", zipName);
+                List<Filepair> filepairList;
+                byte[] zipFile = filomraadeService.getZipFile(zipName);
+                try {
+                    filepairList = Unzipper.unzipXmlPdf(zipFile);
+                } catch (Exception e) {
+                    log.error("Skanmotutgaaende klarte ikke lese zipfil {}", zipName, e);
+                    processedZipFiles.add(zipName);
+                    lastOppZipfilTilFeilomrade(zipFile, zipName);
+                    continue;
+                }
+                log.info("Skanmotutgaaende begynner behandling av {}", zipName);
 
-        for (String zipName : zipfiles.keySet()) {
-            isFeilomraadeDirty = false;
-            try {
-                List<Filepair> filepairList = Unzipper.unzipXmlPdf(zipfiles.get(zipName));
+                filepairList.forEach(filepair -> {
+                    setUpMDCforFile(filepair.getName());
 
-                List<LagreFildetaljerResponse> responses = filepairList.stream()
-                        .map(filepair -> lagreFil(filepair, zipName))
-                        .filter(response -> null != response)
-                        .collect(Collectors.toList());
+                    Optional<Skanningmetadata> skanningmetadata = extractMetadata(filepair, zipName);
+                    if (skanningmetadata.isEmpty()) {
+                        lastOppFilpar(filepair, zipName);
+                        tearDownMDCforFile();
+                    } else {
+                        Optional<LagreFildetaljerResponse> response = lagreFildetaljerService.lagreFildetaljer(skanningmetadata, filepair);
+                        try {
+                            if (response.isEmpty()) {
+                                lastOppFilpar(filepair, zipName);
+                            }
+                        } catch (Exception e) {
+                            log.error("Skanmotutgaaende feilet ved opplasting til feilområde, fil={} feilmelding={}", filepair.getName(), zipName, e.getMessage(), e);
+                            safeToDeleteZipFile.set(false);
+                        } finally {
+                            tearDownMDCforFile();
+                            cleanUplastOppZipfilTilFeilomrade(zipName);
+                        }
+                    }
+                });
 
-                log.info("Skanmotutgaaende lagret fildetaljer fra zipfil {} i dokarkiv", zipName);
-                allResponses.add(responses);
-            } catch (IOException e) {
-                log.error("Skanmotutgaaende klarte ikke lese fra fil {}", zipName, e);
-                lastOppZipfilTilFeilomrade(zipfiles.get(zipName), zipName);
-            } catch (SkanmotutgaaendeUnzipperFunctionalException e) {
-                log.error("Skanmotutgaaende feilet i unzipping av fil {}", zipName, e);
-            } finally {
-                processedZipFiles.add(zipName);
-                cleanUplastOppZipfilTilFeilomrade(zipName);
+                if (safeToDeleteZipFile.get()) {
+                    filomraadeService.moveZipFile(zipName, "processed");
+                }
+                tearDownMDCforZip();
             }
+        } catch (Exception e) {
+            log.error("Skanmotutgaaende ukjent feil oppstod i lesOgLagreZipfiler, feilmelding={}", e.getMessage(), e);
+        } finally {
+            // Feels like a leaky abstraction ...
+            filomraadeService.disconnect();
         }
-
-        // Flytter prosesserte zipfiler til "/processed" i stedet for å slette dem enn så lenge
-        //slettZipfiler(processedZipFiles);
-        filomraadeService.moveZipFiles(processedZipFiles, "processed");
-        filomraadeService.disconnect();
-
-        return allResponses;
-    }
-
-    private Map<String, byte[]> lesFil() {
-        try {
-            return filomraadeService.getZipFiles();
-        } catch (SkanmotutgaaendeSftpTechnicalException | LesZipFilFuntionalException e) {
-            return new HashMap<>();
-        }
-    }
-
-    private LagreFildetaljerResponse lagreFil(Filepair filepair, String zipName) {
-        log.info("Skanmotutgaaende behandler fil {}", filepair.getName());
-        LagreFildetaljerResponse response = null;
-
-        FilepairWithMetadata filepairWithMetadata = extractMetadata(filepair, zipName);
-
-        if (filepairWithMetadata == null) {
-            return null;
-        }
-        log.info("Filpar med navn {} er tilknyttet journalpost med id {}", filepair.getName(), filepairWithMetadata.getSkanningmetadata().getJournalpost().getJournalpostId());
-        try {
-            response = lagreFildetaljerService.lagreFildetaljer(filepairWithMetadata);
-            log.info("Skanmotutgaaende lagret fildetaljer for journalpost med id {}", filepairWithMetadata.getSkanningmetadata().getJournalpost().getJournalpostId());
-        } catch (AbstractSkanmotutgaaendeFunctionalException e) {
-            log.warn("Skanmotutgaaende feilet funksjonelt med lagring av fildetaljer til journalpost med id {}. Fil: {}. Feilmelding: {}",
-                    filepairWithMetadata.getSkanningmetadata().getJournalpost().getJournalpostId(), filepair.getName(), e.getMessage(), e);
-            lastOppFilpar(filepair, zipName);
-        } catch (AbstractSkanmotutgaaendeTechnicalException e) {
-            log.warn("Skanmotutgaaende feilet teknisk med lagring av fildetaljer til journalpost med id {}. Fil: {}. Feilmelding: {}",
-                    filepairWithMetadata.getSkanningmetadata().getJournalpost().getJournalpostId(), filepair.getName(), e.getLocalizedMessage(), e);
-            lastOppFilpar(filepair, zipName);
-        }
-        return response;
     }
 
     private void lastOppFilpar(Filepair filepair, String zipName) {
+        log.info("Skanmotutgaaende laster opp filpar til feilområde, fil={} zipfil={}", filepair.getName(), zipName);
         String path = Utils.removeFileExtensionInFilename(zipName);
         filomraadeService.uploadFileToFeilomrade(filepair.getPdf(), filepair.getName() + ".pdf", path);
         filomraadeService.uploadFileToFeilomrade(filepair.getXml(), filepair.getName() + ".xml", path);
@@ -136,17 +121,36 @@ public class LesFraFilomraadeOgLagreFildetaljer {
         }
     }
 
-    private void slettZipfiler(List<String> zipFiles) {
-        filomraadeService.deleteZipFiles(zipFiles);
-    }
-
-    private FilepairWithMetadata extractMetadata(Filepair filepair, String zipName) {
+    private Optional<Skanningmetadata> extractMetadata(Filepair filepair, String zipName) {
         try {
-            return UnzipSkanningmetadataUtils.extractMetadata(filepair);
+            return Optional.of(UnzipSkanningmetadataUtils.bytesToSkanningmetadata(filepair.getXml()));
         } catch (InvalidMetadataException e) {
             log.warn("Skanningmetadata hadde ugyldige verdier for fil {}. Skanmotutgaaende klarte ikke unmarshalle.", filepair.getName(), e);
-            lastOppFilpar(filepair, zipName);
-            return null;
+            return Optional.empty();
+        } catch (SkanmotutgaaendeUnzipperFunctionalException e) {
+            log.warn("Kunne ikke hente metadata fra {}, feilmelding={}", filepair.getName(), e.getMessage(), e);
+            return Optional.empty();
+        } catch (SkanmotutgaaendeUnzipperTechnicalException e) {
+            log.error("Teknisk feil oppsto ved deserialisering av {}, feilmelding={}, cause={}", filepair.getName(), e.getMessage(), e.getCause().getMessage(), e);
+            return Optional.empty();
         }
+    }
+
+    private void setUpMDCforZip(String zipname) {
+        MDCGenerate.setZipId(zipname);
+    }
+
+    private void tearDownMDCforZip() {
+        MDCGenerate.clearZipId();
+    }
+
+    private void setUpMDCforFile(String filename) {
+        MDCGenerate.setFileName(filename);
+        MDCGenerate.generateNewCallIdIfThereAreNone();
+    }
+
+    private void tearDownMDCforFile() {
+        MDCGenerate.clearFilename();
+        MDCGenerate.clearCallId();
     }
 }

@@ -1,13 +1,11 @@
-package no.nav.skanmotutgaaende.unittest;
+package no.nav.skanmotutgaaende.unzipskanningmetadata;
 
 import no.nav.skanmotutgaaende.domain.Filepair;
 import no.nav.skanmotutgaaende.domain.FilepairWithMetadata;
 import no.nav.skanmotutgaaende.domain.Journalpost;
 import no.nav.skanmotutgaaende.domain.SkanningInfo;
 import no.nav.skanmotutgaaende.exceptions.functional.InvalidMetadataException;
-import no.nav.skanmotutgaaende.exceptions.functional.SkanmotutgaaendeUnzipperFunctionalException;
-import no.nav.skanmotutgaaende.unzipskanningmetadata.UnzipSkanningmetadataUtils;
-import no.nav.skanmotutgaaende.unzipskanningmetadata.Unzipper;
+import no.nav.skanmotutgaaende.exceptions.technical.SkanmotutgaaendeUnzipperTechnicalException;
 import org.junit.Test;
 
 import java.io.File;
@@ -27,11 +25,11 @@ public class UnzipperTest {
     private final String ZIP_FILE_PATH = "src/test/resources/__files/xml_pdf_pairs/xml_pdf_pairs_testdata.zip";
     private final String BROKEN_ZIP_FILE_PATH = "src/test/resources/__files/xml_pdf_pairs/xml_pdf_pairs_broken_testdata.zip";
     private final String INVALID_ZIP_FILE_PATH = "src/test/resources/__files/xml_pdf_pairs/xml_pdf_pairs_invalid_testdata.zip";
-    private final String PDF_PATH = "src/test/resources/__files/data_005.pdf";
-    private final String XML_PATH = "src/test/resources/__files/data_005.xml";
+    private final String PDF_PATH = "src/test/resources/__files/data_002.pdf";
+    private final String XML_PATH = "src/test/resources/__files/data_002.xml";
 
-    private final String ZIPPED_PDF_NAME = "data_005.pdf";
-    private final String JOURNALPOST_ID = "005";
+    private final String ZIPPED_PDF_NAME = "data_002.pdf";
+    private final String JOURNALPOST_ID = "002";
     private final String MOTTAKSKANAL = "SKAN_IM";
     private final long DATO_MOTTATT = ***gammelt_fnr***00L;
     private final String BATCH_NAVN = "xml_pdf_pairs_testdata.zip";
@@ -50,12 +48,12 @@ public class UnzipperTest {
         Journalpost journalpost = pair.getSkanningmetadata().getJournalpost();
         SkanningInfo skanningInfo = pair.getSkanningmetadata().getSkanningInfo();
 
-        assertEquals(10, extracted.size());
+        assertEquals(4, extracted.size());
         assertEquals(JOURNALPOST_ID, journalpost.getJournalpostId());
         assertEquals(MOTTAKSKANAL, journalpost.getMottakskanal());
         assertEquals(DATO_MOTTATT, journalpost.getDatoMottatt().getTime());
-        assertEquals(BATCH_NAVN, journalpost.getBatchNavn());
-        assertEquals(ZIPPED_PDF_NAME, journalpost.getFilNavn());
+        assertEquals(BATCH_NAVN, journalpost.getBatchnavn());
+        assertEquals(ZIPPED_PDF_NAME, journalpost.getFilnavn());
         assertEquals(ENDORSERNR, journalpost.getEndorsernr());
         assertEquals(POSTBOKS, skanningInfo.getFysiskPostboks());
         assertEquals(POSTBOKS, skanningInfo.getStrekkodePostboks());
@@ -66,7 +64,7 @@ public class UnzipperTest {
     @Test
     public void shouldThrowExceptionIfUnableToReadMetadata() {
         File zip = Paths.get(BROKEN_ZIP_FILE_PATH).toFile();
-        assertThrows(SkanmotutgaaendeUnzipperFunctionalException.class, () ->
+        assertThrows(SkanmotutgaaendeUnzipperTechnicalException.class, () ->
                 Unzipper.unzipXmlPdf(zip).stream().map(filepair ->
                         UnzipSkanningmetadataUtils.extractMetadata(filepair))
                         .collect(Collectors.toList()));
@@ -101,7 +99,7 @@ public class UnzipperTest {
 
     private FilepairWithMetadata getSkanningmetadataPdfPairFromPdfName(List<FilepairWithMetadata> filepairWithMetadata, String name) {
         return filepairWithMetadata.stream()
-                .filter(pair -> name.equals(pair.getSkanningmetadata().getJournalpost().getFilNavn()))
+                .filter(pair -> name.equals(pair.getSkanningmetadata().getJournalpost().getFilnavn()))
                 .findFirst().get();
     }
 }

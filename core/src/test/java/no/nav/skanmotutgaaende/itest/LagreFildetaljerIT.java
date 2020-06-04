@@ -5,8 +5,10 @@ import no.nav.skanmotutgaaende.config.properties.SkanmotutgaaendeProperties;
 import no.nav.skanmotutgaaende.exceptions.functional.MottaDokumentUtgaaendeSkanningFunctionalException;
 import no.nav.skanmotutgaaende.itest.config.TestConfig;
 import no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerConsumer;
+import no.nav.skanmotutgaaende.lagrefildetaljer.data.DokumentVariant;
 import no.nav.skanmotutgaaende.lagrefildetaljer.data.LagreFildetaljerRequest;
 import no.nav.skanmotutgaaende.lagrefildetaljer.data.LagreFildetaljerResponse;
+import no.nav.skanmotutgaaende.lagrefildetaljer.data.Tilleggsopplysning;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,6 +28,9 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.put;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
+import static no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerRequestMapper.ENDORSERNR_NOKKEL;
+import static no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerRequestMapper.FYSISK_POSTBOKS_NOKKEL;
+import static no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerRequestMapper.STREKKODE_POSTBOKS_NOKKEL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -62,9 +67,9 @@ public class LagreFildetaljerIT {
 
     private void setUpStubs() {
         stubFor(put(urlMatching(MOTTA_DOKUMENT_UTGAAENDE_SKANNING_TJENESTE))
-            .willReturn(aResponse().withStatus(HttpStatus.OK.value())));
+                .willReturn(aResponse().withStatus(HttpStatus.OK.value())));
         stubFor(put(urlMatching(MOTTA_DOKUMENT_UTGAAENDE_SKANNING_TJENESTE_INVALID_JOURNALPOST))
-            .willReturn(aResponse().withStatus(HttpStatus.BAD_REQUEST.value())));
+                .willReturn(aResponse().withStatus(HttpStatus.BAD_REQUEST.value())));
     }
 
     @Test
@@ -85,27 +90,27 @@ public class LagreFildetaljerIT {
                 .datoMottatt(new Date())
                 .batchnavn("xml_pdf_pairs_testdata.zip")
                 .tilleggsopplysninger(Arrays.asList(
-                        LagreFildetaljerRequest.Tilleggsopplysninger.builder()
-                                .nokkel(LagreFildetaljerRequest.ENDORSER_NR)
+                        Tilleggsopplysning.builder()
+                                .nokkel(ENDORSERNR_NOKKEL)
                                 .verdi("3110190003NAV743506")
                                 .build(),
-                        LagreFildetaljerRequest.Tilleggsopplysninger.builder()
-                                .nokkel(LagreFildetaljerRequest.FYSISK_POSTBOKS)
+                        Tilleggsopplysning.builder()
+                                .nokkel(FYSISK_POSTBOKS_NOKKEL)
                                 .verdi("1408")
                                 .build(),
-                        LagreFildetaljerRequest.Tilleggsopplysninger.builder()
-                                .nokkel(LagreFildetaljerRequest.STREKKODE_POSTBOKS)
+                        Tilleggsopplysning.builder()
+                                .nokkel(STREKKODE_POSTBOKS_NOKKEL)
                                 .verdi("1408")
                                 .build()
                 ))
                 .dokumentvarianter(Arrays.asList(
-                        LagreFildetaljerRequest.Dokumentvariant.builder()
+                        DokumentVariant.builder()
                                 .filtype("pdf")
                                 .variantformat("ARKIV")
                                 .fysiskDokument(DUMMY_FILE)
                                 .filnavn("data_005.pdf")
                                 .build(),
-                        LagreFildetaljerRequest.Dokumentvariant.builder()
+                        DokumentVariant.builder()
                                 .filtype("xml")
                                 .variantformat("ORIGINAL")
                                 .fysiskDokument(DUMMY_FILE)

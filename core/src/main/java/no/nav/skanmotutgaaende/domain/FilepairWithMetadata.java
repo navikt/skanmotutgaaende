@@ -7,6 +7,7 @@ import lombok.Data;
 @Builder
 public class FilepairWithMetadata {
 
+    private final String name;
     private final Skanningmetadata skanningmetadata;
     private final byte[] pdf;
     private final byte[] xml;

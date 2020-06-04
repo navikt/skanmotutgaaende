@@ -7,9 +7,7 @@ import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
 import java.io.ByteArrayInputStream;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Service
@@ -22,26 +20,8 @@ public class FilomraadeService {
         this.filomraadeConsumer = filomraadeConsumer;
     }
 
-    public Map<String, byte[]> getZipFiles() throws SkanmotutgaaendeSftpTechnicalException {
-        try {
-            List<String> fileNames = filomraadeConsumer.listZipFiles();
-            Map<String, byte[]> files = new HashMap<>();
-
-            for (String filename : fileNames) {
-                byte[] zipFile = getZipFile(filename);
-                if (zipFile != null) {
-                    files.put(filename, zipFile);
-                }
-            }
-            log.info("Skanmotutgaaende leser {} fra sftp", fileNames.toString());
-            return files;
-        } catch (LesZipFilFuntionalException e) {
-            log.warn("Skanmotutgaaende klarte ikke hente zipfiler", e);
-            throw e;
-        } catch (SkanmotutgaaendeSftpTechnicalException e) {
-            log.warn("Skanmotutgaaende klarte ikke koble til sftp", e);
-            throw e;
-        }
+    public List<String> getFileNames() throws LesZipFilFuntionalException, SkanmotutgaaendeSftpTechnicalException {
+        return filomraadeConsumer.listZipFiles();
     }
 
     public void uploadFileToFeilomrade(byte[] file, String filename, String path) {
@@ -64,10 +44,8 @@ public class FilomraadeService {
         zipFiles.stream().forEach(this::deleteZipFile);
     }
 
-    public void moveZipFiles(List<String> files, String destination) {
-        files.stream().forEach(file -> {
-            moveFile(file, destination, file + ".processed");
-        });
+    public void moveZipFile(String file, String destination) {
+        moveFile(file, destination, file + ".processed");
     }
 
     public void disconnect() {
@@ -90,7 +68,7 @@ public class FilomraadeService {
         }
     }
 
-    private byte[] getZipFile(String fileName) {
+    public byte[] getZipFile(String fileName) {
         try {
             return filomraadeConsumer.getFile(fileName);
         } catch (Exception e) {
