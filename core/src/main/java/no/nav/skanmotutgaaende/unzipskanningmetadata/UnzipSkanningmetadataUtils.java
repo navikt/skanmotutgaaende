@@ -1,9 +1,11 @@
 package no.nav.skanmotutgaaende.unzipskanningmetadata;
 
+import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotutgaaende.domain.Filepair;
 import no.nav.skanmotutgaaende.domain.FilepairWithMetadata;
 import no.nav.skanmotutgaaende.domain.Skanningmetadata;
 import no.nav.skanmotutgaaende.exceptions.functional.SkanmotutgaaendeUnzipperFunctionalException;
+import no.nav.skanmotutgaaende.exceptions.technical.SkanmotutgaaendeUnzipperTechnicalException;
 import no.nav.skanmotutgaaende.utils.Utils;
 
 import javax.xml.bind.JAXBContext;
@@ -16,6 +18,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 
+@Slf4j
 public class UnzipSkanningmetadataUtils {
 
     public static List<FilepairWithMetadata> pairFiles(List<Skanningmetadata> skanningmetadataList, Map<String, byte[]> pdfs, Map<String, byte[]> xmls) {
@@ -68,7 +71,8 @@ public class UnzipSkanningmetadataUtils {
 
             return skanningmetadata;
         } catch (UnsupportedEncodingException | JAXBException e) {
-            throw new SkanmotutgaaendeUnzipperFunctionalException("Skanmotutgaaende klarte ikke unmarshalle skanningmetadata fra xml", e);
+            log.error("Skanmotutgaaende klarte ikke lese metadata i fil, feilmelding={}", e.getMessage(), e);
+            throw new SkanmotutgaaendeUnzipperTechnicalException("Skanmotutgaaende klarte ikke unmarshalle skanningmetadata fra xml", e);
         } catch (NullPointerException e) {
             throw new SkanmotutgaaendeUnzipperFunctionalException("Xml fil mangler");
         }

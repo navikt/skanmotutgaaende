@@ -22,7 +22,7 @@ public class FilomraadeService {
         this.filomraadeConsumer = filomraadeConsumer;
     }
 
-    public Map<String, byte[]> getZipFiles() throws SkanmotutgaaendeSftpTechnicalException {
+    /*public Map<String, byte[]> getZipFiles() throws SkanmotutgaaendeSftpTechnicalException {
         try {
             List<String> fileNames = filomraadeConsumer.listZipFiles();
             Map<String, byte[]> files = new HashMap<>();
@@ -42,6 +42,10 @@ public class FilomraadeService {
             log.warn("Skanmotutgaaende klarte ikke koble til sftp", e);
             throw e;
         }
+    }*/
+
+    public List<String> getFileNames() throws LesZipFilFuntionalException, SkanmotutgaaendeSftpTechnicalException {
+        return filomraadeConsumer.listZipFiles();
     }
 
     public void uploadFileToFeilomrade(byte[] file, String filename, String path) {
@@ -64,10 +68,8 @@ public class FilomraadeService {
         zipFiles.stream().forEach(this::deleteZipFile);
     }
 
-    public void moveZipFiles(List<String> files, String destination) {
-        files.stream().forEach(file -> {
-            moveFile(file, destination, file + ".processed");
-        });
+    public void moveZipFile(String file, String destination) {
+        moveFile(file, destination, file + ".processed");
     }
 
     public void disconnect() {
@@ -90,7 +92,7 @@ public class FilomraadeService {
         }
     }
 
-    private byte[] getZipFile(String fileName) {
+    public byte[] getZipFile(String fileName) {
         try {
             return filomraadeConsumer.getFile(fileName);
         } catch (Exception e) {

@@ -125,7 +125,7 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
     public void shouldLesOgLagreHappy() throws IOException {
         copyFileToSkanmotutgaaendeFolder(HAPPY_ZIP_PATH);
 
-        assertDoesNotThrow(() -> lesFraFilomraadeOgLagreFildetaljer.lesOgLagre());
+        assertDoesNotThrow(() -> lesFraFilomraadeOgLagreFildetaljer.lesOgLagreZipfiler());
         verify(exactly(4), putRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
     }
 
@@ -135,7 +135,7 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
         File movedFile = new File(Path.of(SKANMOTUTGAAENDE_PATH.toString(), "/processed/xml_pdf_pairs_testdata.zip.processed").toString());
 
         assertFalse(movedFile.exists());
-        lesFraFilomraadeOgLagreFildetaljer.lesOgLagre();
+        lesFraFilomraadeOgLagreFildetaljer.lesOgLagreZipfiler();
         assertTrue(movedFile.exists());
     }
 
@@ -145,9 +145,8 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
         stubFor(put(urlMatching(URL_DOKARKIV_JOURNALPOST_001))
                 .willReturn(aResponse().withStatus(HttpStatus.BAD_REQUEST.value())));
 
-        List<List<LagreFildetaljerResponse>> responses = lesFraFilomraadeOgLagreFildetaljer.lesOgLagre();
+        lesFraFilomraadeOgLagreFildetaljer.lesOgLagreZipfiler();
 
-        assertEquals(3, responses.get(0).size());
         assertEquals(2, new File("src/test/resources/inbound/SKANMOTUTGAAENDE_FEIL/xml_pdf_pairs_testdata").listFiles().length);
 
         sftp.disconnect();

@@ -1,5 +1,6 @@
 package no.nav.skanmotutgaaende.lagrefildetaljer;
 
+import no.nav.skanmotutgaaende.domain.Filepair;
 import no.nav.skanmotutgaaende.domain.FilepairWithMetadata;
 import no.nav.skanmotutgaaende.domain.Journalpost;
 import no.nav.skanmotutgaaende.domain.SkanningInfo;
@@ -39,25 +40,26 @@ public class LagreFildetaljerRequestMapperTest {
     @Test
     public void shouldMapSkanningmetadataToLagreFildetaljerRequest() {
         LagreFildetaljerRequest lagreFildetaljerRequest = lagreFildetaljerRequestMapper.mapMetadataToOpprettJournalpostRequest(
-                FilepairWithMetadata.builder()
-                        .name(FILNAVN)
-                        .skanningmetadata(Skanningmetadata.builder()
-                                .journalpost(Journalpost.builder()
-                                        .journalpostId(JOURNALPOSTID)
-                                        .mottakskanal(MOTTAKSKANAL)
-                                        .datoMottatt(new Date())
-                                        .batchnavn(BATCHNAVN)
-                                        .filnavn(FILNAVN_I_XML)
-                                        .endorsernr(ENDORSERNR)
-                                        .build())
-                                .skanningInfo(SkanningInfo.builder()
-                                        .fysiskPostboks(FYSISK_POSTBOKS_VERDI)
-                                        .strekkodePostboks(STREKKODE_POSTBOKS_VERDI)
-                                        .build())
+                Skanningmetadata.builder()
+                        .journalpost(Journalpost.builder()
+                                .journalpostId(JOURNALPOSTID)
+                                .mottakskanal(MOTTAKSKANAL)
+                                .datoMottatt(new Date())
+                                .batchnavn(BATCHNAVN)
+                                .filnavn(FILNAVN_I_XML)
+                                .endorsernr(ENDORSERNR)
                                 .build())
-                        .xml(DUMMY_FILE)
+                        .skanningInfo(SkanningInfo.builder()
+                                .fysiskPostboks(FYSISK_POSTBOKS_VERDI)
+                                .strekkodePostboks(STREKKODE_POSTBOKS_VERDI)
+                                .build())
+                        .build(),
+                Filepair.builder()
+                        .name(FILNAVN)
                         .pdf(DUMMY_FILE)
-                .build());
+                        .xml(DUMMY_FILE)
+                        .build()
+        );
 
         assertEquals(BATCHNAVN, lagreFildetaljerRequest.getBatchnavn());
         assertEquals(MOTTAKSKANAL, lagreFildetaljerRequest.getMottakskanal());

@@ -1,8 +1,10 @@
 package no.nav.skanmotutgaaende.lagrefildetaljer;
 
+import no.nav.skanmotutgaaende.domain.Filepair;
 import no.nav.skanmotutgaaende.domain.FilepairWithMetadata;
 import no.nav.skanmotutgaaende.domain.Journalpost;
 import no.nav.skanmotutgaaende.domain.SkanningInfo;
+import no.nav.skanmotutgaaende.domain.Skanningmetadata;
 import no.nav.skanmotutgaaende.lagrefildetaljer.data.DokumentVariant;
 import no.nav.skanmotutgaaende.lagrefildetaljer.data.LagreFildetaljerRequest;
 import no.nav.skanmotutgaaende.lagrefildetaljer.data.Tilleggsopplysning;
@@ -24,9 +26,9 @@ public class LagreFildetaljerRequestMapper {
     public static final String VARIANTFORMAT_ARKIV = "ARKIV";
     public static final String VARIANTFORMAT_SKANNING_META = "SKANNING_META";
 
-    public LagreFildetaljerRequest mapMetadataToOpprettJournalpostRequest(FilepairWithMetadata filepairWithMetadata) {
-        Journalpost journalpost = filepairWithMetadata.getSkanningmetadata().getJournalpost();
-        SkanningInfo skanningInfo = filepairWithMetadata.getSkanningmetadata().getSkanningInfo();
+    public LagreFildetaljerRequest mapMetadataToOpprettJournalpostRequest(Skanningmetadata skanningmetadata, Filepair filepair) {
+        Journalpost journalpost = skanningmetadata.getJournalpost();
+        SkanningInfo skanningInfo = skanningmetadata.getSkanningInfo();
         Date datoMotatt = journalpost.getDatoMottatt();
         String batchnavn = journalpost.getBatchnavn();
         String mottakskanal = journalpost.getMottakskanal();
@@ -41,15 +43,15 @@ public class LagreFildetaljerRequestMapper {
         DokumentVariant pdf = DokumentVariant.builder()
                 .filtype(PDFA)
                 .variantformat(VARIANTFORMAT_ARKIV)
-                .fysiskDokument(filepairWithMetadata.getPdf())
-                .filnavn(appendFileType(filepairWithMetadata.getName(), FILTYPE_PDF))
+                .fysiskDokument(filepair.getPdf())
+                .filnavn(appendFileType(filepair.getName(), FILTYPE_PDF))
                 .build();
 
         DokumentVariant xml = DokumentVariant.builder()
                 .filtype(XML)
                 .variantformat(VARIANTFORMAT_SKANNING_META)
-                .fysiskDokument(filepairWithMetadata.getXml())
-                .filnavn(appendFileType(filepairWithMetadata.getName(), FILTYPE_XML))
+                .fysiskDokument(filepair.getXml())
+                .filnavn(appendFileType(filepair.getName(), FILTYPE_XML))
                 .build();
 
 
