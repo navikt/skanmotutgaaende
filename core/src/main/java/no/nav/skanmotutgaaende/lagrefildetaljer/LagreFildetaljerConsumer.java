@@ -85,8 +85,12 @@ public class LagreFildetaljerConsumer {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        headers.add(CORRELATION_HEADER, MDC.get(MDCConstants.MDC_CALL_ID));
-        headers.add(MDCConstants.MDC_NAV_CONSUMER_ID, CONSUMER_ID);
+        if (MDC.get(MDCConstants.MDC_NAV_CALL_ID) != null) {
+            headers.add(MDCConstants.MDC_NAV_CALL_ID, MDC.get(MDCConstants.MDC_NAV_CALL_ID));
+        }
+        if (MDC.get(MDCConstants.MDC_NAV_CONSUMER_ID) != null) {
+            headers.add(MDCConstants.MDC_NAV_CONSUMER_ID, MDC.get(MDCConstants.MDC_NAV_CONSUMER_ID));
+        }
         return headers;
     }
 }

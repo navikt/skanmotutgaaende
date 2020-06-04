@@ -1,11 +1,9 @@
 package no.nav.skanmotutgaaende.lagrefildetaljer;
 
 import no.nav.skanmotutgaaende.domain.Filepair;
-import no.nav.skanmotutgaaende.domain.FilepairWithMetadata;
 import no.nav.skanmotutgaaende.domain.Journalpost;
 import no.nav.skanmotutgaaende.domain.SkanningInfo;
 import no.nav.skanmotutgaaende.domain.Skanningmetadata;
-import no.nav.skanmotutgaaende.lagrefildetaljer.data.DokumentVariant;
 import no.nav.skanmotutgaaende.lagrefildetaljer.data.LagreFildetaljerRequest;
 import no.nav.skanmotutgaaende.lagrefildetaljer.data.Tilleggsopplysning;
 import org.junit.Test;
@@ -14,9 +12,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static no.nav.skanmotutgaaende.lagrefildetaljer.data.Tilleggsopplysning.ENDORSER_NR;
-import static no.nav.skanmotutgaaende.lagrefildetaljer.data.Tilleggsopplysning.FYSISK_POSTBOKS;
-import static no.nav.skanmotutgaaende.lagrefildetaljer.data.Tilleggsopplysning.STREKKODE_POSTBOKS;
+import static no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerRequestMapper.ENDORSERNR_NOKKEL;
+import static no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerRequestMapper.FYSISK_POSTBOKS_NOKKEL;
+import static no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerRequestMapper.STREKKODE_POSTBOKS_NOKKEL;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -31,15 +29,15 @@ public class LagreFildetaljerRequestMapperTest {
     private final String FILNAVN_PDF = "filnavn.pdf";
     private final String FILNAVN_XML = "filnavn.xml";
     private final String ENDORSERNR = "222111NAV456";
-    private final String FYSISK_POSTBOKS_VERDI = "1002";
-    private final String STREKKODE_POSTBOKS_VERDI = "1004";
+    private final String FYSISK_POSTBOKS = "1002";
+    private final String STREKKODE_POSTBOKS = "1004";
     private final byte[] DUMMY_FILE = "dummyfile".getBytes();
 
     private LagreFildetaljerRequestMapper lagreFildetaljerRequestMapper = new LagreFildetaljerRequestMapper();
 
     @Test
     public void shouldMapSkanningmetadataToLagreFildetaljerRequest() {
-        LagreFildetaljerRequest lagreFildetaljerRequest = lagreFildetaljerRequestMapper.mapMetadataToOpprettJournalpostRequest(
+        LagreFildetaljerRequest lagreFildetaljerRequest = lagreFildetaljerRequestMapper.mapMetadataToLagreFildetaljerRequest(
                 Skanningmetadata.builder()
                         .journalpost(Journalpost.builder()
                                 .journalpostId(JOURNALPOSTID)
@@ -50,8 +48,8 @@ public class LagreFildetaljerRequestMapperTest {
                                 .endorsernr(ENDORSERNR)
                                 .build())
                         .skanningInfo(SkanningInfo.builder()
-                                .fysiskPostboks(FYSISK_POSTBOKS_VERDI)
-                                .strekkodePostboks(STREKKODE_POSTBOKS_VERDI)
+                                .fysiskPostboks(FYSISK_POSTBOKS)
+                                .strekkodePostboks(STREKKODE_POSTBOKS)
                                 .build())
                         .build(),
                 Filepair.builder()
@@ -63,9 +61,9 @@ public class LagreFildetaljerRequestMapperTest {
 
         assertEquals(BATCHNAVN, lagreFildetaljerRequest.getBatchnavn());
         assertEquals(MOTTAKSKANAL, lagreFildetaljerRequest.getMottakskanal());
-        assertEquals(FYSISK_POSTBOKS_VERDI, getTillegsopplysningerVerdiFromNokkel(lagreFildetaljerRequest.getTilleggsopplysninger(), FYSISK_POSTBOKS));
-        assertEquals(STREKKODE_POSTBOKS_VERDI, getTillegsopplysningerVerdiFromNokkel(lagreFildetaljerRequest.getTilleggsopplysninger(), STREKKODE_POSTBOKS));
-        assertEquals(ENDORSERNR, getTillegsopplysningerVerdiFromNokkel(lagreFildetaljerRequest.getTilleggsopplysninger(), ENDORSER_NR));
+        assertEquals(FYSISK_POSTBOKS, getTillegsopplysningerVerdiFromNokkel(lagreFildetaljerRequest.getTilleggsopplysninger(), FYSISK_POSTBOKS_NOKKEL));
+        assertEquals(STREKKODE_POSTBOKS, getTillegsopplysningerVerdiFromNokkel(lagreFildetaljerRequest.getTilleggsopplysninger(), STREKKODE_POSTBOKS_NOKKEL));
+        assertEquals(ENDORSERNR, getTillegsopplysningerVerdiFromNokkel(lagreFildetaljerRequest.getTilleggsopplysninger(), ENDORSERNR_NOKKEL));
 
         AtomicInteger pdfCounter = new AtomicInteger();
         AtomicInteger xmlCounter = new AtomicInteger();

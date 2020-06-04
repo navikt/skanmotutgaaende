@@ -2,19 +2,15 @@ package no.nav.skanmotutgaaende.lagrefildetaljer;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotutgaaende.domain.Filepair;
-import no.nav.skanmotutgaaende.domain.FilepairWithMetadata;
 import no.nav.skanmotutgaaende.domain.Journalpost;
-import no.nav.skanmotutgaaende.domain.SkanningInfo;
 import no.nav.skanmotutgaaende.domain.Skanningmetadata;
 import no.nav.skanmotutgaaende.exceptions.functional.AbstractSkanmotutgaaendeFunctionalException;
 import no.nav.skanmotutgaaende.exceptions.technical.AbstractSkanmotutgaaendeTechnicalException;
 import no.nav.skanmotutgaaende.lagrefildetaljer.data.LagreFildetaljerRequest;
 import no.nav.skanmotutgaaende.lagrefildetaljer.data.LagreFildetaljerResponse;
-import no.nav.skanmotutgaaende.utils.Utils;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
-import java.util.Arrays;
 import java.util.Optional;
 
 @Service
@@ -38,7 +34,7 @@ public class LagreFildetaljerService {
         try {
             String jpid = skanningmetadata.get().getJournalpost().getJournalpostId();
             log.info("Skanmotutgaaende lagrer fildetaljer for journalpost, id={}, fil={}, batch={}", jpid, filepair.getName(), batchnavn);
-            LagreFildetaljerRequest request = lagreFildetaljerRequestMapper.mapMetadataToOpprettJournalpostRequest(skanningmetadata.get(), filepair);
+            LagreFildetaljerRequest request = lagreFildetaljerRequestMapper.mapMetadataToLagreFildetaljerRequest(skanningmetadata.get(), filepair);
             LagreFildetaljerResponse response = lagreFildetaljerConsumer.lagreFilDetaljer(request, jpid);
             return Optional.of(response);
 
