@@ -31,6 +31,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerRequestMapper.ENDORSERNR_NOKKEL;
 import static no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerRequestMapper.FYSISK_POSTBOKS_NOKKEL;
 import static no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerRequestMapper.STREKKODE_POSTBOKS_NOKKEL;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -75,8 +76,7 @@ public class LagreFildetaljerIT {
     @Test
     public void shouldLagreFildetaljer() {
         LagreFildetaljerRequest request = createLagreFildetaljerRequest();
-        LagreFildetaljerResponse res = lagrefildetaljerConsumer.lagreFilDetaljer(request, JOURNALPOST_ID);
-        assertEquals(null, res);
+        assertDoesNotThrow(() -> lagrefildetaljerConsumer.lagreFilDetaljer(request, JOURNALPOST_ID));
     }
 
     @Test

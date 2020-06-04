@@ -37,7 +37,7 @@ public class LesFraFilomraadeOgLagreFildetaljer {
     }
 
     //@Scheduled(cron = "0 0 6,7,16,17,21 * * ?")
-    //@Scheduled(initialDelay = 10_000, fixedDelay = 1_800_000) //Kjører hvert 30 min. For tidlig testing
+    @Scheduled(initialDelay = 10_000, fixedDelay = 1_800_000) //Kjører hvert 30 min. For tidlig testing
     public void scheduledJob() {
         lesOgLagreZipfiler();
     }
@@ -74,9 +74,9 @@ public class LesFraFilomraadeOgLagreFildetaljer {
                         lastOppFilpar(filepair, zipName);
                         tearDownMDCforFile();
                     } else {
-                        Optional<LagreFildetaljerResponse> response = lagreFildetaljerService.lagreFildetaljer(skanningmetadata, filepair);
+                        boolean lagringOk = lagreFildetaljerService.lagreFildetaljer(skanningmetadata, filepair);
                         try {
-                            if (response.isEmpty()) {
+                            if (!lagringOk) {
                                 lastOppFilpar(filepair, zipName);
                             }
                         } catch (Exception e) {
@@ -84,7 +84,6 @@ public class LesFraFilomraadeOgLagreFildetaljer {
                             safeToDeleteZipFile.set(false);
                         } finally {
                             tearDownMDCforFile();
-                            cleanUplastOppZipfilTilFeilomrade(zipName);
                         }
                     }
                 });
@@ -92,6 +91,7 @@ public class LesFraFilomraadeOgLagreFildetaljer {
                 if (safeToDeleteZipFile.get()) {
                     filomraadeService.moveZipFile(zipName, "processed");
                 }
+                cleanUpLastOppFilerTilFeilomrade(zipName);
                 tearDownMDCforZip();
             }
         } catch (Exception e) {
@@ -115,7 +115,7 @@ public class LesFraFilomraadeOgLagreFildetaljer {
         filomraadeService.uploadFileToFeilomrade(zipFile, zipName, path);
     }
 
-    private void cleanUplastOppZipfilTilFeilomrade(String zipName) {
+    private void cleanUpLastOppFilerTilFeilomrade(String zipName) {
         if (isFeilomraadeDirty) {
             filomraadeService.cleanDirtyFeilomrade(Utils.removeFileExtensionInFilename(zipName));
         }
