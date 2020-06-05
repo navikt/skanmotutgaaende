@@ -52,7 +52,7 @@ public class LagreFildetaljerConsumer {
     }
 
     @Metrics(value = DOK_METRIC, extraTags = {PROCESS_NAME, "lagreFilDetaljer"}, percentiles = {0.5, 0.95}, histogram = true)
-    public LagreFildetaljerResponse lagreFilDetaljer(LagreFildetaljerRequest lagreFildetaljerRequest, String journalpostId) {
+    public void lagreFilDetaljer(LagreFildetaljerRequest lagreFildetaljerRequest, String journalpostId) {
         try {
             HttpHeaders headers = createHeaders();
             HttpEntity<LagreFildetaljerRequest> requestEntity = new HttpEntity<>(lagreFildetaljerRequest, headers);
@@ -60,7 +60,7 @@ public class LagreFildetaljerConsumer {
             URI uri = UriComponentsBuilder.fromHttpUrl(dokarkivJournalpostUrl)
                     .pathSegment(journalpostId, MOTTA_DOKUMENT_UTGAAENDE_SKANNING_TJENESTE)
                     .build().toUri();
-            return restTemplate.exchange(uri, HttpMethod.PUT, requestEntity, LagreFildetaljerResponse.class)
+            restTemplate.exchange(uri, HttpMethod.PUT, requestEntity, LagreFildetaljerResponse.class)
                     .getBody();
 
         } catch (HttpClientErrorException e) {

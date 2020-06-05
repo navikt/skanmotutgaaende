@@ -2,9 +2,12 @@ package no.nav.skanmotutgaaende;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotutgaaende.domain.Filepair;
+import no.nav.skanmotutgaaende.domain.Journalpost;
 import no.nav.skanmotutgaaende.domain.Skanningmetadata;
+import no.nav.skanmotutgaaende.exceptions.functional.AbstractSkanmotutgaaendeFunctionalException;
 import no.nav.skanmotutgaaende.exceptions.functional.InvalidMetadataException;
 import no.nav.skanmotutgaaende.exceptions.functional.SkanmotutgaaendeUnzipperFunctionalException;
+import no.nav.skanmotutgaaende.exceptions.technical.AbstractSkanmotutgaaendeTechnicalException;
 import no.nav.skanmotutgaaende.exceptions.technical.SkanmotutgaaendeUnzipperTechnicalException;
 import no.nav.skanmotutgaaende.filomraade.FilomraadeService;
 import no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerService;
@@ -37,7 +40,7 @@ public class LesFraFilomraadeOgLagreFildetaljer {
     }
 
     //@Scheduled(cron = "0 0 6,7,16,17,21 * * ?")
-    //@Scheduled(initialDelay = 10_000, fixedDelay = 1_800_000) //Kjører hvert 30 min. For tidlig testing
+    @Scheduled(initialDelay = 10_000, fixedDelay = 1_800_000) //Kjører hvert 30 min. For tidlig testing
     public void scheduledJob() {
         lesOgLagreZipfiler();
     }
@@ -46,7 +49,7 @@ public class LesFraFilomraadeOgLagreFildetaljer {
         List<String> processedZipFiles = new ArrayList<>();
         try {
             List<String> zipFileNames = filomraadeService.getFileNames();
-            log.info("Skanmotutgaaende fant {} zipfiler på sftp server: {}", processedZipFiles.size(), processedZipFiles);
+            log.info("Skanmotutgaaende fant {} zipfiler på sftp server: {}", zipFileNames.size(), zipFileNames);
 
             for (String zipName : zipFileNames) {
                 setUpMDCforZip(zipName);
@@ -74,9 +77,9 @@ public class LesFraFilomraadeOgLagreFildetaljer {
                         lastOppFilpar(filepair, zipName);
                         tearDownMDCforFile();
                     } else {
-                        Optional<LagreFildetaljerResponse> response = lagreFildetaljerService.lagreFildetaljer(skanningmetadata, filepair);
+                        boolean opplastingOk = lagreFilDetaljer(skanningmetadata.get(), filepair);
                         try {
-                            if (response.isEmpty()) {
+                            if (!opplastingOk) {
                                 lastOppFilpar(filepair, zipName);
                             }
                         } catch (Exception e) {
@@ -84,7 +87,6 @@ public class LesFraFilomraadeOgLagreFildetaljer {
                             safeToDeleteZipFile.set(false);
                         } finally {
                             tearDownMDCforFile();
-                            cleanUplastOppZipfilTilFeilomrade(zipName);
                         }
                     }
                 });
@@ -92,6 +94,7 @@ public class LesFraFilomraadeOgLagreFildetaljer {
                 if (safeToDeleteZipFile.get()) {
                     filomraadeService.moveZipFile(zipName, "processed");
                 }
+                cleanUpLastOppFilerTilFeilomrade(zipName);
                 tearDownMDCforZip();
             }
         } catch (Exception e) {
@@ -99,6 +102,22 @@ public class LesFraFilomraadeOgLagreFildetaljer {
         } finally {
             // Feels like a leaky abstraction ...
             filomraadeService.disconnect();
+        }
+    }
+
+    private boolean lagreFilDetaljer(Skanningmetadata skanningmetadata, Filepair filepair) {
+        try {
+            lagreFildetaljerService.lagreFildetaljer(skanningmetadata, filepair);
+            return true;
+        } catch (AbstractSkanmotutgaaendeFunctionalException e) {
+            log.warn("Skanmotutgaaende feilet funksjonelt med lagring av fildetaljer fil={}, batch={}", filepair.getName(), skanningmetadata.getJournalpost().getBatchnavn(), e);
+            return false;
+        } catch (AbstractSkanmotutgaaendeTechnicalException e) {
+            log.warn("Skanmotutgaaende feilet teknisk med lagring av fildetaljer fil={}, batch={}", filepair.getName(), skanningmetadata.getJournalpost().getBatchnavn(), e);
+            return false;
+        } catch (Exception e) {
+            log.warn("Skanmotutgaaende feilet med ukjent feil ved lagring av fildetaljer fil={}, batch={}", filepair.getName(), skanningmetadata.getJournalpost().getBatchnavn(), e);
+            return false;
         }
     }
 
@@ -115,7 +134,7 @@ public class LesFraFilomraadeOgLagreFildetaljer {
         filomraadeService.uploadFileToFeilomrade(zipFile, zipName, path);
     }
 
-    private void cleanUplastOppZipfilTilFeilomrade(String zipName) {
+    private void cleanUpLastOppFilerTilFeilomrade(String zipName) {
         if (isFeilomraadeDirty) {
             filomraadeService.cleanDirtyFeilomrade(Utils.removeFileExtensionInFilename(zipName));
         }
