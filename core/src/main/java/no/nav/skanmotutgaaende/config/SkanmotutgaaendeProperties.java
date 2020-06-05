@@ -19,14 +19,11 @@ public class SkanmotutgaaendeProperties {
     @NotNull
     private String dokarkivjournalposturl;
 
-    @NotNull
-    private FilomraadeProperties filomraade;
+    private final FilomraadeProperties filomraade = new FilomraadeProperties();
 
-    @NotNull
-    private SftpProperties sftp;
+    private final SftpProperties sftp = new SftpProperties();
 
-    @NotNull
-    private ServiceUserProperties serviceuser;
+    private final ServiceUserProperties serviceuser = new ServiceUserProperties();
 
     @Getter
     @Setter
