@@ -1,7 +1,6 @@
 package no.nav.skanmotutgaaende.itest;
 
-import no.nav.skanmotutgaaende.config.properties.SkanmotutgaaendeProperties;
-import no.nav.skanmotutgaaende.exceptions.functional.SkanmotutgaaendeSftpFunctionalException;
+import no.nav.skanmotutgaaende.config.SkanmotutgaaendeProperties;
 import no.nav.skanmotutgaaende.exceptions.technical.SkanmotutgaaendeSftpTechnicalException;
 import no.nav.skanmotutgaaende.itest.config.TestConfig;
 import no.nav.skanmotutgaaende.sftp.Sftp;
