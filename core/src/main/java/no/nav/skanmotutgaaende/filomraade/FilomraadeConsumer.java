@@ -1,7 +1,7 @@
 package no.nav.skanmotutgaaende.filomraade;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.skanmotutgaaende.config.properties.SkanmotutgaaendeProperties;
+import no.nav.skanmotutgaaende.config.SkanmotutgaaendeProperties;
 import no.nav.skanmotutgaaende.exceptions.functional.LesZipFilFuntionalException;
 import no.nav.skanmotutgaaende.sftp.Sftp;
 import org.springframework.beans.factory.annotation.Autowired;

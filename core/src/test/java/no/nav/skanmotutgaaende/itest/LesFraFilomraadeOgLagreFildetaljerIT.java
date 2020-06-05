@@ -1,13 +1,12 @@
 package no.nav.skanmotutgaaende.itest;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
-import no.nav.skanmotutgaaende.config.properties.SkanmotutgaaendeProperties;
+import no.nav.skanmotutgaaende.config.SkanmotutgaaendeProperties;
 import no.nav.skanmotutgaaende.filomraade.FilomraadeConsumer;
 import no.nav.skanmotutgaaende.filomraade.FilomraadeService;
 import no.nav.skanmotutgaaende.itest.config.TestConfig;
 import no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerConsumer;
 import no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerService;
-import no.nav.skanmotutgaaende.lagrefildetaljer.data.LagreFildetaljerResponse;
 import no.nav.skanmotutgaaende.LesFraFilomraadeOgLagreFildetaljer;
 import no.nav.skanmotutgaaende.sftp.Sftp;
 import org.apache.sshd.server.SshServer;
