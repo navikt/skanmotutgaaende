@@ -38,13 +38,13 @@ public class LagreFildetaljerService {
             return true;
 
         } catch (AbstractSkanmotutgaaendeFunctionalException e) {
-            log.warn("Skanmotutgaaende feilet funksjonelt med oppretting av journalpost fil={}, batch={}", filepair.getName(), batchnavn, e);
+            log.warn("Skanmotutgaaende feilet funksjonelt med lagring av fildetaljer fil={}, batch={}", filepair.getName(), batchnavn, e);
             return false;
         } catch (AbstractSkanmotutgaaendeTechnicalException e) {
-            log.warn("Skanmotutgaaende feilet teknisk med  oppretting av journalpost fil={}, batch={}", filepair.getName(), batchnavn, e);
+            log.warn("Skanmotutgaaende feilet teknisk med lagring av fildetaljer fil={}, batch={}", filepair.getName(), batchnavn, e);
             return false;
         } catch (Exception e) {
-            log.warn("Skanmotutgaaende feilet med ukjent feil ved oppretting av journalpost fil={}, batch={}", filepair.getName(), batchnavn, e);
+            log.warn("Skanmotutgaaende feilet med ukjent feil ved lagring av fildetaljer fil={}, batch={}", filepair.getName(), batchnavn, e);
             return false;
         }
     }
