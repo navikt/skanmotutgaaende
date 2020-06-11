@@ -19,6 +19,9 @@ public class SkanmotutgaaendeProperties {
     @NotNull
     private String dokarkivjournalposturl;
 
+    @NotNull
+    private String schedule;
+
     private final FilomraadeProperties filomraade = new FilomraadeProperties();
 
     private final SftpProperties sftp = new SftpProperties();

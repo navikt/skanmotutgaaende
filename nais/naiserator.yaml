@@ -9,6 +9,8 @@ spec:
   env:
     - name: SKANMOTUTGAAENDE_DOKARKIVJOURNALPOSTURL
       value: {{ SKANMOTUTGAAENDE_DOKARKIVJOURNALPOSTURL }}
+    - name: SKANMOTUTGAAENDE_SCHEDULE
+      value: {{ SKANMOTUTGAAENDE_SCHEDULE }}
     - name: SKANMOTUTGAAENDE_SFTP_PRIVATEKEY
       value: /var/run/secrets/nais.io/keys/privatekey
     - name: SKANMOTUTGAAENDE_SFTP_HOSTKEY

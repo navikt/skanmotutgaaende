@@ -39,7 +39,7 @@ public class LesFraFilomraadeOgLagreFildetaljer {
         this.lagreFildetaljerService = lagreFildetaljerService;
     }
 
-    @Scheduled(cron = "0 0/30 8-16 * *  MON-FRI")
+    @Scheduled(cron = "${skanmotutgaaende.schedule}")
     public void scheduledJob() {
         lesOgLagreZipfiler();
     }
@@ -73,21 +73,16 @@ public class LesFraFilomraadeOgLagreFildetaljer {
 
                     Optional<Skanningmetadata> skanningmetadata = extractMetadata(filepair, zipName);
                     if (skanningmetadata.isEmpty()) {
-                        lastOppFilpar(filepair, zipName);
-                        tearDownMDCforFile();
+                        boolean opplastingOk = lastOppFilpar(filepair, zipName);
+                        safeToDeleteZipFile.set(opplastingOk && safeToDeleteZipFile.get());
                     } else {
-                        boolean opplastingOk = lagreFilDetaljer(skanningmetadata.get(), filepair);
-                        try {
-                            if (!opplastingOk) {
-                                lastOppFilpar(filepair, zipName);
-                            }
-                        } catch (Exception e) {
-                            log.error("Skanmotutgaaende feilet ved opplasting til feilområde, fil={} feilmelding={}", filepair.getName(), zipName, e.getMessage(), e);
-                            safeToDeleteZipFile.set(false);
-                        } finally {
-                            tearDownMDCforFile();
+                        boolean lagringOk = lagreFilDetaljer(skanningmetadata.get(), filepair);
+                        if (!lagringOk) {
+                            boolean opplastingOk = lastOppFilpar(filepair, zipName);
+                            safeToDeleteZipFile.set(opplastingOk && safeToDeleteZipFile.get());
                         }
                     }
+                    tearDownMDCforFile();
                 });
 
                 if (safeToDeleteZipFile.get()) {
@@ -120,12 +115,18 @@ public class LesFraFilomraadeOgLagreFildetaljer {
         }
     }
 
-    private void lastOppFilpar(Filepair filepair, String zipName) {
-        log.info("Skanmotutgaaende laster opp filpar til feilområde, fil={} zipfil={}", filepair.getName(), zipName);
-        String path = Utils.removeFileExtensionInFilename(zipName);
-        filomraadeService.uploadFileToFeilomrade(filepair.getPdf(), filepair.getName() + ".pdf", path);
-        filomraadeService.uploadFileToFeilomrade(filepair.getXml(), filepair.getName() + ".xml", path);
-        isFeilomraadeDirty = true;
+    private boolean lastOppFilpar(Filepair filepair, String zipName) {
+        try {
+            log.info("Skanmotutgaaende laster opp filpar til feilområde, fil={} zipfil={}", filepair.getName(), zipName);
+            String path = Utils.removeFileExtensionInFilename(zipName);
+            filomraadeService.uploadFileToFeilomrade(filepair.getPdf(), filepair.getName() + ".pdf", path);
+            filomraadeService.uploadFileToFeilomrade(filepair.getXml(), filepair.getName() + ".xml", path);
+            isFeilomraadeDirty = true;
+            return true;
+        } catch (Exception e) {
+            log.error("Skanmotutgaaende feilet ved opplasting til feilområde, fil={} feilmelding={}", filepair.getName(), zipName, e.getMessage(), e);
+            return false;
+        }
     }
 
     private void lastOppZipfilTilFeilomrade(byte[] zipFile, String zipName) {

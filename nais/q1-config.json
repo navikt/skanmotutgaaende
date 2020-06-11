@@ -4,6 +4,7 @@
   "SKANMOTUTGAAENDE_VAULT": "/kv/preprod/fss/skanmotutgaaende/q1",
   "SFTP_KEYS": "kv/preprod/fss/skanmotutgaaende/keys",
   "SKANMOTUTGAAENDE_DOKARKIVJOURNALPOSTURL": "https://dokarkiv-q1.nais.preprod.local/rest/intern/journalpostapi/v1/journalpost",
+  "SKANMOTUTGAAENDE_SCHEDULE": "0 0/5 * * * *",
   "INGRESSES": [
     "https://skanmotutgaaende-q1.nais.preprod.local"
   ]
