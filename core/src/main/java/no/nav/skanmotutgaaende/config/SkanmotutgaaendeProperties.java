@@ -37,9 +37,6 @@ public class SkanmotutgaaendeProperties {
         private String inngaaendemappe;
 
         @NotEmpty
-        private String utgaaendemappe;
-
-        @NotEmpty
         private String feilmappe;
     }
 
