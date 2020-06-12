@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import java.util.Date;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerRequestMapper.ENDORSERNR_NOKKEL;
@@ -17,6 +18,7 @@ import static no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerRequestMa
 import static no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerRequestMapper.STREKKODE_POSTBOKS_NOKKEL;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class LagreFildetaljerRequestMapperTest {
@@ -87,6 +89,35 @@ public class LagreFildetaljerRequestMapperTest {
         });
         assertEquals(1, pdfCounter.get());
         assertEquals(1, xmlCounter.get());
+    }
+
+    @Test
+    public void shouldFilterEmptyTilleggsopplysninger() {
+        LagreFildetaljerRequest lagreFildetaljerRequest = lagreFildetaljerRequestMapper.mapMetadataToLagreFildetaljerRequest(
+                Skanningmetadata.builder()
+                        .journalpost(Journalpost.builder()
+                                .journalpostId(JOURNALPOSTID)
+                                .mottakskanal(MOTTAKSKANAL)
+                                .datoMottatt(new Date())
+                                .batchnavn(BATCHNAVN)
+                                .filnavn(FILNAVN_I_XML)
+                                .endorsernr(null)
+                                .build())
+                        .skanningInfo(SkanningInfo.builder()
+                                .fysiskPostboks("")
+                                .strekkodePostboks(STREKKODE_POSTBOKS)
+                                .build())
+                        .build(),
+                Filepair.builder()
+                        .name(FILNAVN)
+                        .pdf(DUMMY_FILE)
+                        .xml(DUMMY_FILE)
+                        .build()
+        );
+        assertEquals(1, lagreFildetaljerRequest.getTilleggsopplysninger().size());
+        assertEquals(STREKKODE_POSTBOKS, getTillegsopplysningerVerdiFromNokkel(lagreFildetaljerRequest.getTilleggsopplysninger(), "strekkodePostboks"));
+        assertThrows(NoSuchElementException.class, () -> getTillegsopplysningerVerdiFromNokkel(lagreFildetaljerRequest.getTilleggsopplysninger(), "endorsernr"));
+        assertThrows(NoSuchElementException.class, () -> getTillegsopplysningerVerdiFromNokkel(lagreFildetaljerRequest.getTilleggsopplysninger(), "fysiskPostboks"));
     }
 
     private String getTillegsopplysningerVerdiFromNokkel(List<Tilleggsopplysning> tilleggsopplysninger, String nokkel) {
