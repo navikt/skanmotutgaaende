@@ -17,6 +17,6 @@ public class SkanningInfo {
     @XmlElement(required = false, name = "fysiskPostboks")
     private String fysiskPostboks;
 
-    @XmlElement(required = false, name = "strekkodePostboks")
+    @XmlElement(required = true, name = "strekkodePostboks")
     private String strekkodePostboks;
 }

@@ -10,6 +10,7 @@ import no.nav.skanmotutgaaende.lagrefildetaljer.data.Tilleggsopplysning;
 
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class LagreFildetaljerRequestMapper {
 
@@ -37,7 +38,7 @@ public class LagreFildetaljerRequestMapper {
                 new Tilleggsopplysning(STREKKODE_POSTBOKS_NOKKEL, skanningInfo.getStrekkodePostboks()),
                 new Tilleggsopplysning(ENDORSERNR_NOKKEL, journalpost.getEndorsernr()),
                 new Tilleggsopplysning(ANTALL_SIDER_NOKKEL, journalpost.getAntallSider())
-        );
+        ).stream().filter(tilleggsopplysning -> notNullOrEmpty(tilleggsopplysning.getVerdi())).collect(Collectors.toList());
 
         DokumentVariant pdf = DokumentVariant.builder()
                 .filtype(PDFA)
@@ -61,6 +62,10 @@ public class LagreFildetaljerRequestMapper {
                 .batchnavn(batchnavn)
                 .dokumentvarianter(List.of(pdf, xml))
                 .build();
+    }
+
+    private boolean notNullOrEmpty(String string) {
+        return string != null && !string.isBlank();
     }
 
     private static String appendFileType(String filename, String filetype) {

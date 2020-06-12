@@ -32,11 +32,6 @@ public class SkanningmetadataValidatorTest {
     }
 
     @Test
-    public void shouldNotValidateInvalidFileName() {
-        assertThrows(InvalidMetadataException.class, () -> skanningmetadataValidator.validate(getSkanningmetadata(JPID_VALID, FILE_NAME_INVALID)));
-    }
-
-    @Test
     public void shouldNotValidateMissingSkanningInfo() {
         assertThrows(InvalidMetadataException.class, () ->
                 skanningmetadataValidator.validate(Skanningmetadata.builder()
