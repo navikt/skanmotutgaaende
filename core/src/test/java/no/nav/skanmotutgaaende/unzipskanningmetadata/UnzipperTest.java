@@ -4,7 +4,6 @@ import no.nav.skanmotutgaaende.domain.Filepair;
 import no.nav.skanmotutgaaende.domain.FilepairWithMetadata;
 import no.nav.skanmotutgaaende.domain.Journalpost;
 import no.nav.skanmotutgaaende.domain.SkanningInfo;
-import no.nav.skanmotutgaaende.exceptions.functional.InvalidMetadataException;
 import no.nav.skanmotutgaaende.exceptions.technical.SkanmotutgaaendeUnzipperTechnicalException;
 import org.junit.Test;
 
@@ -24,7 +23,6 @@ public class UnzipperTest {
 
     private final String ZIP_FILE_PATH = "src/test/resources/__files/xml_pdf_pairs/xml_pdf_pairs_testdata.zip";
     private final String BROKEN_ZIP_FILE_PATH = "src/test/resources/__files/xml_pdf_pairs/xml_pdf_pairs_broken_testdata.zip";
-    private final String INVALID_ZIP_FILE_PATH = "src/test/resources/__files/xml_pdf_pairs/xml_pdf_pairs_invalid_testdata.zip";
     private final String PDF_PATH = "src/test/resources/__files/data_002.pdf";
     private final String XML_PATH = "src/test/resources/__files/data_002.xml";
 
@@ -65,15 +63,6 @@ public class UnzipperTest {
     public void shouldThrowExceptionIfUnableToReadMetadata() {
         File zip = Paths.get(BROKEN_ZIP_FILE_PATH).toFile();
         assertThrows(SkanmotutgaaendeUnzipperTechnicalException.class, () ->
-                Unzipper.unzipXmlPdf(zip).stream().map(filepair ->
-                        UnzipSkanningmetadataUtils.extractMetadata(filepair))
-                        .collect(Collectors.toList()));
-    }
-
-    @Test
-    public void shouldThrowExceptionIfInvalidMetadata() {
-        File zip = Paths.get(INVALID_ZIP_FILE_PATH).toFile();
-        assertThrows(InvalidMetadataException.class, () ->
                 Unzipper.unzipXmlPdf(zip).stream().map(filepair ->
                         UnzipSkanningmetadataUtils.extractMetadata(filepair))
                         .collect(Collectors.toList()));
