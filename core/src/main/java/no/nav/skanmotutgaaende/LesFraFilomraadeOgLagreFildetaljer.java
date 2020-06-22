@@ -32,16 +32,13 @@ public class LesFraFilomraadeOgLagreFildetaljer {
 
     private final FilomraadeService filomraadeService;
     private final LagreFildetaljerService lagreFildetaljerService;
-    private final DokCounter dokCounter;
 
     private boolean isFeilomraadeDirty = false;
 
     public LesFraFilomraadeOgLagreFildetaljer(FilomraadeService filomraadeService,
-                                              LagreFildetaljerService lagreFildetaljerService,
-                                              DokCounter dokCounter) {
+                                              LagreFildetaljerService lagreFildetaljerService) {
         this.filomraadeService = filomraadeService;
         this.lagreFildetaljerService = lagreFildetaljerService;
-        this.dokCounter = dokCounter;
     }
 
     @Scheduled(cron = "${skanmotutgaaende.schedule}")
@@ -68,7 +65,7 @@ public class LesFraFilomraadeOgLagreFildetaljer {
                     filepairList = Unzipper.unzipXmlPdf(zipFile);
                 } catch (Exception e) {
                     log.error("Skanmotutgaaende klarte ikke lese zipfil {}", zipName, e);
-                    dokCounter.incrementError(e);
+                    DokCounter.incrementError(e);
                     if(zipFile != null){
                         processedZipFiles.add(zipName);
                         lastOppZipfilTilFeilomrade(zipFile, zipName);
@@ -98,7 +95,7 @@ public class LesFraFilomraadeOgLagreFildetaljer {
                     try {
                         filomraadeService.moveZipFile(zipName, "processed");
                     } catch(Exception e){
-                        dokCounter.incrementError(e);
+                        DokCounter.incrementError(e);
                     }
                 }
                 cleanUpLastOppFilerTilFeilomrade(zipName);
@@ -106,7 +103,7 @@ public class LesFraFilomraadeOgLagreFildetaljer {
             }
         } catch (Exception e) {
             log.error("Skanmotutgaaende ukjent feil oppstod i lesOgLagreZipfiler, feilmelding={}", e.getMessage(), e);
-            dokCounter.incrementError(e);
+            DokCounter.incrementError(e);
         } finally {
             // Feels like a leaky abstraction ...
             filomraadeService.disconnect();
@@ -119,15 +116,15 @@ public class LesFraFilomraadeOgLagreFildetaljer {
             return true;
         } catch (AbstractSkanmotutgaaendeFunctionalException e) {
             log.warn("Skanmotutgaaende feilet funksjonelt med lagring av fildetaljer fil={}, batch={}", filepair.getName(), skanningmetadata.getJournalpost().getBatchnavn(), e);
-            dokCounter.incrementError(e);
+            DokCounter.incrementError(e);
             return false;
         } catch (AbstractSkanmotutgaaendeTechnicalException e) {
             log.warn("Skanmotutgaaende feilet teknisk med lagring av fildetaljer fil={}, batch={}", filepair.getName(), skanningmetadata.getJournalpost().getBatchnavn(), e);
-            dokCounter.incrementError(e);
+            DokCounter.incrementError(e);
             return false;
         } catch (Exception e) {
             log.warn("Skanmotutgaaende feilet med ukjent feil ved lagring av fildetaljer fil={}, batch={}", filepair.getName(), skanningmetadata.getJournalpost().getBatchnavn(), e);
-            dokCounter.incrementError(e);
+            DokCounter.incrementError(e);
             return false;
         }
     }
@@ -142,7 +139,7 @@ public class LesFraFilomraadeOgLagreFildetaljer {
             return true;
         } catch (Exception e) {
             log.error("Skanmotutgaaende feilet ved opplasting til feilområde, fil={} feilmelding={}", filepair.getName(), zipName, e.getMessage(), e);
-            dokCounter.incrementError(e);
+            DokCounter.incrementError(e);
             return false;
         }
     }
@@ -157,7 +154,7 @@ public class LesFraFilomraadeOgLagreFildetaljer {
             try{
                 filomraadeService.cleanDirtyFeilomrade(Utils.removeFileExtensionInFilename(zipName));
             } catch(Exception e) {
-                dokCounter.incrementError(e);
+                DokCounter.incrementError(e);
             }
         }
     }
@@ -172,15 +169,15 @@ public class LesFraFilomraadeOgLagreFildetaljer {
             return Optional.of(UnzipSkanningmetadataUtils.bytesToSkanningmetadata(filepair.getXml()));
         } catch (InvalidMetadataException e) {
             log.warn("Skanningmetadata hadde ugyldige verdier for fil {}. Skanmotutgaaende klarte ikke unmarshalle.", filepair.getName(), e);
-            dokCounter.incrementError(e);
+            DokCounter.incrementError(e);
             return Optional.empty();
         } catch (SkanmotutgaaendeUnzipperFunctionalException e) {
             log.warn("Kunne ikke hente metadata fra {}, feilmelding={}", filepair.getName(), e.getMessage(), e);
-            dokCounter.incrementError(e);
+            DokCounter.incrementError(e);
             return Optional.empty();
         } catch (SkanmotutgaaendeUnzipperTechnicalException e) {
             log.error("Teknisk feil oppsto ved deserialisering av {}, feilmelding={}, cause={}", filepair.getName(), e.getMessage(), e.getCause().getMessage(), e);
-            dokCounter.incrementError(e);
+            DokCounter.incrementError(e);
             return Optional.empty();
         }
     }
@@ -208,7 +205,7 @@ public class LesFraFilomraadeOgLagreFildetaljer {
         final String FYSISKPOSTBOKS = "fysiskPostboks";
         final String EMPTY = "empty";
 
-        dokCounter.incrementCounter(Map.of(
+        DokCounter.incrementCounter(Map.of(
                 STREKKODEPOSTBOKS, Optional.ofNullable(skanningmetadata)
                         .map(Skanningmetadata::getSkanningInfo)
                         .map(SkanningInfo::getStrekkodePostboks)

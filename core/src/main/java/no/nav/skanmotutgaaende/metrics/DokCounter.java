@@ -10,34 +10,34 @@ import java.util.Map;
 
 @Component
 public class DokCounter {
-    private final String DOK_SKANMOTUTGAAENDE = "dok_skanmotutgaaende_";
-    private final String TOTAL = "_total";
-    private final String EXCEPTION = "exception";
-    private final String ERROR_TYPE = "error_type";
-    private final String EXCEPTION_NAME = "exception_name";
-    private final String FUNCTIONAL_ERROR = "functional";
-    private final String TECHNICAL_ERROR = "technical";
-    private final String DOMAIN = "domain";
-    private final String UTGAAENDE = "utgaaende";
+    private static final String DOK_SKANMOTUTGAAENDE = "dok_skanmotutgaaende_";
+    private static final String TOTAL = "_total";
+    private static final String EXCEPTION = "exception";
+    private static final String ERROR_TYPE = "error_type";
+    private static final String EXCEPTION_NAME = "exception_name";
+    private static final String FUNCTIONAL_ERROR = "functional";
+    private static final String TECHNICAL_ERROR = "technical";
+    private static final String DOMAIN = "domain";
+    private static final String UTGAAENDE = "utgaaende";
 
-    private final MeterRegistry meterRegistry;
+    private static MeterRegistry meterRegistry;
     @Inject
     public DokCounter(MeterRegistry meterRegistry){
-        this.meterRegistry = meterRegistry;
+        DokCounter.meterRegistry = meterRegistry;
     }
 
-    public void incrementCounter(Map<String, String> metadata){
-        metadata.forEach(this::incrementCounter);
+    public static void incrementCounter(Map<String, String> metadata){
+        metadata.forEach(DokCounter::incrementCounter);
     }
 
-    private void incrementCounter(String key, String value) {
+    private static void incrementCounter(String key, String value) {
         Counter.builder(DOK_SKANMOTUTGAAENDE + key + TOTAL)
                 .tags(key, value)
                 .register(meterRegistry)
                 .increment();
     }
 
-    public void incrementError(Throwable throwable){
+    public static void incrementError(Throwable throwable){
         Counter.builder(DOK_SKANMOTUTGAAENDE + EXCEPTION)
                 .tags(ERROR_TYPE, isFunctionalException(throwable) ? FUNCTIONAL_ERROR : TECHNICAL_ERROR)
                 .tags(EXCEPTION_NAME, throwable.getClass().getSimpleName())
@@ -46,11 +46,11 @@ public class DokCounter {
                 .increment();
     }
 
-    private boolean isFunctionalException(Throwable e) {
+    private static boolean isFunctionalException(Throwable e) {
         return e instanceof AbstractSkanmotutgaaendeFunctionalException;
     }
 
-    private boolean isEmptyString(String string) {
+    private static boolean isEmptyString(String string) {
         return string == null || string.isBlank();
     }
 }

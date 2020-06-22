@@ -9,7 +9,6 @@ import no.nav.skanmotutgaaende.itest.config.TestConfig;
 import no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerConsumer;
 import no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerService;
 import no.nav.skanmotutgaaende.LesFraFilomraadeOgLagreFildetaljer;
-import no.nav.skanmotutgaaende.metrics.DokCounter;
 import no.nav.skanmotutgaaende.sftp.Sftp;
 import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.config.keys.AuthorizedKeysAuthenticator;
@@ -79,14 +78,12 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
     private int PORT = 2222;
     private SshServer sshd = SshServer.setUpDefaultServer();
     private Sftp sftp;
-    private DokCounter dokCounter;
 
     @Autowired
     SkanmotutgaaendeProperties skanmotutgaaendeProperties;
 
     @BeforeAll
     void startSftpServer() throws IOException {
-        dokCounter = new DokCounter(new SimpleMeterRegistry());
         sshd.setPort(PORT);
         sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider(Path.of("src/test/resources/sftp/itest.ser")));
         sshd.setCommandFactory(new ScpCommandFactory());
@@ -106,7 +103,7 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
         sftp = new Sftp(skanmotutgaaendeProperties);
         filomraadeService = Mockito.spy(new FilomraadeService(new FilomraadeConsumer(sftp, skanmotutgaaendeProperties)));
         lagreFildetaljerService = new LagreFildetaljerService(new LagreFildetaljerConsumer(new RestTemplateBuilder(), skanmotutgaaendeProperties));
-        lesFraFilomraadeOgLagreFildetaljer = new LesFraFilomraadeOgLagreFildetaljer(filomraadeService, lagreFildetaljerService, dokCounter);
+        lesFraFilomraadeOgLagreFildetaljer = new LesFraFilomraadeOgLagreFildetaljer(filomraadeService, lagreFildetaljerService);
         setUpStubs();
         cleanFolder(SKANMOTUTGAAENDE_PATH);
         cleanFolder(SKANMOTUTGAAENDE_FEIL_PATH);
