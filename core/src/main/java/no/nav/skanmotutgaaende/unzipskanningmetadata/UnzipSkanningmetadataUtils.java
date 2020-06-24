@@ -6,7 +6,6 @@ import no.nav.skanmotutgaaende.domain.FilepairWithMetadata;
 import no.nav.skanmotutgaaende.domain.Skanningmetadata;
 import no.nav.skanmotutgaaende.exceptions.functional.SkanmotutgaaendeUnzipperFunctionalException;
 import no.nav.skanmotutgaaende.exceptions.technical.SkanmotutgaaendeUnzipperTechnicalException;
-import no.nav.skanmotutgaaende.utils.Utils;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -48,8 +47,6 @@ public class UnzipSkanningmetadataUtils {
             Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 
             Skanningmetadata skanningmetadata = (Skanningmetadata) jaxbUnmarshaller.unmarshal(new StringReader(xmlString));
-
-            skanningmetadata.verifyFields();
 
             return skanningmetadata;
         } catch (UnsupportedEncodingException | JAXBException e) {

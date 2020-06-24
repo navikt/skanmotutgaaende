@@ -1,6 +1,7 @@
 package no.nav.skanmotutgaaende.itest;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import no.nav.skanmotutgaaende.config.SkanmotutgaaendeProperties;
 import no.nav.skanmotutgaaende.filomraade.FilomraadeConsumer;
 import no.nav.skanmotutgaaende.filomraade.FilomraadeService;
@@ -21,6 +22,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -48,9 +50,10 @@ import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @ExtendWith(SpringExtension.class)
@@ -98,7 +101,7 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
     @BeforeEach
     void setUpServices() throws IOException {
         sftp = new Sftp(skanmotutgaaendeProperties);
-        filomraadeService = new FilomraadeService(new FilomraadeConsumer(sftp, skanmotutgaaendeProperties));
+        filomraadeService = Mockito.spy(new FilomraadeService(new FilomraadeConsumer(sftp, skanmotutgaaendeProperties)));
         lagreFildetaljerService = new LagreFildetaljerService(new LagreFildetaljerConsumer(new RestTemplateBuilder(), skanmotutgaaendeProperties));
         lesFraFilomraadeOgLagreFildetaljer = new LesFraFilomraadeOgLagreFildetaljer(filomraadeService, lagreFildetaljerService);
         setUpStubs();
@@ -125,7 +128,8 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
         copyFileToSkanmotutgaaendeFolder(HAPPY_ZIP_PATH);
 
         assertDoesNotThrow(() -> lesFraFilomraadeOgLagreFildetaljer.lesOgLagreZipfiler());
-        verify(exactly(4), putRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
+        Mockito.verify(filomraadeService, Mockito.times(2)).uploadFileToFeilomrade(any(), any(), any());
+        verify(exactly(3), putRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
     }
 
     @Test
@@ -135,6 +139,7 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
 
         assertFalse(movedFile.exists());
         lesFraFilomraadeOgLagreFildetaljer.lesOgLagreZipfiler();
+        Mockito.verify(filomraadeService, Mockito.times(2)).uploadFileToFeilomrade(any(), any(), any());
         assertTrue(movedFile.exists());
     }
 
@@ -146,7 +151,7 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
 
         lesFraFilomraadeOgLagreFildetaljer.lesOgLagreZipfiler();
 
-        assertEquals(2, new File("src/test/resources/inbound/SKANMOTUTGAAENDE_FEIL/xml_pdf_pairs_testdata").listFiles().length);
+        Mockito.verify(filomraadeService, Mockito.times(4)).uploadFileToFeilomrade(any(), any(), eq("xml_pdf_pairs_testdata"));
 
         sftp.disconnect();
     }

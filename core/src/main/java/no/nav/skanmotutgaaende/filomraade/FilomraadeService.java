@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.List;
 
 @Slf4j
@@ -37,6 +38,7 @@ public class FilomraadeService {
             filomraadeConsumer.cleanDirtyFeilomrade(folderName);
         } catch (Exception e) {
             log.warn("Skanmotutgaaende klarte ikke bytte navn på mappe {}", folderName);
+            throw e;
         }
     }
 
@@ -65,15 +67,16 @@ public class FilomraadeService {
             filomraadeConsumer.moveFile(from, to, newFilename);
         } catch (Exception e) {
             log.error("Skanmotutgaaende klarte ikke flytte fil {} til {}/{}", from, to, newFilename, e);
+            throw e;
         }
     }
 
-    public byte[] getZipFile(String fileName) {
+    public byte[] getZipFile(String fileName) throws IOException {
         try {
             return filomraadeConsumer.getFile(fileName);
         } catch (Exception e) {
             log.error("Skanmotutgaaende klarte ikke hente filen {}", fileName, e);
-            return null;
+            throw e;
         }
     }
 }

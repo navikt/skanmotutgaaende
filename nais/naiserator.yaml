@@ -26,6 +26,9 @@ spec:
     initialDelay: 30
     failureThreshold: 10
   port: 8080
+  prometheus:
+    enabled: true
+    path: /actuator/prometheus
   readiness:
     path: /isReady
     port: 8080
