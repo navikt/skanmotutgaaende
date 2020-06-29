@@ -131,7 +131,7 @@ public class LesFraFilomraadeOgLagreFildetaljer {
 
     private boolean lastOppFilpar(Filepair filepair, String zipName) {
         try {
-            log.info("Skanmotutgaaende laster opp filpar til feilområde, fil={} zipfil={}", filepair.getName(), zipName);
+            log.warn("Skanmotutgaaende laster opp filpar til feilområde, fil={} zipfil={}", filepair.getName(), zipName);
             String path = Utils.removeFileExtensionInFilename(zipName);
             filomraadeService.uploadFileToFeilomrade(filepair.getPdf(), filepair.getName() + ".pdf", path);
             filomraadeService.uploadFileToFeilomrade(filepair.getXml(), filepair.getName() + ".xml", path);

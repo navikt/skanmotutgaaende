@@ -33,8 +33,6 @@ import static no.nav.skanmotutgaaende.metrics.MetricLabels.PROCESS_NAME;
 @Component
 public class LagreFildetaljerConsumer {
 
-    public static final String CORRELATION_HEADER = "X-Correlation-Id";
-    public static final String CONSUMER_ID = "skanmotutgaaende";
     private final String MOTTA_DOKUMENT_UTGAAENDE_SKANNING_TJENESTE = "mottaDokumentUtgaaendeSkanning";
 
     private final RestTemplate restTemplate;
@@ -71,12 +69,8 @@ public class LagreFildetaljerConsumer {
                 throw new MottaDokumentUtgaaendeSkanningTillaterIkkeTilknyttingFunctionalException(String.format("mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode=%s. Feilmelding=%s", e
                         .getStatusCode(), e.getMessage()), e);
             } else {
-                log.warn("logtest 1 - mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode={}. Feilmelding={}", e.getStatusCode(), e.getMessage(), e);
-                log.warn(e.getMessage(), e);
-                log.warn("logtest 3 - mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode={}. Feilmelding={}", e.getStatusCode(), e.toString(), e);
-                throw new MottaDokumentUtgaaendeSkanningFunctionalException(e.getMessage(), e);
-                //throw new MottaDokumentUtgaaendeSkanningFunctionalException(String.format("mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode=%s. Feilmelding=%s", e
-                //        .getStatusCode(), e.getMessage()), e);
+                throw new MottaDokumentUtgaaendeSkanningFunctionalException(String.format("mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode=%s. Feilmelding=%s", e
+                        .getStatusCode(), e.getMessage()), e);
             }
         } catch (HttpServerErrorException e) {
             throw new MottaDokumentUtgaaendeSkanningTechnicalException(String.format("mottaDokumentUtgaaendeSkanning feilet teknisk med statusKode=%s. Feilmelding=%s", e
