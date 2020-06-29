@@ -131,7 +131,7 @@ public class LesFraFilomraadeOgLagreFildetaljer {
 
     private boolean lastOppFilpar(Filepair filepair, String zipName) {
         try {
-            log.info("Skanmotutgaaende laster opp filpar til feilområde, fil={} zipfil={}", filepair.getName(), zipName);
+            log.warn("Skanmotutgaaende laster opp filpar til feilområde, fil={} zipfil={}", filepair.getName(), zipName);
             String path = Utils.removeFileExtensionInFilename(zipName);
             filomraadeService.uploadFileToFeilomrade(filepair.getPdf(), filepair.getName() + ".pdf", path);
             filomraadeService.uploadFileToFeilomrade(filepair.getXml(), filepair.getName() + ".xml", path);
@@ -168,7 +168,7 @@ public class LesFraFilomraadeOgLagreFildetaljer {
 
             return Optional.of(UnzipSkanningmetadataUtils.bytesToSkanningmetadata(filepair.getXml()));
         } catch (InvalidMetadataException e) {
-            log.warn("Skanningmetadata hadde ugyldige verdier for fil {}. Skanmotutgaaende klarte ikke unmarshalle.", filepair.getName(), e);
+            log.error("Skanningmetadata hadde ugyldige verdier for fil {}. Skanmotutgaaende klarte ikke unmarshalle.", filepair.getName(), e);
             DokCounter.incrementError(e);
             return Optional.empty();
         } catch (SkanmotutgaaendeUnzipperFunctionalException e) {
