@@ -1,6 +1,5 @@
 package no.nav.skanmotutgaaende.lagrefildetaljer;
 
-import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotutgaaende.config.SkanmotutgaaendeProperties;
 import no.nav.skanmotutgaaende.exceptions.functional.MottaDokumentUtgaaendeSkanningFinnesIkkeFunctionalException;
 import no.nav.skanmotutgaaende.exceptions.functional.MottaDokumentUtgaaendeSkanningFunctionalException;
@@ -29,7 +28,6 @@ import java.time.Duration;
 import static no.nav.skanmotutgaaende.metrics.MetricLabels.DOK_METRIC;
 import static no.nav.skanmotutgaaende.metrics.MetricLabels.PROCESS_NAME;
 
-@Slf4j
 @Component
 public class LagreFildetaljerConsumer {
 
