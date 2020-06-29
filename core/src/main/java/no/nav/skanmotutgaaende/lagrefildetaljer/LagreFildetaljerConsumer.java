@@ -1,5 +1,6 @@
 package no.nav.skanmotutgaaende.lagrefildetaljer;
 
+import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotutgaaende.config.SkanmotutgaaendeProperties;
 import no.nav.skanmotutgaaende.exceptions.functional.MottaDokumentUtgaaendeSkanningFinnesIkkeFunctionalException;
 import no.nav.skanmotutgaaende.exceptions.functional.MottaDokumentUtgaaendeSkanningFunctionalException;
@@ -29,6 +30,7 @@ import java.time.Duration;
 import static no.nav.skanmotutgaaende.metrics.MetricLabels.DOK_METRIC;
 import static no.nav.skanmotutgaaende.metrics.MetricLabels.PROCESS_NAME;
 
+@Slf4j
 @Component
 public class LagreFildetaljerConsumer {
 
@@ -70,6 +72,12 @@ public class LagreFildetaljerConsumer {
                 throw new MottaDokumentUtgaaendeSkanningTillaterIkkeTilknyttingFunctionalException(String.format("mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode=%s. Feilmelding=%s", e
                         .getStatusCode(), e.getMessage()), e);
             } else {
+                log.warn("logtest 1 - mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode={}. Feilmelding={}", e.getStatusCode(), e.getMessage(), e);
+                log.warn("logtest 2 - mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode={}. Feilmelding={}", e.getStatusCode(), e.getCause().getMessage(), e);
+                log.warn("logtest 3 - mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode={}. Feilmelding={}", e.getStatusCode(), e.getCause().getCause().getMessage(), e);
+                log.warn("logtest 4 - mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode={}. Feilmelding={}", e.getStatusCode(), e.getLocalizedMessage(), e);
+                log.warn("logtest 5 - mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode={}. Feilmelding={}", e.getStatusCode(), e.getCause().getLocalizedMessage(), e);
+                log.warn("logtest 6 - mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode={}. Feilmelding={}", e.getStatusCode(), e.getCause().getCause().getLocalizedMessage(), e);
                 throw new MottaDokumentUtgaaendeSkanningFunctionalException(String.format("mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode=%s. Feilmelding=%s", e
                         .getStatusCode(), e.getMessage()), e);
             }

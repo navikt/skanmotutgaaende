@@ -168,7 +168,7 @@ public class LesFraFilomraadeOgLagreFildetaljer {
 
             return Optional.of(UnzipSkanningmetadataUtils.bytesToSkanningmetadata(filepair.getXml()));
         } catch (InvalidMetadataException e) {
-            log.warn("Skanningmetadata hadde ugyldige verdier for fil {}. Skanmotutgaaende klarte ikke unmarshalle.", filepair.getName(), e);
+            log.error("Skanningmetadata hadde ugyldige verdier for fil {}. Skanmotutgaaende klarte ikke unmarshalle.", filepair.getName(), e);
             DokCounter.incrementError(e);
             return Optional.empty();
         } catch (SkanmotutgaaendeUnzipperFunctionalException e) {
