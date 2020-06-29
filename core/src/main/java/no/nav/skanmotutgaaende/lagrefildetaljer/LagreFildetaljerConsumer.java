@@ -5,11 +5,10 @@ import no.nav.skanmotutgaaende.exceptions.functional.MottaDokumentUtgaaendeSkann
 import no.nav.skanmotutgaaende.exceptions.functional.MottaDokumentUtgaaendeSkanningFunctionalException;
 import no.nav.skanmotutgaaende.exceptions.functional.MottaDokumentUtgaaendeSkanningTillaterIkkeTilknyttingFunctionalException;
 import no.nav.skanmotutgaaende.exceptions.technical.MottaDokumentUtgaaendeSkanningTechnicalException;
-import no.nav.skanmotutgaaende.jaxws.MDCGenerate;
 import no.nav.skanmotutgaaende.lagrefildetaljer.data.LagreFildetaljerRequest;
 import no.nav.skanmotutgaaende.lagrefildetaljer.data.LagreFildetaljerResponse;
+import no.nav.skanmotutgaaende.mdc.MDCConstants;
 import no.nav.skanmotutgaaende.metrics.Metrics;
-import no.nav.skanmotutgaaende.constants.MDCConstants;
 import org.slf4j.MDC;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
@@ -81,7 +80,6 @@ public class LagreFildetaljerConsumer {
     }
 
     private HttpHeaders createHeaders() {
-        MDCGenerate.generateNewCallIdIfThereAreNone();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
