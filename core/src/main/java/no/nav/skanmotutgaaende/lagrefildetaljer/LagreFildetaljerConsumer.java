@@ -24,6 +24,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.validation.constraints.Null;
 import java.net.URI;
 import java.time.Duration;
 
@@ -72,12 +73,14 @@ public class LagreFildetaljerConsumer {
                 throw new MottaDokumentUtgaaendeSkanningTillaterIkkeTilknyttingFunctionalException(String.format("mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode=%s. Feilmelding=%s", e
                         .getStatusCode(), e.getMessage()), e);
             } else {
-                log.warn("logtest 1 - mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode={}. Feilmelding={}", e.getStatusCode(), e.getMessage(), e);
-                log.warn("logtest 2 - mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode={}. Feilmelding={}", e.getStatusCode(), e.getCause().getMessage(), e);
-                log.warn("logtest 3 - mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode={}. Feilmelding={}", e.getStatusCode(), e.getCause().getCause().getMessage(), e);
-                log.warn("logtest 4 - mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode={}. Feilmelding={}", e.getStatusCode(), e.getLocalizedMessage(), e);
-                log.warn("logtest 5 - mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode={}. Feilmelding={}", e.getStatusCode(), e.getCause().getLocalizedMessage(), e);
-                log.warn("logtest 6 - mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode={}. Feilmelding={}", e.getStatusCode(), e.getCause().getCause().getLocalizedMessage(), e);
+                try {
+                    log.warn("logtest 1 - mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode={}. Feilmelding={}", e.getStatusCode(), e.getMessage(), e);
+                    log.warn("logtest 2 - mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode={}. Feilmelding={}", e.getStatusCode(), e.getLocalizedMessage(), e);
+                    log.warn("logtest 3 - mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode={}. Feilmelding={}", e.getStatusCode(), e.getCause().getMessage(), e);
+                    log.warn("logtest 4 - mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode={}. Feilmelding={}", e.getStatusCode(), e.getCause().getLocalizedMessage(), e);
+                    log.warn("logtest 5 - mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode={}. Feilmelding={}", e.getStatusCode(), e.getCause().getCause().getMessage(), e);
+                    log.warn("logtest 6 - mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode={}. Feilmelding={}", e.getStatusCode(), e.getCause().getCause().getLocalizedMessage(), e);
+                } catch (NullPointerException e1) {}
                 throw new MottaDokumentUtgaaendeSkanningFunctionalException(String.format("mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode=%s. Feilmelding=%s", e
                         .getStatusCode(), e.getMessage()), e);
             }
