@@ -13,6 +13,7 @@ import no.nav.skanmotutgaaende.metrics.Metrics;
 import org.slf4j.MDC;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -20,11 +21,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
-
-import org.springframework.http.HttpHeaders;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import javax.validation.constraints.Null;
 import java.net.URI;
 import java.time.Duration;
 
@@ -43,7 +41,7 @@ public class LagreFildetaljerConsumer {
     private final String dokarkivJournalpostUrl;
 
     public LagreFildetaljerConsumer(RestTemplateBuilder restTemplateBuilder,
-                                             SkanmotutgaaendeProperties skanmotutgaaendeProperties) {
+                                    SkanmotutgaaendeProperties skanmotutgaaendeProperties) {
         this.dokarkivJournalpostUrl = skanmotutgaaendeProperties.getDokarkivjournalposturl();
         this.restTemplate = restTemplateBuilder
                 .setReadTimeout(Duration.ofSeconds(150))
@@ -73,16 +71,12 @@ public class LagreFildetaljerConsumer {
                 throw new MottaDokumentUtgaaendeSkanningTillaterIkkeTilknyttingFunctionalException(String.format("mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode=%s. Feilmelding=%s", e
                         .getStatusCode(), e.getMessage()), e);
             } else {
-                try {
-                    log.warn("logtest 1 - mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode={}. Feilmelding={}", e.getStatusCode(), e.getMessage(), e);
-                    log.warn("logtest 2 - mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode={}. Feilmelding={}", e.getStatusCode(), e.getLocalizedMessage(), e);
-                    log.warn("logtest 3 - mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode={}. Feilmelding={}", e.getStatusCode(), e.getCause().getMessage(), e);
-                    log.warn("logtest 4 - mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode={}. Feilmelding={}", e.getStatusCode(), e.getCause().getLocalizedMessage(), e);
-                    log.warn("logtest 5 - mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode={}. Feilmelding={}", e.getStatusCode(), e.getCause().getCause().getMessage(), e);
-                    log.warn("logtest 6 - mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode={}. Feilmelding={}", e.getStatusCode(), e.getCause().getCause().getLocalizedMessage(), e);
-                } catch (NullPointerException e1) {}
-                throw new MottaDokumentUtgaaendeSkanningFunctionalException(String.format("mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode=%s. Feilmelding=%s", e
-                        .getStatusCode(), e.getMessage()), e);
+                log.warn("logtest 1 - mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode={}. Feilmelding={}", e.getStatusCode(), e.getMessage(), e);
+                log.warn(e.getMessage(), e);
+                log.warn("logtest 3 - mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode={}. Feilmelding={}", e.getStatusCode(), e.toString(), e);
+                throw new MottaDokumentUtgaaendeSkanningFunctionalException(e.getMessage(), e);
+                //throw new MottaDokumentUtgaaendeSkanningFunctionalException(String.format("mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode=%s. Feilmelding=%s", e
+                //        .getStatusCode(), e.getMessage()), e);
             }
         } catch (HttpServerErrorException e) {
             throw new MottaDokumentUtgaaendeSkanningTechnicalException(String.format("mottaDokumentUtgaaendeSkanning feilet teknisk med statusKode=%s. Feilmelding=%s", e
