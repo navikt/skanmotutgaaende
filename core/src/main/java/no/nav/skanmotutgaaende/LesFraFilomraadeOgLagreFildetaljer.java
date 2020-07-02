@@ -66,7 +66,7 @@ public class LesFraFilomraadeOgLagreFildetaljer {
                 } catch (Exception e) {
                     log.error("Skanmotutgaaende klarte ikke lese zipfil {}", zipName, e);
                     DokCounter.incrementError(e);
-                    if(zipFile != null){
+                    if (zipFile != null) {
                         processedZipFiles.add(zipName);
                         lastOppZipfilTilFeilomrade(zipFile, zipName);
                     }
@@ -77,7 +77,7 @@ public class LesFraFilomraadeOgLagreFildetaljer {
                 filepairList.forEach(filepair -> {
                     setUpMDCforFile(filepair.getName());
 
-                    Optional<Skanningmetadata> skanningmetadata = extractMetadata(filepair, zipName);
+                    Optional<Skanningmetadata> skanningmetadata = extractMetadata(filepair);
                     if (skanningmetadata.isEmpty()) {
                         boolean opplastingOk = lastOppFilpar(filepair, zipName);
                         safeToDeleteZipFile.set(opplastingOk && safeToDeleteZipFile.get());
@@ -94,7 +94,7 @@ public class LesFraFilomraadeOgLagreFildetaljer {
                 if (safeToDeleteZipFile.get()) {
                     try {
                         filomraadeService.moveZipFile(zipName, "processed");
-                    } catch(Exception e){
+                    } catch (Exception e) {
                         DokCounter.incrementError(e);
                     }
                 }
@@ -130,15 +130,21 @@ public class LesFraFilomraadeOgLagreFildetaljer {
     }
 
     private boolean lastOppFilpar(Filepair filepair, String zipName) {
+        log.warn("Skanmotutgaaende laster opp filpar til feilområde, fil={} zipfil={}", filepair.getName(), zipName);
+        String path = Utils.removeFileExtensionInFilename(zipName);
+        boolean pdfOk = lastOppFil(filepair.getPdf(), filepair.getName() + ".pdf", path, zipName);
+        boolean xmlOk = lastOppFil(filepair.getXml(), filepair.getName() + ".xml", path, zipName);
+        isFeilomraadeDirty = pdfOk || xmlOk;
+        return pdfOk || xmlOk;
+    }
+
+    private boolean lastOppFil(byte[] file, String name, String path, String zipName) {
         try {
-            log.warn("Skanmotutgaaende laster opp filpar til feilområde, fil={} zipfil={}", filepair.getName(), zipName);
-            String path = Utils.removeFileExtensionInFilename(zipName);
-            filomraadeService.uploadFileToFeilomrade(filepair.getPdf(), filepair.getName() + ".pdf", path);
-            filomraadeService.uploadFileToFeilomrade(filepair.getXml(), filepair.getName() + ".xml", path);
-            isFeilomraadeDirty = true;
+            System.out.println(file.length + ";" + name + ";" + path);
+            filomraadeService.uploadFileToFeilomrade(file, name, path);
             return true;
         } catch (Exception e) {
-            log.error("Skanmotutgaaende feilet ved opplasting til feilområde, fil={} feilmelding={}", filepair.getName(), zipName, e.getMessage(), e);
+            log.error("Skanmotutgaaende feilet ved opplasting til feilområde fil={} zipFil={} feilmelding={}", name, zipName, e.getMessage(), e);
             DokCounter.incrementError(e);
             return false;
         }
@@ -151,15 +157,21 @@ public class LesFraFilomraadeOgLagreFildetaljer {
 
     private void cleanUpLastOppFilerTilFeilomrade(String zipName) {
         if (isFeilomraadeDirty) {
-            try{
+            try {
                 filomraadeService.cleanDirtyFeilomrade(Utils.removeFileExtensionInFilename(zipName));
-            } catch(Exception e) {
+            } catch (Exception e) {
                 DokCounter.incrementError(e);
             }
         }
     }
 
-    private Optional<Skanningmetadata> extractMetadata(Filepair filepair, String zipName) {
+    private Optional<Skanningmetadata> extractMetadata(Filepair filepair) {
+        if (filepair.getPdf() == null) {
+            Exception e = new InvalidMetadataException("Mangler fysisk dokument");
+            log.error("Filpar mangler fysisk dokument for fil {}.", filepair.getName(), e);
+            DokCounter.incrementError(e);
+            return Optional.empty();
+        }
         try {
             Skanningmetadata skanningmetadata = UnzipSkanningmetadataUtils.bytesToSkanningmetadata(filepair.getXml());
 
@@ -200,7 +212,7 @@ public class LesFraFilomraadeOgLagreFildetaljer {
         MDCGenerate.clearCallId();
     }
 
-    private void incrementMetadataMetrics(Skanningmetadata skanningmetadata){
+    private void incrementMetadataMetrics(Skanningmetadata skanningmetadata) {
         final String STREKKODEPOSTBOKS = "strekkodePostboks";
         final String FYSISKPOSTBOKS = "fysiskPostboks";
         final String EMPTY = "empty";
