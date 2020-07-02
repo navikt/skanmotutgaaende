@@ -6,14 +6,17 @@ import no.nav.skanmotutgaaende.domain.FilepairWithMetadata;
 import no.nav.skanmotutgaaende.domain.Skanningmetadata;
 import no.nav.skanmotutgaaende.exceptions.functional.SkanmotutgaaendeUnzipperFunctionalException;
 import no.nav.skanmotutgaaende.exceptions.technical.SkanmotutgaaendeUnzipperTechnicalException;
+import no.nav.skanmotutgaaende.utils.Utils;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 
@@ -21,13 +24,13 @@ import java.util.zip.ZipEntry;
 public class UnzipSkanningmetadataUtils {
 
     public static List<Filepair> pairFiles(Map<String, byte[]> pdfs, Map<String, byte[]> xmls) {
-        return pdfs.keySet().stream().map(key ->
+        return getAllFileNamesWithoutFileExtensions(pdfs.keySet(), xmls.keySet()).stream().map(name ->
                 Filepair.builder()
-                        .name(key)
-                        .pdf(pdfs.get(key))
-                        .xml(xmls.get(key))
-                        .build())
-                .collect(Collectors.toList());
+                        .name(name)
+                        .pdf(pdfs.get(name + ".pdf"))
+                        .xml(xmls.get(name + ".xml"))
+                        .build()
+        ).collect(Collectors.toList());
     }
 
     public static FilepairWithMetadata extractMetadata(Filepair filepair) {
@@ -59,5 +62,12 @@ public class UnzipSkanningmetadataUtils {
 
     public static String getFileType(ZipEntry file) {
         return file.getName().substring(file.getName().lastIndexOf(".") + 1).toLowerCase();
+    }
+
+    private static Set<String> getAllFileNamesWithoutFileExtensions(Set<String> pdfNames, Set<String> xmlNames) {
+        Set<String> allNames = new HashSet<>();
+        pdfNames.stream().forEach(name -> allNames.add(Utils.removeFileExtensionInFilename(name)));
+        xmlNames.stream().forEach(name -> allNames.add(Utils.removeFileExtensionInFilename(name)));
+        return allNames;
     }
 }

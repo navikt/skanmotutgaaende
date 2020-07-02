@@ -26,7 +26,6 @@ public class LagreFildetaljerService {
         log.info("Skanmotutgaaende lagrer fildetaljer for journalpost, id={}, fil={}, batch={}", jpid, filepair.getName(), skanningmetadata.getJournalpost().getBatchnavn());
         LagreFildetaljerRequest request = lagreFildetaljerRequestMapper.mapMetadataToLagreFildetaljerRequest(skanningmetadata, filepair);
         lagreFildetaljerConsumer.lagreFilDetaljer(request, jpid);
-
     }
 
 }

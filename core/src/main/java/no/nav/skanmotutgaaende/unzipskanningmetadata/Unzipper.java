@@ -2,7 +2,6 @@ package no.nav.skanmotutgaaende.unzipskanningmetadata;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotutgaaende.domain.Filepair;
-import no.nav.skanmotutgaaende.utils.Utils;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 
@@ -14,6 +13,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static no.nav.skanmotutgaaende.utils.Utils.changeFiletypeInFilename;
 
 @Slf4j
 public class Unzipper {
@@ -41,10 +42,11 @@ public class Unzipper {
                 byteArrayOutputStream.write(buffer, 0, len);
             }
             if ("xml".equalsIgnoreCase(UnzipSkanningmetadataUtils.getFileType(zipEntry))) {
-                xmls.put(Utils.removeFileExtensionInFilename(zipEntry.getName()), byteArrayOutputStream.toByteArray());
-            }
-            else if ("pdf".equalsIgnoreCase(UnzipSkanningmetadataUtils.getFileType(zipEntry))) {
-                pdfs.put(Utils.removeFileExtensionInFilename(zipEntry.getName()), byteArrayOutputStream.toByteArray());
+                String xmlName = changeFiletypeInFilename(zipEntry.getName(), "xml");
+                xmls.put(xmlName, byteArrayOutputStream.toByteArray());
+            } else if ("pdf".equalsIgnoreCase(UnzipSkanningmetadataUtils.getFileType(zipEntry))) {
+                String pdfName = changeFiletypeInFilename(zipEntry.getName(), "pdf");
+                pdfs.put(pdfName, byteArrayOutputStream.toByteArray());
             }
             byteArrayOutputStream.close();
             zipEntry = zipInputStream.getNextZipEntry();
