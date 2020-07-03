@@ -115,15 +115,18 @@ public class LesFraFilomraadeOgLagreFildetaljer {
             lagreFildetaljerService.lagreFildetaljer(skanningmetadata, filepair);
             return true;
         } catch (AbstractSkanmotutgaaendeFunctionalException e) {
-            log.warn("Skanmotutgaaende feilet funksjonelt med lagring av fildetaljer fil={}, batch={}", filepair.getName(), skanningmetadata.getJournalpost().getBatchnavn(), e);
+            log.warn("Skanmotutgaaende feilet funksjonelt med lagring av fildetaljer jpid={}, fil={}, batch={}",
+                    Utils.removeLeadingZeros(skanningmetadata.getJournalpost().getJournalpostId()), filepair.getName(), skanningmetadata.getJournalpost().getBatchnavn(), e);
             DokCounter.incrementError(e);
             return false;
         } catch (AbstractSkanmotutgaaendeTechnicalException e) {
-            log.warn("Skanmotutgaaende feilet teknisk med lagring av fildetaljer fil={}, batch={}", filepair.getName(), skanningmetadata.getJournalpost().getBatchnavn(), e);
+            log.warn("Skanmotutgaaende feilet teknisk med lagring av fildetaljer jpid={}, fil={}, batch={}",
+                    Utils.removeLeadingZeros(skanningmetadata.getJournalpost().getJournalpostId()), filepair.getName(), skanningmetadata.getJournalpost().getBatchnavn(), e);
             DokCounter.incrementError(e);
             return false;
         } catch (Exception e) {
-            log.warn("Skanmotutgaaende feilet med ukjent feil ved lagring av fildetaljer fil={}, batch={}", filepair.getName(), skanningmetadata.getJournalpost().getBatchnavn(), e);
+            log.warn("Skanmotutgaaende feilet med ukjent feil ved lagring av fildetaljer jpid={}, fil={}, batch={}",
+                    Utils.removeLeadingZeros(skanningmetadata.getJournalpost().getJournalpostId()), filepair.getName(), skanningmetadata.getJournalpost().getBatchnavn(), e);
             DokCounter.incrementError(e);
             return false;
         }
@@ -140,7 +143,6 @@ public class LesFraFilomraadeOgLagreFildetaljer {
 
     private boolean lastOppFil(byte[] file, String name, String path, String zipName) {
         try {
-            System.out.println(file.length + ";" + name + ";" + path);
             filomraadeService.uploadFileToFeilomrade(file, name, path);
             return true;
         } catch (Exception e) {
