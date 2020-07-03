@@ -7,6 +7,14 @@ public class Utils {
     }
 
     public static String removeFileExtensionInFilename(String originalName) {
-        return originalName.substring(0, originalName.lastIndexOf("."));
+        int dotIndex = originalName.lastIndexOf(".");
+        if (dotIndex == -1) {
+            return originalName;
+        }
+        return originalName.substring(0, dotIndex);
+    }
+
+    public static String removeLeadingZeros(String s) {
+        return s.replaceFirst("^0+(?!$)", "");
     }
 }
