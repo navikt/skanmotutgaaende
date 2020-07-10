@@ -17,7 +17,6 @@
 			<groupId>no.nav.skanmotutgaaende</groupId>
 			<artifactId>core</artifactId>
 		</dependency>
-
 	</dependencies>
 	
 	<build>

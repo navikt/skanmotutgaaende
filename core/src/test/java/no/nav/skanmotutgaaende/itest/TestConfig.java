@@ -1,8 +1,11 @@
-package no.nav.skanmotutgaaende.itest.config;
+package no.nav.skanmotutgaaende.itest;
 
+import lombok.extern.slf4j.Slf4j;
+import no.nav.skanmotutgaaende.CoreConfig;
 import no.nav.skanmotutgaaende.config.SkanmotutgaaendeProperties;
-import no.nav.skanmotutgaaende.config.CoreConfig;
 import no.nav.skanmotutgaaende.metrics.DokCounter;
+import org.apache.camel.CamelContext;
+import org.apache.camel.spring.boot.CamelContextConfiguration;
 import org.apache.sshd.common.file.virtualfs.VirtualFileSystemFactory;
 import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.auth.UserAuthNoneFactory;
@@ -23,12 +26,43 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicInteger;
 
+@Slf4j
 @Configuration
 @EnableAutoConfiguration
 @EnableConfigurationProperties(SkanmotutgaaendeProperties.class)
-@Import({CoreConfig.class, DokCounter.class})
+@Import({TestConfig.CamelTestStartupConfig.class, TestConfig.SshdSftpServerConfig.class, CoreConfig.class, DokCounter.class})
 public class TestConfig {
+
+    @Configuration
+    static class CamelTestStartupConfig {
+        private final AtomicInteger sshServerStartupCounter = new AtomicInteger(0);
+        // Hindre at sshserver ikke er klar før camel starter å behandle.
+        @Bean
+        CamelContextConfiguration contextConfiguration(SshServer sshServer) {
+            return new CamelContextConfiguration() {
+
+                @Override
+                public void beforeApplicationStart(CamelContext camelContext) {
+                    while(!sshServer.isStarted() && sshServerStartupCounter.get() <= 5) {
+                        try {
+                            // Busy wait
+                            Thread.sleep(1000);
+                            log.info("Forsøkt å starte sshserver. retry=" + sshServerStartupCounter.getAndIncrement());
+                        } catch (InterruptedException e) {
+                            // noop
+                        }
+                    }
+                }
+
+                @Override
+                public void afterApplicationStart(CamelContext camelContext) {
+
+                }
+            };
+        }
+    }
 
     @Configuration
     static class SshdSftpServerConfig {
@@ -40,12 +74,11 @@ public class TestConfig {
         @Bean(initMethod = "start", destroyMethod = "stop")
         public SshServer sshServer(final Path sshdPath,
                                    final SkanmotutgaaendeProperties properties) {
-
             String sftpPort = String.valueOf(ThreadLocalRandom.current().nextInt(2000, 2999));
             System.setProperty("skanmotutgaaende.sftp.port", sftpPort);
 
             SshServer sshd = SshServer.setUpDefaultServer();
-            sshd.setPort(Integer.parseInt(properties.getSftp().getPort()));
+            sshd.setPort(Integer.parseInt(sftpPort));
             sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider(Path.of("src/test/resources/sftp/itest.ser")));
             sshd.setCommandFactory(new ScpCommandFactory());
             sshd.setSubsystemFactories(List.of(new SftpSubsystemFactory()));

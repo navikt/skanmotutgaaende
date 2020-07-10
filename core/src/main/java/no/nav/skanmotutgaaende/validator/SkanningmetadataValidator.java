@@ -9,8 +9,8 @@ import no.nav.skanmotutgaaende.exceptions.functional.InvalidMetadataException;
 @Slf4j
 public class SkanningmetadataValidator {
 
-    private JournalpostValidator journalpostValidator = new JournalpostValidator();
-    private SkanningInfoValidator skanningInfoValidator = new SkanningInfoValidator();
+    private final JournalpostValidator journalpostValidator = new JournalpostValidator();
+    private final SkanningInfoValidator skanningInfoValidator = new SkanningInfoValidator();
 
     public void validate(Skanningmetadata skanningmetadata) {
         verfiyMetadataIsValid(skanningmetadata);

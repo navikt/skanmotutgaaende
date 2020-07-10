@@ -13,8 +13,8 @@ import javax.inject.Inject;
 @Slf4j
 public class LagreFildetaljerService {
 
-    private LagreFildetaljerConsumer lagreFildetaljerConsumer;
-    private LagreFildetaljerRequestMapper lagreFildetaljerRequestMapper;
+    private final LagreFildetaljerConsumer lagreFildetaljerConsumer;
+    private final LagreFildetaljerRequestMapper lagreFildetaljerRequestMapper;
 
     @Inject
     public LagreFildetaljerService(LagreFildetaljerConsumer lagreFildetaljerConsumer) {

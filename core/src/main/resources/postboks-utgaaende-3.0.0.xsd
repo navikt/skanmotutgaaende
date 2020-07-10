@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema" version="3.0.0">
+    <xs:element name="skanningmetadata" type="skanningmetadataType"/>
+    <xs:complexType name="skanningmetadataType">
+        <xs:sequence>
+            <xs:element name="journalpost" type="journalpostType" minOccurs="1"/>
+            <xs:element name="skanningInfo" type="skanninginfoType" minOccurs="1"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="journalpostType">
+        <xs:sequence>
+            <xs:element name="journalpostId" type="xs:string" minOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>Strekkode 3, Posisjon 4-22</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="mottakskanal" type="xs:string" minOccurs="1" fixed="SKAN_IM"/>
+            <xs:element name="datoMottatt" type="xs:date" minOccurs="1"/>
+            <xs:element name="batchnavn" type="xs:string" minOccurs="1"/>
+            <xs:element name="filnavn" type="xs:string" minOccurs="0"/>
+            <xs:element name="endorsernr" type="xs:string" minOccurs="0"/>
+            <xs:element name="antallSider" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="skanninginfoType">
+        <xs:sequence>
+            <xs:element name="fysiskPostboks" type="xs:string" minOccurs="0"/>
+            <xs:element name="strekkodePostboks" type="strekkodePostboksType" minOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>Strekkode 2, Posisjon 19-22</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:simpleType name="strekkodePostboksType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="1408"/>
+        </xs:restriction>
+    </xs:simpleType>
+</xs:schema>

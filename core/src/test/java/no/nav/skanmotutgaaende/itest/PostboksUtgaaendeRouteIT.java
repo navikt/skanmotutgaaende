@@ -1,23 +1,12 @@
 package no.nav.skanmotutgaaende.itest;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
-import no.nav.skanmotutgaaende.LesFraFilomraadeOgLagreFildetaljer;
-import no.nav.skanmotutgaaende.config.SkanmotutgaaendeProperties;
-import no.nav.skanmotutgaaende.filomraade.FilomraadeConsumer;
-import no.nav.skanmotutgaaende.filomraade.FilomraadeService;
-import no.nav.skanmotutgaaende.itest.config.TestConfig;
-import no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerConsumer;
-import no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerService;
-import no.nav.skanmotutgaaende.sftp.Sftp;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpHeaders;
@@ -30,20 +19,20 @@ import wiremock.org.apache.commons.io.FilenameUtils;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.exactly;
 import static com.github.tomakehurst.wiremock.client.WireMock.put;
-import static com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
-import static com.github.tomakehurst.wiremock.client.WireMock.verify;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @ExtendWith(SpringExtension.class)
@@ -52,7 +41,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @AutoConfigureWireMock(port = 0)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ActiveProfiles("itest")
-public class LesFraFilomraadeOgLagreFildetaljerIT {
+public class PostboksUtgaaendeRouteIT {
 
     public static final String INNGAAENDE = "inngaaende";
     public static final String FEILMAPPE = "feilmappe";
@@ -61,17 +50,8 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
     private final String URL_DOKARKIV_JOURNALPOST_BAD_REQUEST = "/rest/intern/journalpostapi/v1/journalpost/004/mottaDokumentUtgaaendeSkanning";
     private final String ZIP_FILE_NAME_NO_EXTENSION = "01.07.2020_R123456789_1_1000";
 
-    LesFraFilomraadeOgLagreFildetaljer lesFraFilomraadeOgLagreFildetaljer;
-    FilomraadeService filomraadeService;
-    LagreFildetaljerService lagreFildetaljerService;
-
-    private Sftp sftp;
-
     @Inject
     private Path sshdPath;
-
-    @Autowired
-    SkanmotutgaaendeProperties skanmotutgaaendeProperties;
 
     @BeforeEach
     void beforeEach() throws IOException {
@@ -81,7 +61,6 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
         preparePath(inngaaende);
         preparePath(processed);
         preparePath(feilmappe);
-        setUpServices();
     }
 
     @AfterEach
@@ -104,28 +83,25 @@ public class LesFraFilomraadeOgLagreFildetaljerIT {
         setUpBadStubs();
         copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_NO_EXTENSION + ".zip");
 
-        assertDoesNotThrow(() -> lesFraFilomraadeOgLagreFildetaljer.lesOgLagreZipfiler());
+        await().atMost(10, SECONDS).untilAsserted(() -> {
+            try {
+                assertThat(Files.list(sshdPath.resolve(FEILMAPPE)
+                        .resolve(ZIP_FILE_NAME_NO_EXTENSION))
+                        .collect(Collectors.toList())).hasSize(4);
+            } catch(NoSuchFileException e) {
+                fail();
+            }
+        });
 
-        assertEquals(6, Files.list(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION)).count());
         final List<String> feilmappeContents = Files.list(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION))
                 .map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
                 .collect(Collectors.toList());
         assertTrue(feilmappeContents.containsAll(List.of(
-                "01.07.2020_R123456789_0003.pdf",
-                "01.07.2020_R123456789_0003.xml",
-                "01.07.2020_R123456789_0004.pdf",
-                "01.07.2020_R123456789_0004.xml",
-                "01.07.2020_R123456789_0005.xml",
-                "01.07.2020_R123456789_0006.pdf"
+                "01.07.2020_R123456789_0003.zip",
+                "01.07.2020_R123456789_0004.zip",
+                "01.07.2020_R123456789_0005.zip",
+                "01.07.2020_R123456789_0006.zip"
         )));
-        verify(exactly(3), putRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
-    }
-
-    void setUpServices() {
-        sftp = new Sftp(skanmotutgaaendeProperties);
-        filomraadeService = Mockito.spy(new FilomraadeService(new FilomraadeConsumer(sftp, skanmotutgaaendeProperties)));
-        lagreFildetaljerService = new LagreFildetaljerService(new LagreFildetaljerConsumer(new RestTemplateBuilder(), skanmotutgaaendeProperties));
-        lesFraFilomraadeOgLagreFildetaljer = new LesFraFilomraadeOgLagreFildetaljer(filomraadeService, lagreFildetaljerService);
     }
 
     private void setUpHappyStubs() {

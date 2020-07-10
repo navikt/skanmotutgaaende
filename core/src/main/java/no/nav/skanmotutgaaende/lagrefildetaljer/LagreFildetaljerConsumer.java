@@ -7,7 +7,6 @@ import no.nav.skanmotutgaaende.exceptions.functional.MottaDokumentUtgaaendeSkann
 import no.nav.skanmotutgaaende.exceptions.technical.MottaDokumentUtgaaendeSkanningTechnicalException;
 import no.nav.skanmotutgaaende.lagrefildetaljer.data.LagreFildetaljerRequest;
 import no.nav.skanmotutgaaende.lagrefildetaljer.data.LagreFildetaljerResponse;
-import no.nav.skanmotutgaaende.mdc.MDCConstants;
 import no.nav.skanmotutgaaende.metrics.Metrics;
 import org.slf4j.MDC;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -25,6 +24,10 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 import java.time.Duration;
 
+import static no.nav.skanmotutgaaende.lagrefildetaljer.NavHeaders.NAV_CALL_ID;
+import static no.nav.skanmotutgaaende.lagrefildetaljer.NavHeaders.NAV_CONSUMER_ID;
+import static no.nav.skanmotutgaaende.lagrefildetaljer.NavHeaders.NAV_CONSUMER_ID_VALUE;
+import static no.nav.skanmotutgaaende.mdc.MDCConstants.MDC_CALL_ID;
 import static no.nav.skanmotutgaaende.metrics.MetricLabels.DOK_METRIC;
 import static no.nav.skanmotutgaaende.metrics.MetricLabels.PROCESS_NAME;
 
@@ -80,12 +83,10 @@ public class LagreFildetaljerConsumer {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        if (MDC.get(MDCConstants.MDC_NAV_CALL_ID) != null) {
-            headers.add(MDCConstants.MDC_NAV_CALL_ID, MDC.get(MDCConstants.MDC_NAV_CALL_ID));
+        if (MDC.get(MDC_CALL_ID) != null) {
+            headers.add(NAV_CALL_ID, MDC.get(MDC_CALL_ID));
         }
-        if (MDC.get(MDCConstants.MDC_NAV_CONSUMER_ID) != null) {
-            headers.add(MDCConstants.MDC_NAV_CONSUMER_ID, MDC.get(MDCConstants.MDC_NAV_CONSUMER_ID));
-        }
+        headers.add(NAV_CONSUMER_ID, NAV_CONSUMER_ID_VALUE);
         return headers;
     }
 }

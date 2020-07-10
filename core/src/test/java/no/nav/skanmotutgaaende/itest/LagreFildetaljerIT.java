@@ -3,7 +3,6 @@ package no.nav.skanmotutgaaende.itest;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import no.nav.skanmotutgaaende.config.SkanmotutgaaendeProperties;
 import no.nav.skanmotutgaaende.exceptions.functional.MottaDokumentUtgaaendeSkanningFunctionalException;
-import no.nav.skanmotutgaaende.itest.config.TestConfig;
 import no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerConsumer;
 import no.nav.skanmotutgaaende.lagrefildetaljer.data.DokumentVariant;
 import no.nav.skanmotutgaaende.lagrefildetaljer.data.LagreFildetaljerRequest;
@@ -31,7 +30,6 @@ import static no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerRequestMa
 import static no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerRequestMapper.FYSISK_POSTBOKS_NOKKEL;
 import static no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerRequestMapper.STREKKODE_POSTBOKS_NOKKEL;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(SpringExtension.class)
