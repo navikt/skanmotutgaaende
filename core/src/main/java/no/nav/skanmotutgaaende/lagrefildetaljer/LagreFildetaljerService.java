@@ -23,9 +23,9 @@ public class LagreFildetaljerService {
 
     public void lagreFildetaljer(final Skanningmetadata skanningmetadata, final Filepair filepair) {
         String journalpostId = skanningmetadata.getJournalpost().getJournalpostId();
-        log.info("Skanmotutgaaende forsøker å lagre fildetaljer for journalpost, id={}, fil={}, batch={}", journalpostId, filepair.getName(), skanningmetadata.getJournalpost().getBatchnavn());
+        log.info("Skanmotutgaaende forsøker å lagre fildetaljer for journalpost. journalpostId={}, fil={}, batch={}", journalpostId, filepair.getName(), skanningmetadata.getJournalpost().getBatchnavn());
         LagreFildetaljerRequest request = lagreFildetaljerRequestMapper.mapMetadataToLagreFildetaljerRequest(skanningmetadata, filepair);
         lagreFildetaljerConsumer.lagreFilDetaljer(request, journalpostId);
-        log.info("Skanmotutgaaende lagret fildetaljer for journalpost, id={}, fil={}, batch={}", journalpostId, filepair.getName(), skanningmetadata.getJournalpost().getBatchnavn());
+        log.info("Skanmotutgaaende lagret fildetaljer for journalpost. journalpostId={}, fil={}, batch={}", journalpostId, filepair.getName(), skanningmetadata.getJournalpost().getBatchnavn());
     }
 }
