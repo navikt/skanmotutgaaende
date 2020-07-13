@@ -4,7 +4,7 @@
   "SKANMOTUTGAAENDE_VAULT": "/kv/prod/fss/skanmotutgaaende/default",
   "SFTP_KEYS": "kv/prod/fss/skanmotutgaaende/keys",
   "SKANMOTUTGAAENDE_DOKARKIVJOURNALPOSTURL": "https://dokarkiv.nais.adeo.no/rest/intern/journalpostapi/v1/journalpost",
-  "SKANMOTUTGAAENDE_SCHEDULE": "0+0/30+8-16+*+*+MON-FRI",
+  "SKANMOTUTGAAENDE_SCHEDULE": "0+0/15+*+*+*+*",
   "INGRESSES": [
     "https://skanmotutgaaende.nais.adeo.no"
   ]
