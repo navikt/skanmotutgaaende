@@ -1,10 +1,10 @@
 package no.nav.skanmotutgaaende.lagrefildetaljer;
 
 import no.nav.skanmotutgaaende.config.SkanmotutgaaendeProperties;
-import no.nav.skanmotutgaaende.exceptions.functional.MottaDokumentUtgaaendeSkanningFinnesIkkeFunctionalException;
-import no.nav.skanmotutgaaende.exceptions.functional.MottaDokumentUtgaaendeSkanningFunctionalException;
-import no.nav.skanmotutgaaende.exceptions.functional.MottaDokumentUtgaaendeSkanningTillaterIkkeTilknyttingFunctionalException;
-import no.nav.skanmotutgaaende.exceptions.technical.MottaDokumentUtgaaendeSkanningTechnicalException;
+import no.nav.skanmotutgaaende.exceptions.functional.LagreFilDetaljerFinnesIkkeException;
+import no.nav.skanmotutgaaende.exceptions.functional.LagreFilDetaljerTillaterIkkeTilknyttingException;
+import no.nav.skanmotutgaaende.exceptions.functional.SkanmotutgaaendeFunctionalException;
+import no.nav.skanmotutgaaende.exceptions.technical.SkanmotutgaaendeTechnicalException;
 import no.nav.skanmotutgaaende.lagrefildetaljer.data.LagreFildetaljerRequest;
 import no.nav.skanmotutgaaende.lagrefildetaljer.data.LagreFildetaljerResponse;
 import no.nav.skanmotutgaaende.metrics.Metrics;
@@ -64,18 +64,18 @@ public class LagreFildetaljerConsumer {
 
         } catch (HttpClientErrorException e) {
             if (HttpStatus.NOT_FOUND.equals(e.getStatusCode())) {
-                throw new MottaDokumentUtgaaendeSkanningFinnesIkkeFunctionalException(String.format("mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode=%s. Feilmelding=%s", e
-                        .getStatusCode(), e.getMessage()), e);
+                throw new LagreFilDetaljerFinnesIkkeException(String.format("lagreFilDetaljer feilet funksjonelt med statusKode=%s. Feilmelding=%s", e
+                        .getStatusCode(), e.getResponseBodyAsString()), e);
             } else if (HttpStatus.CONFLICT.equals(e.getStatusCode())) {
-                throw new MottaDokumentUtgaaendeSkanningTillaterIkkeTilknyttingFunctionalException(String.format("mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode=%s. Feilmelding=%s", e
-                        .getStatusCode(), e.getMessage()), e);
+                throw new LagreFilDetaljerTillaterIkkeTilknyttingException(String.format("lagreFilDetaljer feilet funksjonelt med statusKode=%s. Feilmelding=%s", e
+                        .getStatusCode(), e.getResponseBodyAsString()), e);
             } else {
-                throw new MottaDokumentUtgaaendeSkanningFunctionalException(String.format("mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode=%s. Feilmelding=%s", e
-                        .getStatusCode(), e.getMessage()), e);
+                throw new SkanmotutgaaendeFunctionalException(String.format("lagreFilDetaljer feilet funksjonelt med statusKode=%s. Feilmelding=%s", e
+                        .getStatusCode(), e.getResponseBodyAsString()), e);
             }
         } catch (HttpServerErrorException e) {
-            throw new MottaDokumentUtgaaendeSkanningTechnicalException(String.format("mottaDokumentUtgaaendeSkanning feilet teknisk med statusKode=%s. Feilmelding=%s", e
-                    .getStatusCode(), e.getMessage()), e);
+            throw new SkanmotutgaaendeTechnicalException(String.format("lagreFilDetaljer feilet teknisk med statusKode=%s. Feilmelding=%s", e
+                    .getStatusCode(), e.getResponseBodyAsString()), e);
         }
     }
 

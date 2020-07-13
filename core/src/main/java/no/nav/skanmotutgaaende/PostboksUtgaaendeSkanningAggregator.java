@@ -1,7 +1,7 @@
 package no.nav.skanmotutgaaende;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.skanmotutgaaende.exceptions.technical.MottaDokumentUtgaaendeSkanningTechnicalException;
+import no.nav.skanmotutgaaende.exceptions.technical.SkanmotutgaaendeTechnicalException;
 import org.apache.camel.AggregationStrategy;
 import org.apache.camel.Exchange;
 import org.apache.commons.io.IOUtils;
@@ -35,7 +35,7 @@ public class PostboksUtgaaendeSkanningAggregator implements AggregationStrategy 
             applyOnEnvelope(newExchange, envelope);
             return oldExchange;
         } catch (IOException e) {
-            throw new MottaDokumentUtgaaendeSkanningTechnicalException("Klarte ikke lese fil", e);
+            throw new SkanmotutgaaendeTechnicalException("Klarte ikke lese fil", e);
         }
     }
 

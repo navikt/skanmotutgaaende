@@ -60,7 +60,6 @@ public class PostboksUtgaaendeRoute extends RouteBuilder {
                 "&initialDelay=1000" +
                 "&maxMessagesPerPoll=10" +
                 "&move=processed" +
-                "&jailStartingDirectory=false" +
                 "&scheduler=spring&scheduler.cron={{skanmotutgaaende.schedule}}")
                 .routeId("read_zip_from_sftp")
                 .log(LoggingLevel.INFO, log, "Skanmotutgaaende starter behandling av fil=${file:absolute.path}.")

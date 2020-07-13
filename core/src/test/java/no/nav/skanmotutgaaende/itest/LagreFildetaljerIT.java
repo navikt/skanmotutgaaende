@@ -2,7 +2,7 @@ package no.nav.skanmotutgaaende.itest;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import no.nav.skanmotutgaaende.config.SkanmotutgaaendeProperties;
-import no.nav.skanmotutgaaende.exceptions.functional.MottaDokumentUtgaaendeSkanningFunctionalException;
+import no.nav.skanmotutgaaende.exceptions.functional.SkanmotutgaaendeFunctionalException;
 import no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerConsumer;
 import no.nav.skanmotutgaaende.lagrefildetaljer.data.DokumentVariant;
 import no.nav.skanmotutgaaende.lagrefildetaljer.data.LagreFildetaljerRequest;
@@ -79,7 +79,7 @@ public class LagreFildetaljerIT {
     @Test
     public void shoulfFailIfInvalidRequest() {
         LagreFildetaljerRequest request = createLagreFildetaljerRequest();
-        assertThrows(MottaDokumentUtgaaendeSkanningFunctionalException.class, () -> lagrefildetaljerConsumer.lagreFilDetaljer(request, JOURNALPOST_ID_INVALID));
+        assertThrows(SkanmotutgaaendeFunctionalException.class, () -> lagrefildetaljerConsumer.lagreFilDetaljer(request, JOURNALPOST_ID_INVALID));
     }
 
     private LagreFildetaljerRequest createLagreFildetaljerRequest() {
