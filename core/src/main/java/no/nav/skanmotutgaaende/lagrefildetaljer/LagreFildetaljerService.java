@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotutgaaende.domain.Filepair;
 import no.nav.skanmotutgaaende.domain.Skanningmetadata;
 import no.nav.skanmotutgaaende.lagrefildetaljer.data.LagreFildetaljerRequest;
-import no.nav.skanmotutgaaende.utils.Utils;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
@@ -13,8 +12,8 @@ import javax.inject.Inject;
 @Slf4j
 public class LagreFildetaljerService {
 
-    private LagreFildetaljerConsumer lagreFildetaljerConsumer;
-    private LagreFildetaljerRequestMapper lagreFildetaljerRequestMapper;
+    private final LagreFildetaljerConsumer lagreFildetaljerConsumer;
+    private final LagreFildetaljerRequestMapper lagreFildetaljerRequestMapper;
 
     @Inject
     public LagreFildetaljerService(LagreFildetaljerConsumer lagreFildetaljerConsumer) {
@@ -22,11 +21,11 @@ public class LagreFildetaljerService {
         this.lagreFildetaljerRequestMapper = new LagreFildetaljerRequestMapper();
     }
 
-    public void lagreFildetaljer(Skanningmetadata skanningmetadata, Filepair filepair) {
-        String jpid = skanningmetadata.getJournalpost().getJournalpostId();
-        log.info("Skanmotutgaaende forsøker å lagre fildetaljer for journalpost, id={}, fil={}, batch={}", Utils.removeLeadingZeros(jpid), filepair.getName(), skanningmetadata.getJournalpost().getBatchnavn());
+    public void lagreFildetaljer(final Skanningmetadata skanningmetadata, final Filepair filepair) {
+        String journalpostId = skanningmetadata.getJournalpost().getJournalpostId();
+        log.info("Skanmotutgaaende forsøker å lagre fildetaljer for journalpost. journalpostId={}, fil={}, batch={}", journalpostId, filepair.getName(), skanningmetadata.getJournalpost().getBatchnavn());
         LagreFildetaljerRequest request = lagreFildetaljerRequestMapper.mapMetadataToLagreFildetaljerRequest(skanningmetadata, filepair);
-        lagreFildetaljerConsumer.lagreFilDetaljer(request, jpid);
-        log.info("Skanmotutgaaende lagret fildetaljer for journalpost, id={}, fil={}, batch={}", Utils.removeLeadingZeros(jpid), filepair.getName(), skanningmetadata.getJournalpost().getBatchnavn());
+        lagreFildetaljerConsumer.lagreFilDetaljer(request, journalpostId);
+        log.info("Skanmotutgaaende lagret fildetaljer for journalpost. journalpostId={}, fil={}, batch={}", journalpostId, filepair.getName(), skanningmetadata.getJournalpost().getBatchnavn());
     }
 }

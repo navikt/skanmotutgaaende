@@ -1,12 +1,12 @@
 package no.nav.skanmotutgaaende.domain;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.Date;
 
 @Getter
@@ -16,13 +16,13 @@ import java.util.Date;
 public class Journalpost {
 
     @XmlElement(required = true, name = "journalpostId")
+    @XmlJavaTypeAdapter(type = String.class, value = JournalpostIdAdapter.class)
     private String journalpostId;
 
     @XmlElement(required = true, name = "mottakskanal")
     private String mottakskanal;
 
     @XmlElement(required = true, name = "datoMottatt")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
     private Date datoMottatt;
 
     @XmlElement(required = true, name = "batchnavn")

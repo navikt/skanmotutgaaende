@@ -7,14 +7,14 @@ import no.nav.skanmotutgaaende.domain.Skanningmetadata;
 import no.nav.skanmotutgaaende.lagrefildetaljer.data.DokumentVariant;
 import no.nav.skanmotutgaaende.lagrefildetaljer.data.LagreFildetaljerRequest;
 import no.nav.skanmotutgaaende.lagrefildetaljer.data.Tilleggsopplysning;
+import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Component
 public class LagreFildetaljerRequestMapper {
-
-
     public static final String ENDORSERNR_NOKKEL = "endorsernr";
     public static final String FYSISK_POSTBOKS_NOKKEL = "fysiskPostboks";
     public static final String STREKKODE_POSTBOKS_NOKKEL = "strekkodePostboks";
@@ -53,7 +53,6 @@ public class LagreFildetaljerRequestMapper {
                 .fysiskDokument(filepair.getXml())
                 .filnavn(appendFileType(filepair.getName(), FILTYPE_XML))
                 .build();
-
 
         return LagreFildetaljerRequest.builder()
                 .datoMottatt(datoMotatt)

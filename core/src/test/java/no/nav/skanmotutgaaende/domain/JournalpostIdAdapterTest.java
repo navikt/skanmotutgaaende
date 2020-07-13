@@ -1,0 +1,36 @@
+package no.nav.skanmotutgaaende.domain;
+
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+/**
+ * @author Joakim Bjørnstad, Jbit AS
+ */
+class JournalpostIdAdapterTest {
+    private final JournalpostIdAdapter journalpostIdAdapter = new JournalpostIdAdapter();
+
+    @Test
+    void shouldUnmarshal() throws Exception {
+        final String marshal = journalpostIdAdapter.unmarshal("4000000");
+        assertThat(marshal).isEqualTo("4000000");
+    }
+
+    @Test
+    void shouldUnmarshalWhenZeroesAdded() throws Exception {
+        final String marshal = journalpostIdAdapter.unmarshal("***gammelt_fnr***00");
+        assertThat(marshal).isEqualTo("4000000");
+    }
+
+    @Test
+    void shouldMarshal() throws Exception {
+        final String marshal = journalpostIdAdapter.marshal("4000000");
+        assertThat(marshal).isEqualTo("4000000");
+    }
+
+    @Test
+    void shouldMarshalWhenZeroesAdded() throws Exception {
+        final String marshal = journalpostIdAdapter.marshal("***gammelt_fnr***00");
+        assertThat(marshal).isEqualTo("4000000");
+    }
+}

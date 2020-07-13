@@ -19,6 +19,12 @@ public class SkanmotutgaaendeProperties {
     @NotNull
     private String dokarkivjournalposturl;
 
+    @NotEmpty
+    private String endpointuri;
+
+    @NotEmpty
+    private String endpointconfig;
+
     @NotNull
     private String schedule;
 
