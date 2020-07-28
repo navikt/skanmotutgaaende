@@ -1,6 +1,7 @@
 package no.nav.skanmotutgaaende.lagrefildetaljer;
 
 import no.nav.skanmotutgaaende.config.SkanmotutgaaendeProperties;
+import no.nav.skanmotutgaaende.exceptions.functional.HandledByFagpostException;
 import no.nav.skanmotutgaaende.exceptions.functional.LagreFilDetaljerFinnesIkkeException;
 import no.nav.skanmotutgaaende.exceptions.functional.LagreFilDetaljerTillaterIkkeTilknyttingException;
 import no.nav.skanmotutgaaende.exceptions.functional.SkanmotutgaaendeFunctionalException;
@@ -67,7 +68,7 @@ public class LagreFildetaljerConsumer {
                 throw new LagreFilDetaljerFinnesIkkeException(String.format("lagreFilDetaljer feilet funksjonelt med statusKode=%s. Feilmelding=%s", e
                         .getStatusCode(), e.getResponseBodyAsString()), e);
             } else if (HttpStatus.CONFLICT.equals(e.getStatusCode())) {
-                throw new LagreFilDetaljerTillaterIkkeTilknyttingException(String.format("lagreFilDetaljer feilet funksjonelt med statusKode=%s. Feilmelding=%s", e
+                throw new HandledByFagpostException(String.format("lagreFilDetaljer feilet funksjonelt med statusKode=%s. Feilmelding=%s", e
                         .getStatusCode(), e.getResponseBodyAsString()), e);
             } else {
                 throw new SkanmotutgaaendeFunctionalException(String.format("lagreFilDetaljer feilet funksjonelt med statusKode=%s. Feilmelding=%s", e
