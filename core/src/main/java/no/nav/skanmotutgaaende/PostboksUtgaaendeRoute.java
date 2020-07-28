@@ -49,10 +49,10 @@ public class PostboksUtgaaendeRoute extends RouteBuilder {
                 .handled(true)
                 .process(new MdcSetterProcessor())
                 .process(errorMetricsProcessor)
-                .log(LoggingLevel.INFO, log, "Skanmotutgaaende feilet funksjonelt for " + KEY_LOGGING_INFO + ". ${exception}")
+                .log(LoggingLevel.WARN, log, "Skanmotutgaaende feilet funksjonelt for " + KEY_LOGGING_INFO + ". ${exception}")
                 .setHeader(Exchange.FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}/${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}.zip"))
                 .to("direct:avvik")
-                .log(LoggingLevel.INFO, log, "Skanmotutgaaende skrev feiletzip=${header." + Exchange.FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".");
+                .log(LoggingLevel.WARN, log, "Skanmotutgaaende skrev feiletzip=${header." + Exchange.FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".");
 
         // Kjente funksjonelle feil
         onException(AbstractSkanmotutgaaendeFunctionalException.class)
