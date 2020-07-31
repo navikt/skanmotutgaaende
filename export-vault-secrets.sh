@@ -9,5 +9,5 @@ fi
 if test -f /var/run/secrets/nais.io/srvskanmotutgaaende/password;
 then
     echo "Setting SERVICEUSER_PASSWORD"
-    export SKANMOTUTGAAENDE_SERVICEUSER_***passord=gammelt_passord***)
+    export SKANMOTUTGAAENDE_SERVICEUSER_PASSWORD=$(cat /var/run/secrets/nais.io/srvskanmotutgaaende/password)
 fi

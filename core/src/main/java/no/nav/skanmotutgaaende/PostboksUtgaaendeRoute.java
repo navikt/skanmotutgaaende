@@ -2,6 +2,7 @@ package no.nav.skanmotutgaaende;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotutgaaende.exceptions.functional.AbstractSkanmotutgaaendeFunctionalException;
+import no.nav.skanmotutgaaende.exceptions.functional.FunctionalExceptionHandled;
 import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
@@ -43,7 +44,7 @@ public class PostboksUtgaaendeRoute extends RouteBuilder {
                 .to("direct:avvik")
                 .log(LoggingLevel.ERROR, log, "Skanmotutgaaende skrev feiletzip=${header." + Exchange.FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".");
 
-        // Kjente funksjonelle feil
+       // Kjente funksjonelle feil
         onException(AbstractSkanmotutgaaendeFunctionalException.class)
                 .handled(true)
                 .process(new MdcSetterProcessor())

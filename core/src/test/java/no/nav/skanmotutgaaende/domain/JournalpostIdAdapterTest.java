@@ -18,7 +18,7 @@ class JournalpostIdAdapterTest {
 
     @Test
     void shouldUnmarshalWhenZeroesAdded() throws Exception {
-        final String marshal = journalpostIdAdapter.unmarshal("***gammelt_fnr***00");
+        final String marshal = journalpostIdAdapter.unmarshal("0000004000000");
         assertThat(marshal).isEqualTo("4000000");
     }
 
@@ -30,7 +30,7 @@ class JournalpostIdAdapterTest {
 
     @Test
     void shouldMarshalWhenZeroesAdded() throws Exception {
-        final String marshal = journalpostIdAdapter.marshal("***gammelt_fnr***00");
+        final String marshal = journalpostIdAdapter.marshal("0000004000000");
         assertThat(marshal).isEqualTo("4000000");
     }
 }

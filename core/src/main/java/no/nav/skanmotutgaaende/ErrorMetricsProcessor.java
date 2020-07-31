@@ -9,8 +9,9 @@ public class ErrorMetricsProcessor implements Processor {
     @Override
     public void process(Exchange exchange) throws Exception {
         Object exception = exchange.getProperty(Exchange.EXCEPTION_CAUGHT);
-        if(exception instanceof Throwable){
+        if (exception instanceof Throwable) {
             DokCounter.incrementError((Throwable) exception);
         }
+
     }
 }
