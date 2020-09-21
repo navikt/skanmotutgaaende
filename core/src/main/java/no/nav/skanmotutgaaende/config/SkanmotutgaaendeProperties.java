@@ -8,6 +8,7 @@ import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.time.Duration;
 
 @Getter
 @Setter
@@ -27,6 +28,9 @@ public class SkanmotutgaaendeProperties {
 
     @NotNull
     private String schedule;
+
+    @NotNull
+    private Duration completiontimeout;
 
     private final FilomraadeProperties filomraade = new FilomraadeProperties();
 
@@ -57,7 +61,6 @@ public class SkanmotutgaaendeProperties {
         @NotEmpty
         @ToString.Exclude
         private String password;
-
     }
 
     @Getter
