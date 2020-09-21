@@ -52,6 +52,7 @@ public class PostboksUtgaaendeRouteIT {
     private final String URL_DOKARKIV_JOURNALPOST_GEN = "/rest/intern/journalpostapi/v1/journalpost/\\d+/mottaDokumentUtgaaendeSkanning";
     private final String URL_DOKARKIV_JOURNALPOST_BAD_REQUEST = "/rest/intern/journalpostapi/v1/journalpost/4000004/mottaDokumentUtgaaendeSkanning";
     private final String ZIP_FILE_NAME_NO_EXTENSION = "01.07.2020_R123456789_1_1000";
+    private final String ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION = "01.07.2020_R100000000_1_1000_ordered_xml_first_big";
 
     @Inject
     private Path sshdPath;
@@ -86,12 +87,12 @@ public class PostboksUtgaaendeRouteIT {
         setUpBadStubs();
         copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_NO_EXTENSION + ".zip");
 
-        await().atMost(10, SECONDS).untilAsserted(() -> {
+        await().atMost(15, SECONDS).untilAsserted(() -> {
             try {
                 assertThat(Files.list(sshdPath.resolve(FEILMAPPE)
                         .resolve(ZIP_FILE_NAME_NO_EXTENSION))
                         .collect(Collectors.toList())).hasSize(4);
-            } catch(NoSuchFileException e) {
+            } catch (NoSuchFileException e) {
                 fail();
             }
         });
@@ -106,6 +107,44 @@ public class PostboksUtgaaendeRouteIT {
                 "01.07.2020_R123456789_0006.zip"
         )));
         verify(exactly(3), putRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
+    }
+
+    @Test
+    public void shouldBehandleZipXmlOrderedLastWithinCompletionTimeout() throws IOException {
+        // 01.07.2020_R100000000_1_1000_ordered_xml_first_big.zip
+        // OK   - 01.07.2020_R100000000_0001
+        // OK   - 01.07.2020_R100000000_0002 (mangler filnavn og fysiskPostboks)
+        // FEIL - 01.07.2020_R100000000_0003 (valideringsfeil, mangler journalpostid)
+        // FEIL - 01.07.2020_R100000000_0004 (vil feile hos dokarkiv 400_Bad_Request)
+        // FEIL - 01.07.2020_R100000000_0005 (mangler pdf)
+        // FEIL - 01.07.2020_R100000000_0006 (mangler xml)
+        // OK   - 01.07.2020_R100000000_0007
+        // ...
+        // OK   - 01.07.2020_R100000000_0059
+        setUpHappyStubs();
+        setUpBadStubs();
+        copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION + ".zip");
+
+        await().atMost(15, SECONDS).untilAsserted(() -> {
+            try {
+                assertThat(Files.list(sshdPath.resolve(FEILMAPPE)
+                        .resolve(ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION))
+                        .collect(Collectors.toList())).hasSize(4);
+            } catch (NoSuchFileException e) {
+                fail();
+            }
+        });
+
+        final List<String> feilmappeContents = Files.list(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION))
+                .map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
+                .collect(Collectors.toList());
+        assertTrue(feilmappeContents.containsAll(List.of(
+                "01.07.2020_R100000000_0003.zip",
+                "01.07.2020_R100000000_0004.zip",
+                "01.07.2020_R100000000_0005.zip",
+                "01.07.2020_R100000000_0006.zip"
+        )));
+        verify(exactly(56), putRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
     }
 
     private void setUpHappyStubs() {

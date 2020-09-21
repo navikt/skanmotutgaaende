@@ -1,8 +1,8 @@
 package no.nav.skanmotutgaaende;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.skanmotutgaaende.config.SkanmotutgaaendeProperties;
 import no.nav.skanmotutgaaende.exceptions.functional.AbstractSkanmotutgaaendeFunctionalException;
-import no.nav.skanmotutgaaende.exceptions.functional.FunctionalExceptionHandled;
 import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
@@ -24,11 +24,13 @@ public class PostboksUtgaaendeRoute extends RouteBuilder {
     public static final String KEY_LOGGING_INFO = "fil=${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}, batch=${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}";
     static final int FORVENTET_ANTALL_PER_FORSENDELSE = 2;
 
+    private final SkanmotutgaaendeProperties skanmotutgaaendeProperties;
     private final PostboksUtgaaendeService postboksUtgaaendeService;
     private final ErrorMetricsProcessor errorMetricsProcessor;
 
     @Inject
-    public PostboksUtgaaendeRoute(PostboksUtgaaendeService postboksUtgaaendeService) {
+    public PostboksUtgaaendeRoute(SkanmotutgaaendeProperties skanmotutgaaendeProperties, PostboksUtgaaendeService postboksUtgaaendeService) {
+        this.skanmotutgaaendeProperties = skanmotutgaaendeProperties;
         this.postboksUtgaaendeService = postboksUtgaaendeService;
         this.errorMetricsProcessor = new ErrorMetricsProcessor();
     }
@@ -70,7 +72,7 @@ public class PostboksUtgaaendeRoute extends RouteBuilder {
                 .split(new ZipSplitter()).streaming()
                 .aggregate(simple("${file:name.noext.single}"), new PostboksUtgaaendeSkanningAggregator())
                 .completionSize(FORVENTET_ANTALL_PER_FORSENDELSE)
-                .completionTimeout(TimeUnit.SECONDS.toMillis(1))
+                .completionTimeout(skanmotutgaaendeProperties.getCompletiontimeout().toMillis())
                 .setProperty(PROPERTY_FORSENDELSE_FILEBASENAME, simple("${exchangeProperty.CamelAggregatedCorrelationKey}"))
                 .process(new MdcSetterProcessor())
                 .process(exchange -> exchange.getIn().getBody(PostboksUtgaaendeEnvelope.class).validate())
