@@ -98,7 +98,9 @@ public class PostboksUtgaaendeDecryptRoute extends RouteBuilder {
                 .to("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.feilmappe}}" +
                         "?{{skanmotutgaaende.endpointconfig}}")
                 .otherwise()
-                .log(LoggingLevel.ERROR, log, "Skanmotutgaaende teknisk feil der " + KEY_LOGGING_INFO + ". ikke ble flyttet til feilområde. Må analyseres.")
+                .log(LoggingLevel.ERROR, log, "Skanmotutgaaende teknisk feil der " + KEY_LOGGING_INFO +
+                        ". ikke ble flyttet til feilområde. Må analyseres. {{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.feilmappe}}\" +\n" +
+                        "                        \"?{{skanmotutgaaende.endpointconfig}}")
                 .end()
                 .process(new MdcRemoverProcessor());
     }

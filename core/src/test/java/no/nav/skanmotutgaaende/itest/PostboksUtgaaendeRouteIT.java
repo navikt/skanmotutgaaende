@@ -52,7 +52,7 @@ public class PostboksUtgaaendeRouteIT {
 
     private final String URL_DOKARKIV_JOURNALPOST_GEN = "/rest/intern/journalpostapi/v1/journalpost/\\d+/mottaDokumentUtgaaendeSkanning";
     private final String URL_DOKARKIV_JOURNALPOST_BAD_REQUEST = "/rest/intern/journalpostapi/v1/journalpost/4000004/mottaDokumentUtgaaendeSkanning";
-    private final String ZIP_FILE_NAME_NO_EXTENSION = "passprot";
+    private final String ZIP_FILE_NAME_NO_EXTENSION = "01.07.2020_R123456789_1_1000_encrypted";
     //private final String ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION = "01.07.2020_R100000000_1_1000_ordered_xml_first_big";
 
     @Inject
@@ -88,7 +88,7 @@ public class PostboksUtgaaendeRouteIT {
         setUpBadStubs();
         copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_NO_EXTENSION + ".zip");
 
-       await().atMost(600000, SECONDS).untilAsserted(() -> {
+       await().atMost(15, SECONDS).untilAsserted(() -> {
             try {
                 assertThat(Files.list(sshdPath.resolve(FEILMAPPE)
                         .resolve(ZIP_FILE_NAME_NO_EXTENSION))
