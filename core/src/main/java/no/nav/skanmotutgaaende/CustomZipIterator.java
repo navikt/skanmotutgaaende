@@ -42,7 +42,7 @@ public class CustomZipIterator implements Iterator<Message>, Closeable {
             if (zipInputStream == null) {
                 return false;
             }
-            boolean availableDataInCurrentEntry = zipInputStream.available() == 1;
+            boolean availableDataInCurrentEntry = zipInputStream.getAvailableBytesInPushBackInputStream() >= 1;
             if (!availableDataInCurrentEntry) {
                 // advance to the next entry.
                 parent = getNextElement();
