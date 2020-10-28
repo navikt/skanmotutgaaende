@@ -31,6 +31,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
+import static java.lang.Thread.sleep;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -51,8 +52,8 @@ public class PostboksUtgaaendeRouteIT {
 
     private final String URL_DOKARKIV_JOURNALPOST_GEN = "/rest/intern/journalpostapi/v1/journalpost/\\d+/mottaDokumentUtgaaendeSkanning";
     private final String URL_DOKARKIV_JOURNALPOST_BAD_REQUEST = "/rest/intern/journalpostapi/v1/journalpost/4000004/mottaDokumentUtgaaendeSkanning";
-    private final String ZIP_FILE_NAME_NO_EXTENSION = "01.07.2020_R123456789_1_1000";
-    private final String ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION = "01.07.2020_R100000000_1_1000_ordered_xml_first_big";
+    private final String ZIP_FILE_NAME_NO_EXTENSION = "passprot";
+    //private final String ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION = "01.07.2020_R100000000_1_1000_ordered_xml_first_big";
 
     @Inject
     private Path sshdPath;
@@ -87,7 +88,7 @@ public class PostboksUtgaaendeRouteIT {
         setUpBadStubs();
         copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_NO_EXTENSION + ".zip");
 
-        await().atMost(15, SECONDS).untilAsserted(() -> {
+       await().atMost(600000, SECONDS).untilAsserted(() -> {
             try {
                 assertThat(Files.list(sshdPath.resolve(FEILMAPPE)
                         .resolve(ZIP_FILE_NAME_NO_EXTENSION))
@@ -109,7 +110,7 @@ public class PostboksUtgaaendeRouteIT {
         verify(exactly(3), putRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
     }
 
-    @Test
+    /*@Test
     public void shouldBehandleZipXmlOrderedLastWithinCompletionTimeout() throws IOException {
         // 01.07.2020_R100000000_1_1000_ordered_xml_first_big.zip
         // OK   - 01.07.2020_R100000000_0001
@@ -145,7 +146,7 @@ public class PostboksUtgaaendeRouteIT {
                 "01.07.2020_R100000000_0006.zip"
         )));
         verify(exactly(56), putRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
-    }
+    }*/
 
     private void setUpHappyStubs() {
         stubFor(put(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN))

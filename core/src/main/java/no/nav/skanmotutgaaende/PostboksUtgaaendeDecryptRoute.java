@@ -15,10 +15,9 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author Joakim Bjørnstad, Jbit AS
  */
-
 @Slf4j
 @Component
-public class PostboksUtgaaendeRoute extends RouteBuilder {
+public class PostboksUtgaaendeDecryptRoute extends RouteBuilder {
     public static final String PROPERTY_FORSENDELSE_ZIPNAME = "ForsendelseZipname";
     public static final String PROPERTY_FORSENDELSE_BATCHNAVN = "ForsendelseBatchNavn";
     public static final String PROPERTY_FORSENDELSE_FILEBASENAME = "ForsendelseFileBasename";
@@ -30,7 +29,7 @@ public class PostboksUtgaaendeRoute extends RouteBuilder {
     private final ErrorMetricsProcessor errorMetricsProcessor;
 
     @Inject
-    public PostboksUtgaaendeRoute(SkanmotutgaaendeProperties skanmotutgaaendeProperties, PostboksUtgaaendeService postboksUtgaaendeService) {
+    public PostboksUtgaaendeDecryptRoute(SkanmotutgaaendeProperties skanmotutgaaendeProperties, PostboksUtgaaendeService postboksUtgaaendeService) {
         this.skanmotutgaaendeProperties = skanmotutgaaendeProperties;
         this.postboksUtgaaendeService = postboksUtgaaendeService;
         this.errorMetricsProcessor = new ErrorMetricsProcessor();
@@ -38,7 +37,7 @@ public class PostboksUtgaaendeRoute extends RouteBuilder {
 
     @Override
     public void configure() throws Exception {
-       /* onException(Exception.class)
+        onException(Exception.class)
                 .handled(true)
                 .process(new MdcSetterProcessor())
                 .process(errorMetricsProcessor)
@@ -57,7 +56,7 @@ public class PostboksUtgaaendeRoute extends RouteBuilder {
                 .to("direct:avvik")
                 .log(LoggingLevel.WARN, log, "Skanmotutgaaende skrev feiletzip=${header." + Exchange.FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".");
 
-       /* from("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.inngaaendemappe}}" +
+        from("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.inngaaendemappe}}" +
                 "?{{skanmotutgaaende.endpointconfig}}" +
                 "&delay=" + TimeUnit.SECONDS.toMillis(60) +
                 "&antInclude=*.zip,*.ZIP" +
@@ -70,9 +69,14 @@ public class PostboksUtgaaendeRoute extends RouteBuilder {
                 .setProperty(PROPERTY_FORSENDELSE_ZIPNAME, simple("${file:name}"))
                 .setProperty(PROPERTY_FORSENDELSE_BATCHNAVN, simple("${file:name.noext.single}"))
                 .process(new MdcSetterProcessor())
-                .split(new ZipSplitter()).streaming()
+                .log(LoggingLevel.INFO, log, "Skanmotutgaaende starter behandling av fil=${file:absolute.path}.1")
+                .process(exchange -> postboksUtgaaendeService.openWithPassword(exchange))
+                .split(new CustomZipSplitter()).streaming()
+                .log(LoggingLevel.INFO, log, "Skanmotutgaaende starter behandling av fil=${file:absolute.path}.2")
                 .aggregate(simple("${file:name.noext.single}"), new PostboksUtgaaendeSkanningAggregator())
+                .log(LoggingLevel.INFO, log, "Skanmotutgaaende starter behandling av fil=${file:absolute.path}.3")
                 .completionSize(FORVENTET_ANTALL_PER_FORSENDELSE)
+                .log(LoggingLevel.INFO, log, "Skanmotutgaaende starter behandling av fil=${file:absolute.path}.4")
                 .completionTimeout(skanmotutgaaendeProperties.getCompletiontimeout().toMillis())
                 .setProperty(PROPERTY_FORSENDELSE_FILEBASENAME, simple("${exchangeProperty.CamelAggregatedCorrelationKey}"))
                 .process(new MdcSetterProcessor())
@@ -101,5 +105,5 @@ public class PostboksUtgaaendeRoute extends RouteBuilder {
                 .log(LoggingLevel.ERROR, log, "Skanmotutgaaende teknisk feil der " + KEY_LOGGING_INFO + ". ikke ble flyttet til feilområde. Må analyseres.")
                 .end()
                 .process(new MdcRemoverProcessor());
-   */ }
+    }
 }
