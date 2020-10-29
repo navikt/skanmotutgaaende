@@ -1,4 +1,4 @@
-package no.nav.skanmotutgaaende;
+package no.nav.skanmotutgaaende.decrypt;
 
 import net.lingala.zip4j.io.inputstream.ZipInputStream;
 import net.lingala.zip4j.model.LocalFileHeader;
@@ -15,7 +15,6 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
-import java.util.zip.ZipEntry;
 
 public class CustomZipIterator implements Iterator<Message>, Closeable {
     static final Logger LOGGER = LoggerFactory.getLogger(org.apache.camel.dataformat.zipfile.ZipIterator.class);
@@ -85,7 +84,7 @@ public class CustomZipIterator implements Iterator<Message>, Closeable {
                 answer.getHeaders().putAll(exchange.getIn().getHeaders());
                 answer.setHeader("zipFileName", current.getFileName());
                 answer.setHeader(Exchange.FILE_NAME, current.getFileName());
-                answer.setBody(new ZipInputStreamWrapper(zipInputStream));
+                answer.setBody(new CustomZipInputStreamWrapper(zipInputStream));
                 return answer;
             } else {
                 LOGGER.trace("close zipInputStream");

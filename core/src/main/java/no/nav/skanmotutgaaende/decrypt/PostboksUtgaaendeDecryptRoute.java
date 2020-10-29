@@ -1,12 +1,18 @@
-package no.nav.skanmotutgaaende;
+package no.nav.skanmotutgaaende.decrypt;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.skanmotutgaaende.ErrorMetricsProcessor;
+import no.nav.skanmotutgaaende.MdcRemoverProcessor;
+import no.nav.skanmotutgaaende.MdcSetterProcessor;
+import no.nav.skanmotutgaaende.PostboksUtgaaendeEnvelope;
+import no.nav.skanmotutgaaende.PostboksUtgaaendeService;
+import no.nav.skanmotutgaaende.PostboksUtgaaendeSkanningAggregator;
+import no.nav.skanmotutgaaende.SkanningmetadataUnmarshaller;
 import no.nav.skanmotutgaaende.config.SkanmotutgaaendeProperties;
 import no.nav.skanmotutgaaende.exceptions.functional.AbstractSkanmotutgaaendeFunctionalException;
 import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.dataformat.zipfile.ZipSplitter;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
@@ -15,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author Joakim Bjørnstad, Jbit AS
  */
+
 @Slf4j
 @Component
 public class PostboksUtgaaendeDecryptRoute extends RouteBuilder {
@@ -59,17 +66,16 @@ public class PostboksUtgaaendeDecryptRoute extends RouteBuilder {
         from("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.inngaaendemappe}}" +
                 "?{{skanmotutgaaende.endpointconfig}}" +
                 "&delay=" + TimeUnit.SECONDS.toMillis(60) +
-                "&antInclude=*.zip,*.ZIP" +
+                "&antInclude=*encrypted.zip,*encrypted.ZIP" +
                 "&initialDelay=1000" +
                 "&maxMessagesPerPoll=10" +
                 "&move=processed" +
                 "&scheduler=spring&scheduler.cron={{skanmotutgaaende.schedule}}")
-                .routeId("read_zip_from_sftp")
-                .log(LoggingLevel.INFO, log, "Skanmotutgaaende starter behandling av fil=${file:absolute.path}.")
+                .routeId("read_encrypted_zip_from_sftp")
+                .log(LoggingLevel.INFO, log, "SkanmotutgaaendeDecrypt starter behandling av fil=${file:absolute.path}.")
                 .setProperty(PROPERTY_FORSENDELSE_ZIPNAME, simple("${file:name}"))
                 .setProperty(PROPERTY_FORSENDELSE_BATCHNAVN, simple("${file:name.noext.single}"))
                 .process(new MdcSetterProcessor())
-//                .process(exchange -> postboksUtgaaendeService.openWithPassword(exchange))
                 .split(new CustomZipSplitter()).streaming()
                 .aggregate(simple("${file:name.noext.single}"), new PostboksUtgaaendeSkanningAggregator())
                 .completionSize(FORVENTET_ANTALL_PER_FORSENDELSE)
@@ -84,6 +90,7 @@ public class PostboksUtgaaendeDecryptRoute extends RouteBuilder {
                 .end() // split
                 .process(new MdcRemoverProcessor())
                 .log(LoggingLevel.INFO, log, "Skanmotutgaaende behandlet ferdig fil=${file:absolute.path}.");
+
 
         from("direct:process_utgaaende")
                 .routeId("process_utgaaende")

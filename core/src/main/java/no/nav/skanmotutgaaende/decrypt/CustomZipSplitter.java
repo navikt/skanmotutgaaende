@@ -1,7 +1,8 @@
-package no.nav.skanmotutgaaende;
+package no.nav.skanmotutgaaende.decrypt;
 
 import lombok.extern.slf4j.Slf4j;
 import net.lingala.zip4j.io.inputstream.ZipInputStream;
+import no.nav.skanmotutgaaende.exceptions.functional.SkanmotutgaaendeFunctionalException;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
 import org.apache.camel.dataformat.zipfile.ZipSplitter;
@@ -17,14 +18,14 @@ public class CustomZipSplitter extends ZipSplitter {
     public Object evaluate(Exchange exchange) {
         try {
             Message inputMessage = exchange.getIn();
+            //TODO: putt inn passord fra vault
             String zipPassword = "changeme";
             ZipInputStream zip = new ZipInputStream(inputMessage.getBody(InputStream.class), zipPassword.toCharArray());
 
             return new CustomZipIterator(exchange, zip);
         } catch (Exception e) {
             //TODO: FIX
-            log.error("Feilet under dekryptering", e);
-            return null;
+            throw new SkanmotutgaaendeFunctionalException("Feilet under dekryptering", e);
         }
     }
 

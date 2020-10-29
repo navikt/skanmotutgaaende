@@ -38,7 +38,7 @@ public class PostboksUtgaaendeRoute extends RouteBuilder {
 
     @Override
     public void configure() throws Exception {
-       /* onException(Exception.class)
+        onException(Exception.class)
                 .handled(true)
                 .process(new MdcSetterProcessor())
                 .process(errorMetricsProcessor)
@@ -57,9 +57,10 @@ public class PostboksUtgaaendeRoute extends RouteBuilder {
                 .to("direct:avvik")
                 .log(LoggingLevel.WARN, log, "Skanmotutgaaende skrev feiletzip=${header." + Exchange.FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".");
 
-       /* from("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.inngaaendemappe}}" +
+        from("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.inngaaendemappe}}" +
                 "?{{skanmotutgaaende.endpointconfig}}" +
                 "&delay=" + TimeUnit.SECONDS.toMillis(60) +
+                "&antExclude=*encrypted.zip, *encrypted.ZIP" +
                 "&antInclude=*.zip,*.ZIP" +
                 "&initialDelay=1000" +
                 "&maxMessagesPerPoll=10" +
@@ -85,6 +86,7 @@ public class PostboksUtgaaendeRoute extends RouteBuilder {
                 .process(new MdcRemoverProcessor())
                 .log(LoggingLevel.INFO, log, "Skanmotutgaaende behandlet ferdig fil=${file:absolute.path}.");
 
+
         from("direct:process_utgaaende")
                 .routeId("process_utgaaende")
                 .process(new MdcSetterProcessor())
@@ -101,5 +103,5 @@ public class PostboksUtgaaendeRoute extends RouteBuilder {
                 .log(LoggingLevel.ERROR, log, "Skanmotutgaaende teknisk feil der " + KEY_LOGGING_INFO + ". ikke ble flyttet til feilområde. Må analyseres.")
                 .end()
                 .process(new MdcRemoverProcessor());
-   */ }
+    }
 }

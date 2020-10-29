@@ -1,6 +1,8 @@
 package no.nav.skanmotutgaaende.itest;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
+import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,6 +19,7 @@ import wiremock.org.apache.commons.io.FileUtils;
 import wiremock.org.apache.commons.io.FilenameUtils;
 
 import javax.inject.Inject;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
@@ -31,7 +34,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
-import static java.lang.Thread.sleep;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -45,15 +47,15 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @AutoConfigureWireMock(port = 0)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ActiveProfiles("itest")
-public class PostboksUtgaaendeRouteIT {
+public class PostboksUtgaaendeDecryptRouteIT {
 
     public static final String INNGAAENDE = "inngaaende";
     public static final String FEILMAPPE = "feilmappe";
 
     private final String URL_DOKARKIV_JOURNALPOST_GEN = "/rest/intern/journalpostapi/v1/journalpost/\\d+/mottaDokumentUtgaaendeSkanning";
     private final String URL_DOKARKIV_JOURNALPOST_BAD_REQUEST = "/rest/intern/journalpostapi/v1/journalpost/4000004/mottaDokumentUtgaaendeSkanning";
-    private final String ZIP_FILE_NAME_NO_EXTENSION = "01.07.2020_R123456789_1_1000";
-    private final String ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION = "01.07.2020_R100000000_1_1000_ordered_xml_first_big";
+    private final String ZIP_FILE_NAME_NO_EXTENSION = "01.07.2020_R123456789_1_1000_encrypted";
+    private final String ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION = "01.07.2020_R100000000_1_1000_ordered_xml_first_big_encrypted";
 
     @Inject
     private Path sshdPath;
@@ -65,15 +67,23 @@ public class PostboksUtgaaendeRouteIT {
         final Path feilmappe = sshdPath.resolve(FEILMAPPE);
         preparePath(inngaaende);
         preparePath(processed);
-        try{preparePath(feilmappe);}
-        catch(Exception e){}
+        preparePath(feilmappe);
+
     }
 
     @AfterEach
-    void tearDown() {
+    void tearDown() throws IOException{
         WireMock.reset();
         WireMock.resetAllRequests();
         WireMock.removeAllMappings();
+        File dir = sshdPath.toFile();
+        for (File file:dir.listFiles()) {
+            file.delete();
+        }
+        File dirr = new File(String.valueOf(sshdPath.toAbsolutePath()));
+        dirr.delete();
+
+
     }
 
     @Test
@@ -129,6 +139,9 @@ public class PostboksUtgaaendeRouteIT {
 
         await().atMost(15, SECONDS).untilAsserted(() -> {
             try {
+                final List<String> feilmappeContents = Files.list(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION))
+                        .map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
+                        .collect(Collectors.toList());
                 assertThat(Files.list(sshdPath.resolve(FEILMAPPE)
                         .resolve(ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION))
                         .collect(Collectors.toList())).hasSize(4);

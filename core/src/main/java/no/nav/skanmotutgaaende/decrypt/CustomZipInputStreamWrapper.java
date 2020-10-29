@@ -14,19 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.nav.skanmotutgaaende;
+package no.nav.skanmotutgaaende.decrypt;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-class ZipInputStreamWrapper extends BufferedInputStream {
+class CustomZipInputStreamWrapper extends BufferedInputStream {
 
-    ZipInputStreamWrapper(InputStream in, int size) {
+    CustomZipInputStreamWrapper(InputStream in, int size) {
         super(in, size);
     }
 
-    ZipInputStreamWrapper(InputStream in) {
+    CustomZipInputStreamWrapper(InputStream in) {
         super(in);
     }
 
