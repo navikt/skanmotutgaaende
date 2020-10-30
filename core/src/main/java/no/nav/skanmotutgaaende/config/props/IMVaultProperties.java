@@ -25,4 +25,7 @@ public class IMVaultProperties {
     @NotBlank
     private String kubernetespath;
 
+    @NotBlank
+    private String defaultcontext;
+
 }
