@@ -26,6 +26,8 @@
 
         <camel.version>3.4.3</camel.version>
         <spring-cloud.version>Hoxton.SR8</spring-cloud.version>
+        <camel.crypto.version>3.2.0</camel.crypto.version>
+        <zip4j.version>2.6.4</zip4j.version>
         <commons-compress.version>1.20</commons-compress.version>
         <commons-io.version>2.7</commons-io.version>
         <glassfish.jaxb.version>2.3.2</glassfish.jaxb.version>
@@ -43,6 +45,11 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>net.lingala.zip4j</groupId>
+                <artifactId>zip4j</artifactId>
+                <version>${zip4j.version}</version>
+            </dependency>
             <dependency>
                 <groupId>no.nav.skanmotutgaaende</groupId>
                 <artifactId>core</artifactId>
