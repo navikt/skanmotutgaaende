@@ -25,6 +25,7 @@
         <java.version>11</java.version>
 
         <camel.version>3.4.3</camel.version>
+        <spring-cloud.version>Hoxton.SR8</spring-cloud.version>
         <commons-compress.version>1.20</commons-compress.version>
         <commons-io.version>2.7</commons-io.version>
         <glassfish.jaxb.version>2.3.2</glassfish.jaxb.version>
@@ -32,8 +33,8 @@
         <javax.activation.version>1.1.1</javax.activation.version>
         <javax.inject.version>1</javax.inject.version>
         <javax.bind.version>2.3.1</javax.bind.version>
-        <logstash-logback-encoder.version>6.3</logstash-logback-encoder.version>
-        <spring-cloud-contract-wiremock.version>2.2.2.RELEASE</spring-cloud-contract-wiremock.version>
+        <logstash-logback-encoder.version>6.4</logstash-logback-encoder.version>
+        <spring-cloud-contract-wiremock.version>2.2.4.RELEASE</spring-cloud-contract-wiremock.version>
         <sshd-core.version>2.4.0</sshd-core.version>
         <lombok.version>1.18.4</lombok.version>
         <!-- test -->
@@ -54,6 +55,14 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
             <dependency>
                 <groupId>net.logstash.logback</groupId>
                 <artifactId>logstash-logback-encoder</artifactId>

@@ -1,4 +1,4 @@
-package no.nav.skanmotutgaaende.config;
+package no.nav.skanmotutgaaende.config.props;
 
 import lombok.Getter;
 import lombok.Setter;
