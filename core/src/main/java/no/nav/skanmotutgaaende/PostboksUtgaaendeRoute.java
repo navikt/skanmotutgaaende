@@ -1,7 +1,7 @@
 package no.nav.skanmotutgaaende;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.skanmotutgaaende.config.SkanmotutgaaendeProperties;
+import no.nav.skanmotutgaaende.config.props.SkanmotutgaaendeProperties;
 import no.nav.skanmotutgaaende.exceptions.functional.AbstractSkanmotutgaaendeFunctionalException;
 import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;

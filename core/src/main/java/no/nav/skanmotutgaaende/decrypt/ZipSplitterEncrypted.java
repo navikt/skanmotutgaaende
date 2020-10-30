@@ -6,19 +6,23 @@ import no.nav.skanmotutgaaende.exceptions.functional.SkanmotutgaaendeFunctionalE
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
 import org.apache.camel.dataformat.zipfile.ZipSplitter;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.io.InputStream;
 
 @Slf4j
 public class ZipSplitterEncrypted extends ZipSplitter {
-    public ZipSplitterEncrypted() {
+
+    private final String passphrase;
+
+    public ZipSplitterEncrypted(@Value("${skanmotutgaaende.secret.passphrase}") String passphrase) {
+        this.passphrase = passphrase;
     }
 
     @Override
     public ZipIteratorEncrypted evaluate(Exchange exchange) {
         Message inputMessage = exchange.getIn();
-        //TODO: putt inn passord fra vault
-        String zipPassword = "changeme";
+        String zipPassword = passphrase;
         ZipInputStream zip = new ZipInputStream(inputMessage.getBody(InputStream.class), zipPassword.toCharArray());
         return new ZipIteratorEncrypted(exchange, zip);
     }

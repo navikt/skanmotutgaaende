@@ -9,11 +9,12 @@ import no.nav.skanmotutgaaende.PostboksUtgaaendeEnvelope;
 import no.nav.skanmotutgaaende.PostboksUtgaaendeService;
 import no.nav.skanmotutgaaende.PostboksUtgaaendeSkanningAggregator;
 import no.nav.skanmotutgaaende.SkanningmetadataUnmarshaller;
-import no.nav.skanmotutgaaende.config.SkanmotutgaaendeProperties;
+import no.nav.skanmotutgaaende.config.props.SkanmotutgaaendeProperties;
 import no.nav.skanmotutgaaende.exceptions.functional.AbstractSkanmotutgaaendeFunctionalException;
 import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
@@ -35,12 +36,16 @@ public class PostboksUtgaaendeRouteEncrypted extends RouteBuilder {
     private final SkanmotutgaaendeProperties skanmotutgaaendeProperties;
     private final PostboksUtgaaendeService postboksUtgaaendeService;
     private final ErrorMetricsProcessor errorMetricsProcessor;
+    private final String passphrase;
 
     @Inject
-    public PostboksUtgaaendeRouteEncrypted(SkanmotutgaaendeProperties skanmotutgaaendeProperties, PostboksUtgaaendeService postboksUtgaaendeService) {
+    public PostboksUtgaaendeRouteEncrypted(SkanmotutgaaendeProperties skanmotutgaaendeProperties,
+                                           PostboksUtgaaendeService postboksUtgaaendeService,
+                                           @Value("${skanmotutgaaende.secret.passphrase}") String passphrase) {
         this.skanmotutgaaendeProperties = skanmotutgaaendeProperties;
         this.postboksUtgaaendeService = postboksUtgaaendeService;
         this.errorMetricsProcessor = new ErrorMetricsProcessor();
+        this.passphrase = passphrase;
     }
 
     @Override
@@ -90,7 +95,7 @@ public class PostboksUtgaaendeRouteEncrypted extends RouteBuilder {
                 .setProperty(PROPERTY_FORSENDELSE_ZIPNAME, simple("${file:name}"))
                 .setProperty(PROPERTY_FORSENDELSE_BATCHNAVN, simple("${file:name.noext.single}"))
                 .process(new MdcSetterProcessor())
-                .split(new ZipSplitterEncrypted()).streaming()
+                .split(new ZipSplitterEncrypted(passphrase)).streaming()
                 .log("hit")
                 .aggregate(simple("${file:name.noext.single}"), new PostboksUtgaaendeSkanningAggregator())
                 .completionSize(FORVENTET_ANTALL_PER_FORSENDELSE)
