@@ -20,13 +20,13 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-class CustomZipInputStreamWrapper extends BufferedInputStream {
+class ZipInputStreamWrapperEncrypted extends BufferedInputStream {
 
-    CustomZipInputStreamWrapper(InputStream in, int size) {
+    ZipInputStreamWrapperEncrypted(InputStream in, int size) {
         super(in, size);
     }
 
-    CustomZipInputStreamWrapper(InputStream in) {
+    ZipInputStreamWrapperEncrypted(InputStream in) {
         super(in);
     }
 

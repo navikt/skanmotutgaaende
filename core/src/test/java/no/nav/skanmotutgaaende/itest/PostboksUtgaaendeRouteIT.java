@@ -65,8 +65,12 @@ public class PostboksUtgaaendeRouteIT {
         final Path feilmappe = sshdPath.resolve(FEILMAPPE);
         preparePath(inngaaende);
         preparePath(processed);
-        try{preparePath(feilmappe);}
-        catch(Exception e){}
+        try{
+            preparePath(feilmappe);
+        }
+        catch(Exception e){
+            //noop. Windows sliter med å slette filene, de blir kun satt til "unavailable"
+        }
     }
 
     @AfterEach

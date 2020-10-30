@@ -1,6 +1,7 @@
 package no.nav.skanmotutgaaende.decrypt;
 
 import lombok.extern.slf4j.Slf4j;
+import net.lingala.zip4j.exception.ZipException;
 import no.nav.skanmotutgaaende.ErrorMetricsProcessor;
 import no.nav.skanmotutgaaende.MdcRemoverProcessor;
 import no.nav.skanmotutgaaende.MdcSetterProcessor;
@@ -24,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
-public class PostboksUtgaaendeDecryptRoute extends RouteBuilder {
+public class PostboksUtgaaendeRouteEncrypted extends RouteBuilder {
     public static final String PROPERTY_FORSENDELSE_ZIPNAME = "ForsendelseZipname";
     public static final String PROPERTY_FORSENDELSE_BATCHNAVN = "ForsendelseBatchNavn";
     public static final String PROPERTY_FORSENDELSE_FILEBASENAME = "ForsendelseFileBasename";
@@ -36,7 +37,7 @@ public class PostboksUtgaaendeDecryptRoute extends RouteBuilder {
     private final ErrorMetricsProcessor errorMetricsProcessor;
 
     @Inject
-    public PostboksUtgaaendeDecryptRoute(SkanmotutgaaendeProperties skanmotutgaaendeProperties, PostboksUtgaaendeService postboksUtgaaendeService) {
+    public PostboksUtgaaendeRouteEncrypted(SkanmotutgaaendeProperties skanmotutgaaendeProperties, PostboksUtgaaendeService postboksUtgaaendeService) {
         this.skanmotutgaaendeProperties = skanmotutgaaendeProperties;
         this.postboksUtgaaendeService = postboksUtgaaendeService;
         this.errorMetricsProcessor = new ErrorMetricsProcessor();
@@ -53,7 +54,20 @@ public class PostboksUtgaaendeDecryptRoute extends RouteBuilder {
                 .to("direct:avvik")
                 .log(LoggingLevel.ERROR, log, "Skanmotutgaaende skrev feiletzip=${header." + Exchange.FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".");
 
-       // Kjente funksjonelle feil
+        //Er dette en grei måte å håndete dette på?
+        // Feil passord kastes langt nede i et annet bibliotek. Fanges her
+        onException(ZipException.class)
+                .handled(true)
+                .process(new MdcSetterProcessor())
+                .process(errorMetricsProcessor)
+                .log(LoggingLevel.WARN, log, "Feil passord for en fil " + KEY_LOGGING_INFO + ". ${exception}")
+                .setHeader(Exchange.FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}.zip"))
+                //Hvor skal disse sendes?
+                .to("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.feilmappe}}" +
+                        "?{{skanmotutgaaende.endpointconfig}}")
+                .log(LoggingLevel.WARN, log, "Skanmotutgaaende skrev feiletzip=${header." + Exchange.FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".");
+
+        // Kjente funksjonelle feil
         onException(AbstractSkanmotutgaaendeFunctionalException.class)
                 .handled(true)
                 .process(new MdcSetterProcessor())
@@ -66,7 +80,7 @@ public class PostboksUtgaaendeDecryptRoute extends RouteBuilder {
         from("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.inngaaendemappe}}" +
                 "?{{skanmotutgaaende.endpointconfig}}" +
                 "&delay=" + TimeUnit.SECONDS.toMillis(60) +
-                "&antInclude=*encrypted.zip,*encrypted.ZIP" +
+                "&antInclude=*enc.zip,*enc.ZIP" +
                 "&initialDelay=1000" +
                 "&maxMessagesPerPoll=10" +
                 "&move=processed" +
@@ -76,7 +90,8 @@ public class PostboksUtgaaendeDecryptRoute extends RouteBuilder {
                 .setProperty(PROPERTY_FORSENDELSE_ZIPNAME, simple("${file:name}"))
                 .setProperty(PROPERTY_FORSENDELSE_BATCHNAVN, simple("${file:name.noext.single}"))
                 .process(new MdcSetterProcessor())
-                .split(new CustomZipSplitter()).streaming()
+                .split(new ZipSplitterEncrypted()).streaming()
+                .log("hit")
                 .aggregate(simple("${file:name.noext.single}"), new PostboksUtgaaendeSkanningAggregator())
                 .completionSize(FORVENTET_ANTALL_PER_FORSENDELSE)
                 .completionTimeout(skanmotutgaaendeProperties.getCompletiontimeout().toMillis())
@@ -90,7 +105,6 @@ public class PostboksUtgaaendeDecryptRoute extends RouteBuilder {
                 .end() // split
                 .process(new MdcRemoverProcessor())
                 .log(LoggingLevel.INFO, log, "Skanmotutgaaende behandlet ferdig fil=${file:absolute.path}.");
-
 
         from("direct:process_utgaaende")
                 .routeId("process_utgaaende")

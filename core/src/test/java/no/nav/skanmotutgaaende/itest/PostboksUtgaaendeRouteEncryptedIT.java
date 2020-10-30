@@ -47,15 +47,17 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @AutoConfigureWireMock(port = 0)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ActiveProfiles("itest")
-public class PostboksUtgaaendeDecryptRouteIT {
+public class PostboksUtgaaendeRouteEncryptedIT {
 
     public static final String INNGAAENDE = "inngaaende";
     public static final String FEILMAPPE = "feilmappe";
 
     private final String URL_DOKARKIV_JOURNALPOST_GEN = "/rest/intern/journalpostapi/v1/journalpost/\\d+/mottaDokumentUtgaaendeSkanning";
     private final String URL_DOKARKIV_JOURNALPOST_BAD_REQUEST = "/rest/intern/journalpostapi/v1/journalpost/4000004/mottaDokumentUtgaaendeSkanning";
-    private final String ZIP_FILE_NAME_NO_EXTENSION = "01.07.2020_R123456789_1_1000_encrypted";
-    private final String ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION = "01.07.2020_R100000000_1_1000_ordered_xml_first_big_encrypted";
+    private final String ZIP_FILE_NAME_NO_EXTENSION = "01.07.2020_R123456789_1_1000_enc";
+    private final String ZIP_FILENAME_NO_EXTENSION_BAD_PASSWORD = "29.10.2020_R123456789_6_9999_enc";
+    private final String ZIP_FILENAME_NO_EXTENSION_BAD_ENCRYPTION = "01.07.2020_R123456789_2_1000_enc";
+    private final String ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION = "01.07.2020_R100000000_1_1000_ordered_xml_first_big_enc";
 
     @Inject
     private Path sshdPath;
@@ -66,24 +68,29 @@ public class PostboksUtgaaendeDecryptRouteIT {
         final Path processed = inngaaende.resolve("processed");
         final Path feilmappe = sshdPath.resolve(FEILMAPPE);
         preparePath(inngaaende);
-        preparePath(processed);
-        preparePath(feilmappe);
-
+        try {
+            preparePath(processed);
+        } catch (Exception e) {
+            //noop. Windows sliter med å slette filene, de blir kun satt til "unavailable"
+        }
+        try {
+            preparePath(feilmappe);
+        } catch (Exception e) {
+            //noop. Windows sliter med å slette filene, de blir kun satt til "unavailable"
+        }
     }
 
     @AfterEach
-    void tearDown() throws IOException{
+    void tearDown() {
         WireMock.reset();
         WireMock.resetAllRequests();
         WireMock.removeAllMappings();
         File dir = sshdPath.toFile();
-        for (File file:dir.listFiles()) {
+        for (File file : dir.listFiles()) {
             file.delete();
         }
         File dirr = new File(String.valueOf(sshdPath.toAbsolutePath()));
         dirr.delete();
-
-
     }
 
     @Test
@@ -99,7 +106,7 @@ public class PostboksUtgaaendeDecryptRouteIT {
         setUpBadStubs();
         copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_NO_EXTENSION + ".zip");
 
-       await().atMost(15, SECONDS).untilAsserted(() -> {
+        await().atMost(15, SECONDS).untilAsserted(() -> {
             try {
                 assertThat(Files.list(sshdPath.resolve(FEILMAPPE)
                         .resolve(ZIP_FILE_NAME_NO_EXTENSION))
@@ -139,9 +146,6 @@ public class PostboksUtgaaendeDecryptRouteIT {
 
         await().atMost(15, SECONDS).untilAsserted(() -> {
             try {
-                final List<String> feilmappeContents = Files.list(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION))
-                        .map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
-                        .collect(Collectors.toList());
                 assertThat(Files.list(sshdPath.resolve(FEILMAPPE)
                         .resolve(ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION))
                         .collect(Collectors.toList())).hasSize(4);
@@ -160,6 +164,47 @@ public class PostboksUtgaaendeDecryptRouteIT {
                 "01.07.2020_R100000000_0006.zip"
         )));
         verify(exactly(56), putRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
+    }
+
+    @Test
+    public void shouldMoveZipToFeilomraadeWhenBadPassword() throws IOException {
+
+        //ZipException: Bad password
+        //should be sent to feilmappe
+
+        copyFileFromClasspathToInngaaende(ZIP_FILENAME_NO_EXTENSION_BAD_PASSWORD + ".zip");
+
+        await().atMost(150, SECONDS).untilAsserted(() -> {
+            try {
+                final List<String> feilmappeContents = Files.list(sshdPath.resolve(FEILMAPPE))
+                        .map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
+                        .collect(Collectors.toList());
+                assertTrue(feilmappeContents.contains(ZIP_FILENAME_NO_EXTENSION_BAD_PASSWORD + ".zip"));
+            } catch (NoSuchFileException e) {
+                fail();
+            }
+        });
+
+    }
+
+    @Test
+    public void shouldMoveZipToFeilomraadeWhenBadEncryption() throws IOException {
+
+        //ZipException: Bad encryption
+        //should be sent to feilmappe
+
+        copyFileFromClasspathToInngaaende(ZIP_FILENAME_NO_EXTENSION_BAD_ENCRYPTION + ".zip");
+
+        await().atMost(15, SECONDS).untilAsserted(() -> {
+            try {
+                final List<String> feilmappeContents = Files.list(sshdPath.resolve(FEILMAPPE))
+                        .map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
+                        .collect(Collectors.toList());
+                assertTrue(feilmappeContents.contains(ZIP_FILENAME_NO_EXTENSION_BAD_ENCRYPTION + ".zip"));
+            } catch (NoSuchFileException e) {
+                fail();
+            }
+        });
     }
 
     private void setUpHappyStubs() {

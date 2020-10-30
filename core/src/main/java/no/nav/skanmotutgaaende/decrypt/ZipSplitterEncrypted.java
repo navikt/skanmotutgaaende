@@ -10,23 +10,17 @@ import org.apache.camel.dataformat.zipfile.ZipSplitter;
 import java.io.InputStream;
 
 @Slf4j
-public class CustomZipSplitter extends ZipSplitter {
-    public CustomZipSplitter() {
+public class ZipSplitterEncrypted extends ZipSplitter {
+    public ZipSplitterEncrypted() {
     }
 
     @Override
-    public Object evaluate(Exchange exchange) {
-        try {
-            Message inputMessage = exchange.getIn();
-            //TODO: putt inn passord fra vault
-            String zipPassword = "changeme";
-            ZipInputStream zip = new ZipInputStream(inputMessage.getBody(InputStream.class), zipPassword.toCharArray());
-
-            return new CustomZipIterator(exchange, zip);
-        } catch (Exception e) {
-            //TODO: FIX
-            throw new SkanmotutgaaendeFunctionalException("Feilet under dekryptering", e);
-        }
+    public ZipIteratorEncrypted evaluate(Exchange exchange) {
+        Message inputMessage = exchange.getIn();
+        //TODO: putt inn passord fra vault
+        String zipPassword = "changeme";
+        ZipInputStream zip = new ZipInputStream(inputMessage.getBody(InputStream.class), zipPassword.toCharArray());
+        return new ZipIteratorEncrypted(exchange, zip);
     }
 
     @Override

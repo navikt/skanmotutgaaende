@@ -47,7 +47,7 @@ public class PostboksUtgaaendeRoute extends RouteBuilder {
                 .to("direct:avvik")
                 .log(LoggingLevel.ERROR, log, "Skanmotutgaaende skrev feiletzip=${header." + Exchange.FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".");
 
-       // Kjente funksjonelle feil
+        // Kjente funksjonelle feil
         onException(AbstractSkanmotutgaaendeFunctionalException.class)
                 .handled(true)
                 .process(new MdcSetterProcessor())
@@ -60,7 +60,7 @@ public class PostboksUtgaaendeRoute extends RouteBuilder {
         from("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.inngaaendemappe}}" +
                 "?{{skanmotutgaaende.endpointconfig}}" +
                 "&delay=" + TimeUnit.SECONDS.toMillis(60) +
-                "&antExclude=*encrypted.zip, *encrypted.ZIP" +
+                "&antExclude=*enc.zip, *enc.ZIP" +
                 "&antInclude=*.zip,*.ZIP" +
                 "&initialDelay=1000" +
                 "&maxMessagesPerPoll=10" +
@@ -85,7 +85,6 @@ public class PostboksUtgaaendeRoute extends RouteBuilder {
                 .end() // split
                 .process(new MdcRemoverProcessor())
                 .log(LoggingLevel.INFO, log, "Skanmotutgaaende behandlet ferdig fil=${file:absolute.path}.");
-
 
         from("direct:process_utgaaende")
                 .routeId("process_utgaaende")

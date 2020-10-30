@@ -1,7 +1,28 @@
+/*
+ * Kode hentet og modifisert fra:
+ * https://github.com/apache/camel/blob/master/components/camel-zipfile/src/main/java/org/apache/camel/dataformat/zipfile/ZipIterator.java
+ *
+ * Copyright ??[yyyy]?? ??[NAV]??
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ */
 package no.nav.skanmotutgaaende.decrypt;
 
+import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.io.inputstream.ZipInputStream;
 import net.lingala.zip4j.model.LocalFileHeader;
+import net.lingala.zip4j.model.enums.EncryptionMethod;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
 import org.apache.camel.RuntimeCamelException;
@@ -16,7 +37,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
 
-public class CustomZipIterator implements Iterator<Message>, Closeable {
+public class ZipIteratorEncrypted implements Iterator<Message>, Closeable {
     static final Logger LOGGER = LoggerFactory.getLogger(org.apache.camel.dataformat.zipfile.ZipIterator.class);
 
     private final Exchange exchange;
@@ -24,7 +45,7 @@ public class CustomZipIterator implements Iterator<Message>, Closeable {
     private volatile ZipInputStream zipInputStream;
     private volatile Message parent;
 
-    public CustomZipIterator(Exchange exchange, InputStream inputStream) {
+    public ZipIteratorEncrypted(Exchange exchange, InputStream inputStream) {
         this.exchange = exchange;
         this.allowEmptyDirectory = false;
         if (inputStream instanceof ZipInputStream) {
@@ -79,12 +100,18 @@ public class CustomZipIterator implements Iterator<Message>, Closeable {
             LocalFileHeader current = getNextEntry();
 
             if (current != null) {
+
+                //we only want to accept files with AES encryption
+                if (current.getEncryptionMethod() != EncryptionMethod.AES) {
+                    throw new ZipException("Bad encryption");
+                }
+
                 LOGGER.debug("read zipEntry {}", current.getFileName());
                 Message answer = new DefaultMessage(exchange.getContext());
                 answer.getHeaders().putAll(exchange.getIn().getHeaders());
                 answer.setHeader("zipFileName", current.getFileName());
                 answer.setHeader(Exchange.FILE_NAME, current.getFileName());
-                answer.setBody(new CustomZipInputStreamWrapper(zipInputStream));
+                answer.setBody(new ZipInputStreamWrapperEncrypted(zipInputStream));
                 return answer;
             } else {
                 LOGGER.trace("close zipInputStream");

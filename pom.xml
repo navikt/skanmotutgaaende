@@ -50,11 +50,6 @@
                 <version>${zip4j.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.camel</groupId>
-                <artifactId>camel-crypto</artifactId>
-                <version>${camel.crypto.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>no.nav.skanmotutgaaende</groupId>
                 <artifactId>core</artifactId>
                 <version>${project.version}</version>
