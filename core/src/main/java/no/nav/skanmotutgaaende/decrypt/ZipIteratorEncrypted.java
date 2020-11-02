@@ -102,8 +102,11 @@ public class ZipIteratorEncrypted implements Iterator<Message>, Closeable {
             if (current != null) {
 
                 //we only want to accept files with AES encryption
+                if (current.getEncryptionMethod() == EncryptionMethod.NONE) {
+                    throw new ZipException("En enc.zip kom inn men filene er ukrypterte");
+                }
                 if (current.getEncryptionMethod() != EncryptionMethod.AES) {
-                    throw new ZipException("Bad encryption");
+                    throw new ZipException("Filene er ikke kryptert med AES men en annen krypteringsmetode.");
                 }
 
                 LOGGER.debug("read zipEntry {}", current.getFileName());

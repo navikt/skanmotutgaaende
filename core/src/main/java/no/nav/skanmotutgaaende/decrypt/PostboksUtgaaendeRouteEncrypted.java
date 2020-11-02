@@ -63,8 +63,9 @@ public class PostboksUtgaaendeRouteEncrypted extends RouteBuilder {
                 .log(LoggingLevel.WARN, log, "Feil passord for en fil " + KEY_LOGGING_INFO + ". ${exception}")
                 .setHeader(Exchange.FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}.zip"))
                 //Hvor skal disse sendes?
-                .to("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.feilmappe}}" +
+                .to("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.feilmappezip}}" +
                         "?{{skanmotutgaaende.endpointconfig}}")
+                .process(new MdcRemoverProcessor())
                 .log(LoggingLevel.WARN, log, "Skanmotutgaaende skrev feiletzip=${header." + Exchange.FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".");
 
         // Kjente funksjonelle feil
@@ -91,7 +92,6 @@ public class PostboksUtgaaendeRouteEncrypted extends RouteBuilder {
                 .setProperty(PROPERTY_FORSENDELSE_BATCHNAVN, simple("${file:name.noext.single}"))
                 .process(new MdcSetterProcessor())
                 .split(new ZipSplitterEncrypted()).streaming()
-                .log("hit")
                 .aggregate(simple("${file:name.noext.single}"), new PostboksUtgaaendeSkanningAggregator())
                 .completionSize(FORVENTET_ANTALL_PER_FORSENDELSE)
                 .completionTimeout(skanmotutgaaendeProperties.getCompletiontimeout().toMillis())
