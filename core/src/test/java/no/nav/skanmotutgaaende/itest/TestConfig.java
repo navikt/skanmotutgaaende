@@ -2,7 +2,8 @@ package no.nav.skanmotutgaaende.itest;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotutgaaende.CoreConfig;
-import no.nav.skanmotutgaaende.config.SkanmotutgaaendeProperties;
+import no.nav.skanmotutgaaende.config.props.IMVaultProperties;
+import no.nav.skanmotutgaaende.config.props.SkanmotutgaaendeProperties;
 import no.nav.skanmotutgaaende.metrics.DokCounter;
 import org.apache.camel.CamelContext;
 import org.apache.camel.spring.boot.CamelContextConfiguration;
@@ -31,7 +32,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Slf4j
 @Configuration
 @EnableAutoConfiguration
-@EnableConfigurationProperties(SkanmotutgaaendeProperties.class)
+@EnableConfigurationProperties({
+        SkanmotutgaaendeProperties.class,
+        IMVaultProperties.class
+})
 @Import({TestConfig.CamelTestStartupConfig.class, TestConfig.SshdSftpServerConfig.class, CoreConfig.class, DokCounter.class})
 public class TestConfig {
 

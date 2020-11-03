@@ -1,6 +1,6 @@
 package no.nav.skanmotutgaaende.lagrefildetaljer;
 
-import no.nav.skanmotutgaaende.config.SkanmotutgaaendeProperties;
+import no.nav.skanmotutgaaende.config.props.SkanmotutgaaendeProperties;
 import no.nav.skanmotutgaaende.exceptions.functional.FunctionalExceptionHandled;
 import no.nav.skanmotutgaaende.exceptions.functional.LagreFilDetaljerFinnesIkkeException;
 import no.nav.skanmotutgaaende.exceptions.functional.SkanmotutgaaendeFunctionalException;

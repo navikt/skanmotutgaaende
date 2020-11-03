@@ -40,7 +40,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = TestConfig.class,
-        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = "spring.cloud.vault.token=123456")
 @AutoConfigureWireMock(port = 0)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ActiveProfiles("itest")
@@ -48,12 +48,11 @@ public class PostboksUtgaaendeRouteIT {
 
     public static final String INNGAAENDE = "inngaaende";
     public static final String FEILMAPPE = "feilmappe";
-    public static final String FEILMAPPEZIP = "feilmappezip";
 
     private final String URL_DOKARKIV_JOURNALPOST_GEN = "/rest/intern/journalpostapi/v1/journalpost/\\d+/mottaDokumentUtgaaendeSkanning";
     private final String URL_DOKARKIV_JOURNALPOST_BAD_REQUEST = "/rest/intern/journalpostapi/v1/journalpost/4000004/mottaDokumentUtgaaendeSkanning";
     private final String ZIP_FILE_NAME_NO_EXTENSION = "01.07.2020_R123456789_1_1000";
-    private final String ZIP_FILE_NAME_NO_EXTENSION_ENCRYPTED = "01.07.2020_R123456789_1_1000_encrypted";
+    private final String ZIP_FILE_NAME_NO_EXTENSION_ENCRYPTED = "01.07.2020_R123456789_1_1000.encrypted";
     private final String ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION = "01.07.2020_R100000000_1_1000_ordered_xml_first_big";
 
     @Inject
@@ -163,7 +162,7 @@ public class PostboksUtgaaendeRouteIT {
 
         await().atMost(15, SECONDS).untilAsserted(() -> {
             try {
-                final List<String> feilmappeContents = Files.list(sshdPath.resolve(FEILMAPPEZIP))
+                final List<String> feilmappeContents = Files.list(sshdPath.resolve(FEILMAPPE))
                         .map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
                         .collect(Collectors.toList());
                 assertTrue(feilmappeContents.contains(ZIP_FILE_NAME_NO_EXTENSION_ENCRYPTED + ".zip"));
