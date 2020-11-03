@@ -154,7 +154,7 @@ public class PostboksUtgaaendeRouteIT {
     }
 
     @Test
-    public void shouldBe() throws IOException {
+    public void shouldMoveZipToFeilomraadeWhenEncryptedZip() throws IOException {
 
         setUpHappyStubs();
         setUpBadStubs();
