@@ -57,7 +57,7 @@ public class PostboksUtgaaendeRouteEncrypted extends RouteBuilder {
                 .process(errorMetricsProcessor)
                 .log(LoggingLevel.ERROR, log, "Skanmotutgaaende feilet teknisk for " + KEY_LOGGING_INFO + ". ${exception}")
                 .setHeader(Exchange.FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}/${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}-teknisk.enc.zip"))
-                .to("direct:avvik")
+                .to("direct:encrypted_avvik")
                 .log(LoggingLevel.ERROR, log, "Skanmotutgaaende skrev feiletzip=${header." + Exchange.FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".");
 
         onException(ZipException.class)
@@ -78,7 +78,7 @@ public class PostboksUtgaaendeRouteEncrypted extends RouteBuilder {
                 .process(errorMetricsProcessor)
                 .log(LoggingLevel.WARN, log, "Skanmotutgaaende feilet funksjonelt for " + KEY_LOGGING_INFO + ". ${exception}")
                 .setHeader(Exchange.FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}/${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}.enc.zip"))
-                .to("direct:avvik")
+                .to("direct:encrypted_avvik")
                 .log(LoggingLevel.WARN, log, "Skanmotutgaaende skrev feiletzip=${header." + Exchange.FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".");
 
         from("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.inngaaendemappe}}" +
@@ -103,20 +103,20 @@ public class PostboksUtgaaendeRouteEncrypted extends RouteBuilder {
                 .process(exchange -> exchange.getIn().getBody(PostboksUtgaaendeEnvelope.class).validate())
                 .bean(new SkanningmetadataUnmarshaller())
                 .setProperty(PROPERTY_FORSENDELSE_BATCHNAVN, simple("${body.skanningmetadata.journalpost.batchnavn}"))
-                .to("direct:process_utgaaende")
+                .to("direct:encrypted_process_utgaaende")
                 .end() // aggregate
                 .end() // split
                 .process(new MdcRemoverProcessor())
                 .log(LoggingLevel.INFO, log, "Skanmotutgaaende behandlet ferdig fil=${file:absolute.path}.");
 
-        from("direct:process_utgaaende")
-                .routeId("process_utgaaende")
+        from("direct:encrypted_process_utgaaende")
+                .routeId("encrypted_process_utgaaende")
                 .process(new MdcSetterProcessor())
                 .bean(postboksUtgaaendeService)
                 .process(new MdcRemoverProcessor());
 
-        from("direct:avvik")
-                .routeId("avvik")
+        from("direct:encrypted_avvik")
+                .routeId("encrypted_avvik")
                 .choice().when(body().isInstanceOf(PostboksUtgaaendeEnvelope.class))
                 .setBody(simple("${body.createZip}"))
                 .to("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.feilmappe}}" +
