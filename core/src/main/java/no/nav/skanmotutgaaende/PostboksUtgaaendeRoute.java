@@ -66,8 +66,9 @@ public class PostboksUtgaaendeRoute extends RouteBuilder {
                 .setHeader(Exchange.FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}.zip"))
                 .to("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.feilmappe}}" +
                         "?{{skanmotutgaaende.endpointconfig}}")
-                .process(new MdcRemoverProcessor())
-                .log(LoggingLevel.WARN, log, "Skanmotutgaaende skrev feilet zip=${header." + Exchange.FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".");
+                .log(LoggingLevel.WARN, log, "Skanmotutgaaende skrev feilet zip=${header." + Exchange.FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".")
+                .end()
+                .process(new MdcRemoverProcessor());
 
         from("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.inngaaendemappe}}" +
                 "?{{skanmotutgaaende.endpointconfig}}" +
