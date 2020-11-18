@@ -2,6 +2,7 @@ package no.nav.skanmotutgaaende;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotutgaaende.config.props.SkanmotutgaaendeProperties;
+import java.util.zip.ZipException;
 import no.nav.skanmotutgaaende.exceptions.functional.AbstractSkanmotutgaaendeFunctionalException;
 import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
@@ -56,6 +57,18 @@ public class PostboksUtgaaendeRoute extends RouteBuilder {
                 .setHeader(Exchange.FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}/${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}.zip"))
                 .to("direct:avvik")
                 .log(LoggingLevel.WARN, log, "Skanmotutgaaende skrev feiletzip=${header." + Exchange.FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".");
+
+        onException(ZipException.class)
+                .handled(true)
+                .process(new MdcSetterProcessor())
+                .process(errorMetricsProcessor)
+                .log(LoggingLevel.WARN, log, "Feil passord for en fil " + KEY_LOGGING_INFO + ". ${exception}")
+                .setHeader(Exchange.FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}.zip"))
+                .to("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.feilmappe}}" +
+                        "?{{skanmotutgaaende.endpointconfig}}")
+                .log(LoggingLevel.WARN, log, "Skanmotutgaaende skrev feilet zip=${header." + Exchange.FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".")
+                .end()
+                .process(new MdcRemoverProcessor());
 
         from("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.inngaaendemappe}}" +
                 "?{{skanmotutgaaende.endpointconfig}}" +

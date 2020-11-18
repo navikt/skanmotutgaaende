@@ -14,6 +14,7 @@ import no.nav.skanmotutgaaende.exceptions.functional.AbstractSkanmotutgaaendeFun
 import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.builder.SimpleBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -49,28 +50,27 @@ public class PostboksUtgaaendeRouteEncrypted extends RouteBuilder {
     }
 
     @Override
-    public void configure() throws Exception {
+    public void configure() {
         onException(Exception.class)
                 .handled(true)
                 .process(new MdcSetterProcessor())
                 .process(errorMetricsProcessor)
                 .log(LoggingLevel.ERROR, log, "Skanmotutgaaende feilet teknisk for " + KEY_LOGGING_INFO + ". ${exception}")
-                .setHeader(Exchange.FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}/${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}-teknisk.zip"))
-                .to("direct:avvik")
+                .setHeader(Exchange.FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}/${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}-teknisk.enc.zip"))
+                .to("direct:encrypted_avvik")
                 .log(LoggingLevel.ERROR, log, "Skanmotutgaaende skrev feiletzip=${header." + Exchange.FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".");
 
-        //Er dette en grei måte å håndete dette på?
-        // Feil passord kastes langt nede i et annet bibliotek. Fanges her
         onException(ZipException.class)
                 .handled(true)
                 .process(new MdcSetterProcessor())
                 .process(errorMetricsProcessor)
                 .log(LoggingLevel.WARN, log, "Feil passord for en fil " + KEY_LOGGING_INFO + ". ${exception}")
-                .setHeader(Exchange.FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}.zip"))
-                //Hvor skal disse sendes?
+                .setHeader(Exchange.FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}.enc.zip"))
                 .to("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.feilmappe}}" +
                         "?{{skanmotutgaaende.endpointconfig}}")
-                .log(LoggingLevel.WARN, log, "Skanmotutgaaende skrev feiletzip=${header." + Exchange.FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".");
+                .log(LoggingLevel.WARN, log, "Skanmotutgaaende skrev feiletzip=${header." + Exchange.FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".")
+                .end()
+                .process(new MdcRemoverProcessor());
 
         // Kjente funksjonelle feil
         onException(AbstractSkanmotutgaaendeFunctionalException.class)
@@ -78,8 +78,8 @@ public class PostboksUtgaaendeRouteEncrypted extends RouteBuilder {
                 .process(new MdcSetterProcessor())
                 .process(errorMetricsProcessor)
                 .log(LoggingLevel.WARN, log, "Skanmotutgaaende feilet funksjonelt for " + KEY_LOGGING_INFO + ". ${exception}")
-                .setHeader(Exchange.FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}/${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}.zip"))
-                .to("direct:avvik")
+                .setHeader(Exchange.FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}/${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}.enc.zip"))
+                .to("direct:encrypted_avvik")
                 .log(LoggingLevel.WARN, log, "Skanmotutgaaende skrev feiletzip=${header." + Exchange.FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".");
 
         from("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.inngaaendemappe}}" +
@@ -93,10 +93,9 @@ public class PostboksUtgaaendeRouteEncrypted extends RouteBuilder {
                 .routeId("read_encrypted_zip_from_sftp")
                 .log(LoggingLevel.INFO, log, "SkanmotutgaaendeDecrypt starter behandling av fil=${file:absolute.path}.")
                 .setProperty(PROPERTY_FORSENDELSE_ZIPNAME, simple("${file:name}"))
-                .setProperty(PROPERTY_FORSENDELSE_BATCHNAVN, simple("${file:name.noext.single}"))
+                .process(exchange -> exchange.setProperty(PROPERTY_FORSENDELSE_BATCHNAVN, cleanDotEncExtension(simple("${file:name.noext.single}"), exchange)))
                 .process(new MdcSetterProcessor())
                 .split(new ZipSplitterEncrypted(passphrase)).streaming()
-                .log("hit")
                 .aggregate(simple("${file:name.noext.single}"), new PostboksUtgaaendeSkanningAggregator())
                 .completionSize(FORVENTET_ANTALL_PER_FORSENDELSE)
                 .completionTimeout(skanmotutgaaendeProperties.getCompletiontimeout().toMillis())
@@ -105,20 +104,20 @@ public class PostboksUtgaaendeRouteEncrypted extends RouteBuilder {
                 .process(exchange -> exchange.getIn().getBody(PostboksUtgaaendeEnvelope.class).validate())
                 .bean(new SkanningmetadataUnmarshaller())
                 .setProperty(PROPERTY_FORSENDELSE_BATCHNAVN, simple("${body.skanningmetadata.journalpost.batchnavn}"))
-                .to("direct:process_utgaaende")
+                .to("direct:encrypted_process_utgaaende")
                 .end() // aggregate
                 .end() // split
                 .process(new MdcRemoverProcessor())
                 .log(LoggingLevel.INFO, log, "Skanmotutgaaende behandlet ferdig fil=${file:absolute.path}.");
 
-        from("direct:process_utgaaende")
-                .routeId("process_utgaaende")
+        from("direct:encrypted_process_utgaaende")
+                .routeId("encrypted_process_utgaaende")
                 .process(new MdcSetterProcessor())
                 .bean(postboksUtgaaendeService)
                 .process(new MdcRemoverProcessor());
 
-        from("direct:avvik")
-                .routeId("avvik")
+        from("direct:encrypted_avvik")
+                .routeId("encrypted_avvik")
                 .choice().when(body().isInstanceOf(PostboksUtgaaendeEnvelope.class))
                 .setBody(simple("${body.createZip}"))
                 .to("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.feilmappe}}" +
@@ -129,5 +128,13 @@ public class PostboksUtgaaendeRouteEncrypted extends RouteBuilder {
                         "                        \"?{{skanmotutgaaende.endpointconfig}}")
                 .end()
                 .process(new MdcRemoverProcessor());
+    }
+
+    private String cleanDotEncExtension(SimpleBuilder value1, Exchange exchange) {
+        String stringRepresentation = value1.evaluate(exchange, String.class);
+        if (stringRepresentation.contains(".enc")) {
+            return stringRepresentation.replace(".enc", "");
+        }
+        return stringRepresentation;
     }
 }

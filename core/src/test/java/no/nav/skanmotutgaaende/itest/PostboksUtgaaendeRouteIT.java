@@ -31,7 +31,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
-import static java.lang.Thread.sleep;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -52,8 +51,9 @@ public class PostboksUtgaaendeRouteIT {
 
     private final String URL_DOKARKIV_JOURNALPOST_GEN = "/rest/intern/journalpostapi/v1/journalpost/\\d+/mottaDokumentUtgaaendeSkanning";
     private final String URL_DOKARKIV_JOURNALPOST_BAD_REQUEST = "/rest/intern/journalpostapi/v1/journalpost/4000004/mottaDokumentUtgaaendeSkanning";
-    private final String ZIP_FILE_NAME_NO_EXTENSION = "01.07.2020_R123456789_1_1000";
-    private final String ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION = "01.07.2020_R100000000_1_1000_ordered_xml_first_big";
+    private final String ZIP_FILE_NAME_NO_EXTENSION = "01.07.2020_R123456780_1_1000";
+    private final String ZIP_FILE_NAME_NO_EXTENSION_ENCRYPTED = "01.07.2020_R123456780_1_1000.encrypted";
+    private final String ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION = "01.07.2020_R200000000_1_1000_ordered_xml_first_big";
 
     @Inject
     private Path sshdPath;
@@ -63,12 +63,18 @@ public class PostboksUtgaaendeRouteIT {
         final Path inngaaende = sshdPath.resolve(INNGAAENDE);
         final Path processed = inngaaende.resolve("processed");
         final Path feilmappe = sshdPath.resolve(FEILMAPPE);
-        preparePath(inngaaende);
-        preparePath(processed);
-        try{
-            preparePath(feilmappe);
+        try {
+            preparePath(inngaaende);
+        } catch (Exception e) {
+            //noop. Windows sliter med å slette filene, de blir kun satt til "unavailable"
+        } try {
+            preparePath(processed);
+        } catch (Exception e) {
+            //noop. Windows sliter med å slette filene, de blir kun satt til "unavailable"
         }
-        catch(Exception e){
+        try {
+            preparePath(feilmappe);
+        } catch (Exception e) {
             //noop. Windows sliter med å slette filene, de blir kun satt til "unavailable"
         }
     }
@@ -82,13 +88,13 @@ public class PostboksUtgaaendeRouteIT {
 
     @Test
     public void shouldLesOgLagreHappy() throws IOException {
-        // 01.07.2020_R123456789_1_1000.zip
-        // OK   - 01.07.2020_R123456789_0001
-        // OK   - 01.07.2020_R123456789_0002 (mangler filnavn og fysiskPostboks)
-        // FEIL - 01.07.2020_R123456789_0003 (valideringsfeil, mangler journalpostid)
-        // FEIL - 01.07.2020_R123456789_0004 (vil feile hos dokarkiv 400_Bad_Request)
-        // FEIL - 01.07.2020_R123456789_0005 (mangler pdf)
-        // FEIL - 01.07.2020_R123456789_0006 (mangler xml)
+        // 01.07.2020_R123456780_1_1000.zip
+        // OK   - 01.07.2020_R123456780_0001
+        // OK   - 01.07.2020_R123456780_0002 (mangler filnavn og fysiskPostboks)
+        // FEIL - 01.07.2020_R123456780_0003 (valideringsfeil, mangler journalpostid)
+        // FEIL - 01.07.2020_R123456780_0004 (vil feile hos dokarkiv 400_Bad_Request)
+        // FEIL - 01.07.2020_R123456780_0005 (mangler pdf)
+        // FEIL - 01.07.2020_R123456780_0006 (mangler xml)
         setUpHappyStubs();
         setUpBadStubs();
         copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_NO_EXTENSION + ".zip");
@@ -107,21 +113,21 @@ public class PostboksUtgaaendeRouteIT {
                 .map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
                 .collect(Collectors.toList());
         assertTrue(feilmappeContents.containsAll(List.of(
-                "01.07.2020_R123456789_0003.zip",
-                "01.07.2020_R123456789_0004.zip",
-                "01.07.2020_R123456789_0005.zip",
-                "01.07.2020_R123456789_0006.zip"
+                "01.07.2020_R123456780_0003.zip",
+                "01.07.2020_R123456780_0004.zip",
+                "01.07.2020_R123456780_0005.zip",
+                "01.07.2020_R123456780_0006.zip"
         )));
         verify(exactly(3), putRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
     }
 
     @Test
     public void shouldBehandleZipXmlOrderedLastWithinCompletionTimeout() throws IOException {
-        // 01.07.2020_R100000000_1_1000_ordered_xml_first_big.zip
+        // 01.07.2020_R200000000_1_1000_ordered_xml_first_big.zip
         // OK   - 01.07.2020_R100000000_0001
         // OK   - 01.07.2020_R100000000_0002 (mangler filnavn og fysiskPostboks)
         // FEIL - 01.07.2020_R100000000_0003 (valideringsfeil, mangler journalpostid)
-        // FEIL - 01.07.2020_R100000000_0004 (vil feile hos dokarkiv 400_Bad_Request)
+        // FEIL - 01.07.2020_R200000000_0004 (vil feile hos dokarkiv 400_Bad_Request)
         // FEIL - 01.07.2020_R100000000_0005 (mangler pdf)
         // FEIL - 01.07.2020_R100000000_0006 (mangler xml)
         // OK   - 01.07.2020_R100000000_0007
@@ -146,11 +152,30 @@ public class PostboksUtgaaendeRouteIT {
                 .collect(Collectors.toList());
         assertTrue(feilmappeContents.containsAll(List.of(
                 "01.07.2020_R100000000_0003.zip",
-                "01.07.2020_R100000000_0004.zip",
+                "01.07.2020_R200000000_0004.zip",
                 "01.07.2020_R100000000_0005.zip",
                 "01.07.2020_R100000000_0006.zip"
         )));
         verify(exactly(56), putRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
+    }
+
+    @Test
+    public void shouldMoveZipToFeilomraadeWhenEncryptedZip() throws IOException {
+
+        setUpHappyStubs();
+        setUpBadStubs();
+        copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_NO_EXTENSION_ENCRYPTED + ".zip");
+
+        await().atMost(15, SECONDS).untilAsserted(() -> {
+            try {
+                final List<String> feilmappeContents = Files.list(sshdPath.resolve(FEILMAPPE))
+                        .map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
+                        .collect(Collectors.toList());
+                assertTrue(feilmappeContents.contains(ZIP_FILE_NAME_NO_EXTENSION_ENCRYPTED + ".zip"));
+            } catch (NoSuchFileException e) {
+                fail();
+            }
+        });
     }
 
     private void setUpHappyStubs() {
