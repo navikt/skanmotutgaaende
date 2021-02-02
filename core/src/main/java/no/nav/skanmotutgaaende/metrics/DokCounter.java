@@ -7,6 +7,7 @@ import no.nav.skanmotutgaaende.exceptions.functional.FunctionalExceptionHandled;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -19,8 +20,8 @@ public class DokCounter {
     private static final String FUNCTIONAL_ERROR = "functional";
     private static final String TECHNICAL_ERROR = "technical";
     private static final String FUNCTIONAL_ERROR_HANDLED = "functional_handled";
-    private static final String DOMAIN = "domain";
-    private static final String UTGAAENDE = "utgaaende";
+    public static final String DOMAIN = "domain";
+    public static final String UTGAAENDE = "utgaaende";
 
     private static MeterRegistry meterRegistry;
 
@@ -31,6 +32,12 @@ public class DokCounter {
 
     public static void incrementCounter(Map<String, String> metadata){
         metadata.forEach(DokCounter::incrementCounter);
+    }
+    public static void incrementCounter(String key, List<String> tags) {
+        Counter.builder(DOK_SKANMOTUTGAAENDE + key + TOTAL)
+                .tags(tags.toArray(new String[0]))
+                .register(meterRegistry)
+                .increment();
     }
 
     private static void incrementCounter(String key, String value){
