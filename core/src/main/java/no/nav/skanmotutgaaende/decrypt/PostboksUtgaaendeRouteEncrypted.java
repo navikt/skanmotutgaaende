@@ -11,6 +11,7 @@ import no.nav.skanmotutgaaende.PostboksUtgaaendeSkanningAggregator;
 import no.nav.skanmotutgaaende.SkanningmetadataUnmarshaller;
 import no.nav.skanmotutgaaende.config.props.SkanmotutgaaendeProperties;
 import no.nav.skanmotutgaaende.exceptions.functional.AbstractSkanmotutgaaendeFunctionalException;
+import no.nav.skanmotutgaaende.metrics.DokCounter;
 import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -101,6 +103,7 @@ public class PostboksUtgaaendeRouteEncrypted extends RouteBuilder {
                 .completionTimeout(skanmotutgaaendeProperties.getCompletiontimeout().toMillis())
                 .setProperty(PROPERTY_FORSENDELSE_FILEBASENAME, simple("${exchangeProperty.CamelAggregatedCorrelationKey}"))
                 .process(new MdcSetterProcessor())
+                .process(exchange -> DokCounter.incrementCounter("antall_innkommende", List.of(DokCounter.DOMAIN, DokCounter.UTGAAENDE)))
                 .process(exchange -> exchange.getIn().getBody(PostboksUtgaaendeEnvelope.class).validate())
                 .bean(new SkanningmetadataUnmarshaller())
                 .setProperty(PROPERTY_FORSENDELSE_BATCHNAVN, simple("${body.skanningmetadata.journalpost.batchnavn}"))
@@ -114,6 +117,7 @@ public class PostboksUtgaaendeRouteEncrypted extends RouteBuilder {
                 .routeId("encrypted_process_utgaaende")
                 .process(new MdcSetterProcessor())
                 .bean(postboksUtgaaendeService)
+                .process(exchange -> DokCounter.incrementCounter("antall_vellykkede", List.of(DokCounter.DOMAIN, DokCounter.UTGAAENDE)))
                 .process(new MdcRemoverProcessor());
 
         from("direct:encrypted_avvik")
