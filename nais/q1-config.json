@@ -1,11 +1,11 @@
 {
-  "NAMESPACE": "q1",
+  "NAMESPACE": "teamdokumenthandtering",
   "SRVSKANMOTUTGAAENDE": "/serviceuser/data/dev/srvskanmotutgaaende",
   "SKANMOTUTGAAENDE_VAULT": "/kv/preprod/fss/skanmotutgaaende/q1",
   "SFTP_KEYS": "kv/preprod/fss/skanmotutgaaende/keys",
-  "SKANMOTUTGAAENDE_DOKARKIVJOURNALPOSTURL": "https://dokarkiv-q1.nais.preprod.local/rest/intern/journalpostapi/v1/journalpost",
+  "SKANMOTUTGAAENDE_DOKARKIVJOURNALPOSTURL": "https://dokarkiv.dev.intern.nav.no/rest/intern/journalpostapi/v1/journalpost",
   "SKANMOTUTGAAENDE_SCHEDULE": "0+*/5+*+*+*+*",
   "INGRESSES": [
-    "https://skanmotutgaaende-q1.nais.preprod.local"
+    "https://skanmotutgaaende.dev.intern.nav.no"
   ]
 }

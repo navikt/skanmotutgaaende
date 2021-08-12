@@ -35,10 +35,10 @@
         <javax.activation.version>1.1.1</javax.activation.version>
         <javax.inject.version>1</javax.inject.version>
         <javax.bind.version>2.3.1</javax.bind.version>
-        <logstash-logback-encoder.version>6.4</logstash-logback-encoder.version>
+        <logstash-logback-encoder.version>6.6</logstash-logback-encoder.version>
         <spring-cloud-contract-wiremock.version>2.2.4.RELEASE</spring-cloud-contract-wiremock.version>
         <sshd-core.version>2.4.0</sshd-core.version>
-        <lombok.version>1.18.4</lombok.version>
+        <lombok.version>1.18.20</lombok.version>
         <!-- test -->
         <junit5.version>5.4.2</junit5.version>
     </properties>
