@@ -22,21 +22,20 @@
     </modules>
 
     <properties>
-        <java.version>11</java.version>
+        <java.version>17</java.version>
 
-        <camel.version>3.4.3</camel.version>
-        <spring-cloud.version>Hoxton.SR8</spring-cloud.version>
-        <camel.crypto.version>3.2.0</camel.crypto.version>
+        <camel.version>3.10.0</camel.version>
+        <spring-cloud.version>Hoxton.SR11</spring-cloud.version>
         <zip4j.version>2.6.4</zip4j.version>
-        <commons-compress.version>1.20</commons-compress.version>
+        <commons-compress.version>1.21</commons-compress.version>
         <commons-io.version>2.7</commons-io.version>
-        <glassfish.jaxb.version>2.3.2</glassfish.jaxb.version>
+        <glassfish.jaxb.version>2.3.3</glassfish.jaxb.version>
         <javax.validation.version>2.0.1.Final</javax.validation.version>
         <javax.activation.version>1.1.1</javax.activation.version>
         <javax.inject.version>1</javax.inject.version>
         <javax.bind.version>2.3.1</javax.bind.version>
         <logstash-logback-encoder.version>6.6</logstash-logback-encoder.version>
-        <spring-cloud-contract-wiremock.version>2.2.4.RELEASE</spring-cloud-contract-wiremock.version>
+        <spring-cloud-contract-wiremock.version>3.0.3</spring-cloud-contract-wiremock.version>
         <sshd-core.version>2.4.0</sshd-core.version>
         <lombok.version>1.18.22</lombok.version>
         <!-- test -->
@@ -197,7 +196,7 @@
                 <configuration>
                     <toolchains>
                         <jdk>
-                            <version>11</version>
+                            <version>17</version>
                             <vendor>openjdk</vendor>
                         </jdk>
                     </toolchains>
