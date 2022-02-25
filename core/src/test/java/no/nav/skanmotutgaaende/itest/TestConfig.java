@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static java.util.Collections.singletonList;
+
 @Slf4j
 @Configuration
 @EnableAutoConfiguration
@@ -76,8 +78,7 @@ public class TestConfig {
         }
 
         @Bean(initMethod = "start", destroyMethod = "stop")
-        public SshServer sshServer(final Path sshdPath,
-                                   final SkanmotutgaaendeProperties properties) {
+        public SshServer sshServer(final Path sshdPath) {
             String sftpPort = String.valueOf(ThreadLocalRandom.current().nextInt(2000, 2999));
             System.setProperty("skanmotutgaaende.sftp.port", sftpPort);
 
@@ -85,9 +86,9 @@ public class TestConfig {
             sshd.setPort(Integer.parseInt(sftpPort));
             sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider(Path.of("src/test/resources/sftp/itest.ser")));
             sshd.setCommandFactory(new ScpCommandFactory());
-            sshd.setSubsystemFactories(List.of(new SftpSubsystemFactory()));
+            sshd.setSubsystemFactories(singletonList(new SftpSubsystemFactory()));
             sshd.setPublickeyAuthenticator(new AuthorizedKeysAuthenticator(Paths.get("src/test/resources/sftp/itest_valid.pub")));
-            sshd.setUserAuthFactories(Collections.singletonList(new UserAuthNoneFactory()));
+            sshd.setUserAuthFactories(singletonList(new UserAuthNoneFactory()));
             sshd.setFileSystemFactory(new VirtualFileSystemFactory(sshdPath));
             return sshd;
         }

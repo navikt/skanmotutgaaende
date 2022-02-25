@@ -2,18 +2,18 @@ package no.nav.skanmotutgaaende;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotutgaaende.config.props.SkanmotutgaaendeProperties;
-import java.util.List;
-import java.util.zip.ZipException;
 import no.nav.skanmotutgaaende.exceptions.functional.AbstractSkanmotutgaaendeFunctionalException;
 import no.nav.skanmotutgaaende.metrics.DokCounter;
 import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.dataformat.zipfile.ZipSplitter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.zip.ZipException;
 
 /**
  * @author Joakim Bjørnstad, Jbit AS
@@ -32,7 +32,7 @@ public class PostboksUtgaaendeRoute extends RouteBuilder {
     private final PostboksUtgaaendeService postboksUtgaaendeService;
     private final ErrorMetricsProcessor errorMetricsProcessor;
 
-    @Inject
+    @Autowired
     public PostboksUtgaaendeRoute(SkanmotutgaaendeProperties skanmotutgaaendeProperties, PostboksUtgaaendeService postboksUtgaaendeService) {
         this.skanmotutgaaendeProperties = skanmotutgaaendeProperties;
         this.postboksUtgaaendeService = postboksUtgaaendeService;

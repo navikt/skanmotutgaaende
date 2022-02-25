@@ -3,11 +3,11 @@ package no.nav.skanmotutgaaende.itest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import wiremock.org.apache.commons.io.FileUtils;
 import wiremock.org.apache.commons.io.FilenameUtils;
 
-import javax.inject.Inject;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
@@ -35,7 +35,7 @@ public class PostboksUtgaaendeRouteIT extends AbstractItest {
 	private final String ZIP_FILE_NAME_NO_EXTENSION_ENCRYPTED = "01.07.2020_R123456780_1_1000.encrypted";
 	private final String ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION = "01.07.2020_R200000000_1_1000_ordered_xml_first_big";
 
-	@Inject
+	@Autowired
 	private Path sshdPath;
 
 	@BeforeEach

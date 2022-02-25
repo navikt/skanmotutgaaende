@@ -6,7 +6,7 @@ import no.nav.skanmotutgaaende.domain.SkanningInfo;
 import no.nav.skanmotutgaaende.domain.Skanningmetadata;
 import no.nav.skanmotutgaaende.lagrefildetaljer.data.LagreFildetaljerRequest;
 import no.nav.skanmotutgaaende.lagrefildetaljer.data.Tilleggsopplysning;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 import java.util.List;
@@ -30,15 +30,15 @@ public class LagreFildetaljerRequestMapperTest {
     private final String FILNAVN = "filnavn";
     private final String FILNAVN_PDF = "filnavn.pdf";
     private final String FILNAVN_XML = "filnavn.xml";
-    private final String ENDORSERNR = "222111NAV456";
-    private final String FYSISK_POSTBOKS = "1002";
     private final String STREKKODE_POSTBOKS = "1004";
     private final byte[] DUMMY_FILE = "dummyfile".getBytes();
 
-    private LagreFildetaljerRequestMapper lagreFildetaljerRequestMapper = new LagreFildetaljerRequestMapper();
+    private final LagreFildetaljerRequestMapper lagreFildetaljerRequestMapper = new LagreFildetaljerRequestMapper();
 
     @Test
     public void shouldMapSkanningmetadataToLagreFildetaljerRequest() {
+        String ENDORSERNR = "222111NAV456";
+        String FYSISK_POSTBOKS = "1002";
         LagreFildetaljerRequest lagreFildetaljerRequest = lagreFildetaljerRequestMapper.mapMetadataToLagreFildetaljerRequest(
                 Skanningmetadata.builder()
                         .journalpost(Journalpost.builder()
@@ -71,20 +71,19 @@ public class LagreFildetaljerRequestMapperTest {
         AtomicInteger xmlCounter = new AtomicInteger();
         lagreFildetaljerRequest.getDokumentvarianter().forEach(dokumentVariant -> {
             switch (dokumentVariant.getFiltype()) {
-                case "PDFA":
+                case "PDFA" -> {
                     pdfCounter.getAndIncrement();
                     assertEquals(FILNAVN_PDF, dokumentVariant.getFilnavn());
                     assertEquals("ARKIV", dokumentVariant.getVariantformat());
                     assertArrayEquals(DUMMY_FILE, dokumentVariant.getFysiskDokument());
-                    break;
-                case "XML":
+                }
+                case "XML" -> {
                     xmlCounter.getAndIncrement();
                     assertEquals(FILNAVN_XML, dokumentVariant.getFilnavn());
                     assertEquals("SKANNING_META", dokumentVariant.getVariantformat());
                     assertArrayEquals(DUMMY_FILE, dokumentVariant.getFysiskDokument());
-                    break;
-                default:
-                    fail();
+                }
+                default -> fail();
             }
         });
         assertEquals(1, pdfCounter.get());

@@ -4,9 +4,9 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import no.nav.skanmotutgaaende.exceptions.functional.AbstractSkanmotutgaaendeFunctionalException;
 import no.nav.skanmotutgaaende.exceptions.functional.FunctionalExceptionHandled;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
 import java.util.List;
 import java.util.Map;
 
@@ -25,7 +25,7 @@ public class DokCounter {
 
     private static MeterRegistry meterRegistry;
 
-    @Inject
+    @Autowired
     public DokCounter(MeterRegistry meterRegistry){
         DokCounter.meterRegistry = meterRegistry;
     }
