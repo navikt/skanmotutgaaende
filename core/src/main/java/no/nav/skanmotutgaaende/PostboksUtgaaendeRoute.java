@@ -40,7 +40,7 @@ public class PostboksUtgaaendeRoute extends RouteBuilder {
     }
 
     @Override
-    public void configure() throws Exception {
+    public void configure() {
         onException(Exception.class)
                 .handled(true)
                 .process(new MdcSetterProcessor())

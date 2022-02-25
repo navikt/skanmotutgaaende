@@ -25,7 +25,6 @@ import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class PostboksUtgaaendeRouteIT extends AbstractItest {
 
 	public static final String INNGAAENDE = "inngaaende";
@@ -40,20 +39,13 @@ public class PostboksUtgaaendeRouteIT extends AbstractItest {
 
 	@BeforeEach
 	void beforeEach() {
+		super.setUp();
 		final Path inngaaende = sshdPath.resolve(INNGAAENDE);
 		final Path processed = inngaaende.resolve("processed");
 		final Path feilmappe = sshdPath.resolve(FEILMAPPE);
 		try {
 			preparePath(inngaaende);
-		} catch (Exception e) {
-			//noop. Windows sliter med å slette filene, de blir kun satt til "unavailable"
-		}
-		try {
 			preparePath(processed);
-		} catch (Exception e) {
-			//noop. Windows sliter med å slette filene, de blir kun satt til "unavailable"
-		}
-		try {
 			preparePath(feilmappe);
 		} catch (Exception e) {
 			//noop. Windows sliter med å slette filene, de blir kun satt til "unavailable"

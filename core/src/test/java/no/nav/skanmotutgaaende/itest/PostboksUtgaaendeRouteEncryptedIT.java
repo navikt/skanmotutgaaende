@@ -28,13 +28,12 @@ import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class PostboksUtgaaendeRouteEncryptedIT extends AbstractItest{
 
 	public static final String INNGAAENDE = "inngaaende";
 	public static final String FEILMAPPE = "feilmappe";
 
-		private final String ZIP_FILE_NAME_NO_EXTENSION = "01.07.2020_R123456789_1_1000";
+	private final String ZIP_FILE_NAME_NO_EXTENSION = "01.07.2020_R123456789_1_1000";
 	private final String ZIP_FILENAME_NO_EXTENSION_BAD_PASSWORD = "29.10.2020_R123456789_6_9999";
 	private final String ZIP_FILENAME_NO_EXTENSION_BAD_ENCRYPTION = "01.07.2020_R123456789_2_1000";
 	private final String ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION = "01.07.2020_R100000000_1_1000_ordered_xml_first_big";
@@ -45,37 +44,17 @@ public class PostboksUtgaaendeRouteEncryptedIT extends AbstractItest{
 
 	@BeforeEach
 	void beforeEach() {
+		super.setUp();
 		final Path inngaaende = sshdPath.resolve(INNGAAENDE);
 		final Path processed = inngaaende.resolve("processed");
 		final Path feilmappe = sshdPath.resolve(FEILMAPPE);
 		try {
 			preparePath(inngaaende);
-		} catch (Exception e) {
-			//noop. Windows sliter med å slette filene, de blir kun satt til "unavailable"
-		}
-		try {
 			preparePath(processed);
-		} catch (Exception e) {
-			//noop. Windows sliter med å slette filene, de blir kun satt til "unavailable"
-		}
-		try {
 			preparePath(feilmappe);
 		} catch (Exception e) {
 			//noop. Windows sliter med å slette filene, de blir kun satt til "unavailable"
 		}
-	}
-
-	@AfterEach
-	void tearDown() {
-		WireMock.reset();
-		WireMock.resetAllRequests();
-		WireMock.removeAllMappings();
-		File dir = sshdPath.toFile();
-		for (File file : dir.listFiles()) {
-			file.delete();
-		}
-		File dirr = new File(String.valueOf(sshdPath.toAbsolutePath()));
-		dirr.delete();
 	}
 
 	@Test

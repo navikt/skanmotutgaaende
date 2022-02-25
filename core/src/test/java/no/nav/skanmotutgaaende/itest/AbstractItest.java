@@ -1,12 +1,8 @@
 package no.nav.skanmotutgaaende.itest;
 
-import com.github.tomakehurst.wiremock.client.WireMock;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
-import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -32,38 +28,34 @@ public class AbstractItest {
 
 	final String URL_DOKARKIV_JOURNALPOST_GEN = "/rest/intern/journalpostapi/v1/journalpost/\\d+/mottaDokumentUtgaaendeSkanning";
 
-	@AfterEach
-	void tearDown() {
-		WireMock.reset();
-		WireMock.resetAllRequests();
-		WireMock.removeAllMappings();
-	}
-
-	@BeforeEach
-	void setUp() {
+	public void setUp() {
 		setUpStubs();
 	}
 
 	private void setUpStubs() {
 		String MOTTA_DOKUMENT_UTGAAENDE_SKANNING_TJENESTE = "/rest/intern/journalpostapi/v1/journalpost/001/mottaDokumentUtgaaendeSkanning";
 		stubFor(put(urlMatching(MOTTA_DOKUMENT_UTGAAENDE_SKANNING_TJENESTE))
-				.willReturn(aResponse().withStatus(OK.value())));
+				.willReturn(aResponse()
+						.withStatus(OK.value()).withHeader("Connection", "close")));
 		String MOTTA_DOKUMENT_UTGAAENDE_SKANNING_TJENESTE_INVALID_JOURNALPOST = "/rest/intern/journalpostapi/v1/journalpost/002/mottaDokumentUtgaaendeSkanning";
 		stubFor(put(urlMatching(MOTTA_DOKUMENT_UTGAAENDE_SKANNING_TJENESTE_INVALID_JOURNALPOST))
-				.willReturn(aResponse().withStatus(BAD_REQUEST.value())));
+				.willReturn(aResponse()
+						.withStatus(BAD_REQUEST.value()).withHeader("Connection", "close")));
 	}
 
 
 	void setUpHappyStubs() {
 		stubFor(put(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN))
-				.willReturn(aResponse().withStatus(OK.value())
+				.willReturn(aResponse()
+						.withStatus(OK.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withHeader("Connection", "close")
 						.withBody("{}")));
 	}
 
 	void setUpBadStubs() {
 		String URL_DOKARKIV_JOURNALPOST_BAD_REQUEST = "/rest/intern/journalpostapi/v1/journalpost/4000004/mottaDokumentUtgaaendeSkanning";
 		stubFor(put(urlMatching(URL_DOKARKIV_JOURNALPOST_BAD_REQUEST))
-				.willReturn(aResponse().withStatus(BAD_REQUEST.value())));
+				.willReturn(aResponse().withStatus(BAD_REQUEST.value()).withHeader("Connection", "close")));
 	}
 }

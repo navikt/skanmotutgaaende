@@ -33,6 +33,7 @@ public class LagreFildetaljerIT extends AbstractItest {
 
 	@BeforeEach
 	void setUpConsumer() {
+		super.setUp();
 		lagrefildetaljerConsumer = new LagreFildetaljerConsumer(new RestTemplateBuilder(), skanmotutgaaendeProperties);
 	}
 
