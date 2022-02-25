@@ -45,7 +45,7 @@ public class PostboksUtgaaendeRouteEncrypted extends RouteBuilder {
     @Autowired
     public PostboksUtgaaendeRouteEncrypted(SkanmotutgaaendeProperties skanmotutgaaendeProperties,
                                            PostboksUtgaaendeService postboksUtgaaendeService,
-                                           @Value("${skanmotutgaaende.secret.passphrase}") String passphrase) {
+                                           @Value("${passphrase}") String passphrase) {
         this.skanmotutgaaendeProperties = skanmotutgaaendeProperties;
         this.postboksUtgaaendeService = postboksUtgaaendeService;
         this.errorMetricsProcessor = new ErrorMetricsProcessor();
