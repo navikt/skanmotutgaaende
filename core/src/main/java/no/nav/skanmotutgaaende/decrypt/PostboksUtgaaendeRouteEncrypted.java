@@ -40,16 +40,16 @@ public class PostboksUtgaaendeRouteEncrypted extends RouteBuilder {
     private final SkanmotutgaaendeProperties skanmotutgaaendeProperties;
     private final PostboksUtgaaendeService postboksUtgaaendeService;
     private final ErrorMetricsProcessor errorMetricsProcessor;
-    private final String passphrase;
+    private final String aesPassphrase;
 
     @Autowired
     public PostboksUtgaaendeRouteEncrypted(SkanmotutgaaendeProperties skanmotutgaaendeProperties,
                                            PostboksUtgaaendeService postboksUtgaaendeService,
-                                           @Value("${passphrase}") String passphrase) {
+                                           @Value("${aes.passphrase}") String aesPassphrase) {
         this.skanmotutgaaendeProperties = skanmotutgaaendeProperties;
         this.postboksUtgaaendeService = postboksUtgaaendeService;
         this.errorMetricsProcessor = new ErrorMetricsProcessor();
-        this.passphrase = passphrase;
+        this.aesPassphrase = aesPassphrase;
     }
 
     @Override
@@ -98,7 +98,7 @@ public class PostboksUtgaaendeRouteEncrypted extends RouteBuilder {
                 .setProperty(PROPERTY_FORSENDELSE_ZIPNAME, simple("${file:name}"))
                 .process(exchange -> exchange.setProperty(PROPERTY_FORSENDELSE_BATCHNAVN, cleanDotEncExtension(simple("${file:name.noext.single}"), exchange)))
                 .process(new MdcSetterProcessor())
-                .split(new ZipSplitterEncrypted(passphrase)).streaming()
+                .split(new ZipSplitterEncrypted(aesPassphrase)).streaming()
                 .aggregate(simple("${file:name.noext.single}"), new PostboksUtgaaendeSkanningAggregator())
                 .completionSize(FORVENTET_ANTALL_PER_FORSENDELSE)
                 .completionTimeout(skanmotutgaaendeProperties.getCompletiontimeout().toMillis())
