@@ -12,7 +12,6 @@ import no.nav.skanmotutgaaende.config.props.SkanmotutgaaendeProperties;
 import no.nav.skanmotutgaaende.exceptions.functional.AbstractSkanmotutgaaendeFunctionalException;
 import no.nav.skanmotutgaaende.metrics.DokCounter;
 import org.apache.camel.Exchange;
-import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.builder.ValueBuilder;
 import org.apache.camel.dataformat.zipfile.ZipSplitter;
@@ -28,6 +27,7 @@ import static no.nav.skanmotutgaaende.metrics.DokCounter.UTGAAENDE;
 import static org.apache.camel.Exchange.FILE_NAME;
 import static org.apache.camel.Exchange.FILE_NAME_PRODUCED;
 import static org.apache.camel.LoggingLevel.ERROR;
+import static org.apache.camel.LoggingLevel.INFO;
 import static org.apache.camel.LoggingLevel.WARN;
 
 @Slf4j
@@ -60,7 +60,6 @@ public class PostboksUtgaaendeRoutePGPEncrypted extends RouteBuilder {
 
 		// @formatter:off
 		onException(Exception.class)
-				.log(ERROR, log, "Inni Exception.class")
 				.handled(true)
 				.process(new MdcSetterProcessor())
 				.process(new ErrorMetricsProcessor())
@@ -75,17 +74,16 @@ public class PostboksUtgaaendeRoutePGPEncrypted extends RouteBuilder {
 				.handled(true)
 				.process(new MdcSetterProcessor())
 				.process(new ErrorMetricsProcessor())
-				.log(WARN, log, "Skanmotutgaaende-pgp feilet i dekryptering av .zip.pgp for " + KEY_LOGGING_INFO + ". ${exception}")
+				.log(ERROR, log, "Skanmotutgaaende-pgp feilet i dekryptering av .zip.pgp for " + KEY_LOGGING_INFO + ". ${exception}")
 				.setHeader(FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}.zip.pgp"))
 				.to("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.feilmappe}}" +
 						"?{{skanmotutgaaende.endpointconfig}}")
-				.log(WARN, log, "Skanmotutgaaende-pgp skrev feiletzip=${header." + FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".")
+				.log(ERROR, log, "Skanmotutgaaende-pgp skrev feiletzip=${header." + FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".")
 				.end()
 				.process(new MdcRemoverProcessor());
 
 		// Kjente funksjonelle feil
 		onException(AbstractSkanmotutgaaendeFunctionalException.class)
-				.log(ERROR, log, "Inni onException(AbstractSkanmotutgaaendeFunctionalException.class)")
 				.handled(true)
 				.process(new MdcSetterProcessor())
 				.process(new ErrorMetricsProcessor())
@@ -103,7 +101,7 @@ public class PostboksUtgaaendeRoutePGPEncrypted extends RouteBuilder {
 				"&move=processed" +
 				"&scheduler=spring&scheduler.cron={{skanmotutgaaende.schedule}}")
 				.routeId("read_encrypted_pgp_utgaaende_zip_from_sftp")
-				.log(LoggingLevel.INFO, log, "Skanmotutgaaende-pgp starter behandling av fil=${file:absolute.path}.")
+				.log(INFO, log, "Skanmotutgaaende-pgp starter behandling av fil=${file:absolute.path}.")
 				.setProperty(PROPERTY_FORSENDELSE_ZIPNAME, simple("${file:name}"))
 				.process(exchange -> exchange.setProperty(PROPERTY_FORSENDELSE_BATCHNAVN, cleanDotPgpExtension(simple("${file:name.noext.single}"), exchange)))
 				.process(new MdcSetterProcessor())
@@ -122,14 +120,14 @@ public class PostboksUtgaaendeRoutePGPEncrypted extends RouteBuilder {
 					.end() // aggregate
 				.end() // split
 				.process(new MdcRemoverProcessor())
-				.log(LoggingLevel.INFO, log, "Skanmotutgaaende-pgp behandlet ferdig fil=${file:absolute.path}.");
+				.log(INFO, log, "Skanmotutgaaende-pgp behandlet ferdig fil=${file:absolute.path}.");
 
 		from(PROCESS_PGP_ENCRYPTED)
 				.routeId(PROCESS_PGP_ENCRYPTED)
 				.process(new MdcSetterProcessor())
-				.log(LoggingLevel.INFO, log, "Skanmotutgaaende behandler " + KEY_LOGGING_INFO + ".")
+				.log(INFO, log, "Skanmotutgaaende behandler " + KEY_LOGGING_INFO + ".")
 				.bean(postboksUtgaaendeService)
-				.log(LoggingLevel.INFO, log, "Skanmotutgaaende journalførte journalpostId=${body}. " + KEY_LOGGING_INFO + ".")
+				.log(INFO, log, "Skanmotutgaaende journalførte journalpostId=${body}. " + KEY_LOGGING_INFO + ".")
 				.process(exchange -> DokCounter.incrementCounter("antall_vellykkede", List.of(DOMAIN, UTGAAENDE)))
 				.process(new MdcRemoverProcessor());
 
