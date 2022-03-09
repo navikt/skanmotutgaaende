@@ -33,12 +33,6 @@ public class PostboksUtgaaendeRouteEncryptedIT extends AbstractItest{
 	public static final String INNGAAENDE = "inngaaende";
 	public static final String FEILMAPPE = "feilmappe";
 
-	private final String ZIP_FILE_NAME_NO_EXTENSION = "01.07.2020_R123456789_1_1000";
-	private final String ZIP_FILENAME_NO_EXTENSION_BAD_PASSWORD = "29.10.2020_R123456789_6_9999";
-	private final String ZIP_FILENAME_NO_EXTENSION_BAD_ENCRYPTION = "01.07.2020_R123456789_2_1000";
-	private final String ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION = "01.07.2020_R100000000_1_1000_ordered_xml_first_big";
-	private final String ZIP_FILE_NAME_NOT_ENCRYPTED_ENC = "01.07.2020_R123456789_1_1000_NotEncrypted";
-
 	@Autowired
 	private Path sshdPath;
 
@@ -68,6 +62,8 @@ public class PostboksUtgaaendeRouteEncryptedIT extends AbstractItest{
 		// FEIL - 01.07.2020_R123456789_0006 (mangler xml)
 		setUpHappyStubs();
 		setUpBadStubs();
+
+		final String ZIP_FILE_NAME_NO_EXTENSION = "01.07.2020_R123456789_1_1000";
 		copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_NO_EXTENSION + ".enc.zip");
 
 		await().atMost(15, SECONDS).untilAsserted(() -> {
@@ -106,6 +102,8 @@ public class PostboksUtgaaendeRouteEncryptedIT extends AbstractItest{
 		// OK   - 01.07.2020_R100000000_0059
 		setUpHappyStubs();
 		setUpBadStubs();
+
+		final String ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION = "01.07.2020_R100000000_1_1000_ordered_xml_first_big";
 		copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION + ".enc.zip");
 
 		await().atMost(25, SECONDS).untilAsserted(() -> {
@@ -136,6 +134,7 @@ public class PostboksUtgaaendeRouteEncryptedIT extends AbstractItest{
 		//ZipException: Bad password
 		//should be sent to feilmappe
 
+		final String ZIP_FILENAME_NO_EXTENSION_BAD_PASSWORD = "29.10.2020_R123456789_6_9999";
 		copyFileFromClasspathToInngaaende(ZIP_FILENAME_NO_EXTENSION_BAD_PASSWORD + ".enc.zip");
 
 		await().atMost(15, SECONDS).untilAsserted(() -> {
@@ -156,6 +155,7 @@ public class PostboksUtgaaendeRouteEncryptedIT extends AbstractItest{
 		//ZipException: En .enc-file kom inn men filene er ukrypterte
 		//should be sent to feilmappe
 
+		final String ZIP_FILE_NAME_NOT_ENCRYPTED_ENC = "01.07.2020_R123456789_1_1000_NotEncrypted";
 		copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_NOT_ENCRYPTED_ENC + ".enc.zip");
 
 		await().atMost(15, SECONDS).untilAsserted(() -> {
@@ -176,6 +176,7 @@ public class PostboksUtgaaendeRouteEncryptedIT extends AbstractItest{
 		//ZipException: Filene er ikke kryptert med AES men en annen krypteringsmetode
 		//should be sent to feilmappe
 
+		final String ZIP_FILENAME_NO_EXTENSION_BAD_ENCRYPTION = "01.07.2020_R123456789_2_1000";
 		copyFileFromClasspathToInngaaende(ZIP_FILENAME_NO_EXTENSION_BAD_ENCRYPTION + ".enc.zip");
 
 		await().atMost(15, SECONDS).untilAsserted(() -> {

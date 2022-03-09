@@ -22,25 +22,27 @@ import java.util.zip.ZipException;
 @Slf4j
 @Component
 public class PostboksUtgaaendeRoute extends RouteBuilder {
-    public static final String PROPERTY_FORSENDELSE_ZIPNAME = "ForsendelseZipname";
-    public static final String PROPERTY_FORSENDELSE_BATCHNAVN = "ForsendelseBatchNavn";
-    public static final String PROPERTY_FORSENDELSE_FILEBASENAME = "ForsendelseFileBasename";
-    public static final String KEY_LOGGING_INFO = "fil=${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}, batch=${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}";
-    static final int FORVENTET_ANTALL_PER_FORSENDELSE = 2;
+	public static final String PROPERTY_FORSENDELSE_ZIPNAME = "ForsendelseZipname";
+	public static final String PROPERTY_FORSENDELSE_BATCHNAVN = "ForsendelseBatchNavn";
+	public static final String PROPERTY_FORSENDELSE_FILEBASENAME = "ForsendelseFileBasename";
+	public static final String KEY_LOGGING_INFO = "fil=${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}, batch=${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}";
+	static final int FORVENTET_ANTALL_PER_FORSENDELSE = 2;
 
-    private final SkanmotutgaaendeProperties skanmotutgaaendeProperties;
-    private final PostboksUtgaaendeService postboksUtgaaendeService;
-    private final ErrorMetricsProcessor errorMetricsProcessor;
+	private final SkanmotutgaaendeProperties skanmotutgaaendeProperties;
+	private final PostboksUtgaaendeService postboksUtgaaendeService;
+	private final ErrorMetricsProcessor errorMetricsProcessor;
 
-    @Autowired
-    public PostboksUtgaaendeRoute(SkanmotutgaaendeProperties skanmotutgaaendeProperties, PostboksUtgaaendeService postboksUtgaaendeService) {
-        this.skanmotutgaaendeProperties = skanmotutgaaendeProperties;
-        this.postboksUtgaaendeService = postboksUtgaaendeService;
-        this.errorMetricsProcessor = new ErrorMetricsProcessor();
-    }
+	@Autowired
+	public PostboksUtgaaendeRoute(SkanmotutgaaendeProperties skanmotutgaaendeProperties, PostboksUtgaaendeService postboksUtgaaendeService) {
+		this.skanmotutgaaendeProperties = skanmotutgaaendeProperties;
+		this.postboksUtgaaendeService = postboksUtgaaendeService;
+		this.errorMetricsProcessor = new ErrorMetricsProcessor();
+	}
 
-    @Override
-    public void configure() {
+	@Override
+	public void configure() {
+
+		// @formatter:off
         onException(Exception.class)
                 .handled(true)
                 .process(new MdcSetterProcessor())
@@ -87,17 +89,17 @@ public class PostboksUtgaaendeRoute extends RouteBuilder {
                 .setProperty(PROPERTY_FORSENDELSE_BATCHNAVN, simple("${file:name.noext.single}"))
                 .process(new MdcSetterProcessor())
                 .split(new ZipSplitter()).streaming()
-                .aggregate(simple("${file:name.noext.single}"), new PostboksUtgaaendeSkanningAggregator())
-                .completionSize(FORVENTET_ANTALL_PER_FORSENDELSE)
-                .completionTimeout(skanmotutgaaendeProperties.getCompletiontimeout().toMillis())
-                .setProperty(PROPERTY_FORSENDELSE_FILEBASENAME, simple("${exchangeProperty.CamelAggregatedCorrelationKey}"))
-                .process(new MdcSetterProcessor())
-                .process(exchange -> DokCounter.incrementCounter("antall_innkommende", List.of(DokCounter.DOMAIN, DokCounter.UTGAAENDE)))
-                .process(exchange -> exchange.getIn().getBody(PostboksUtgaaendeEnvelope.class).validate())
-                .bean(new SkanningmetadataUnmarshaller())
-                .setProperty(PROPERTY_FORSENDELSE_BATCHNAVN, simple("${body.skanningmetadata.journalpost.batchnavn}"))
-                .to("direct:process_utgaaende")
-                .end() // aggregate
+					.aggregate(simple("${file:name.noext.single}"), new PostboksUtgaaendeSkanningAggregator())
+						.completionSize(FORVENTET_ANTALL_PER_FORSENDELSE)
+						.completionTimeout(skanmotutgaaendeProperties.getCompletiontimeout().toMillis())
+						.setProperty(PROPERTY_FORSENDELSE_FILEBASENAME, simple("${exchangeProperty.CamelAggregatedCorrelationKey}"))
+						.process(new MdcSetterProcessor())
+						.process(exchange -> DokCounter.incrementCounter("antall_innkommende", List.of(DokCounter.DOMAIN, DokCounter.UTGAAENDE)))
+						.process(exchange -> exchange.getIn().getBody(PostboksUtgaaendeEnvelope.class).validate())
+						.bean(new SkanningmetadataUnmarshaller())
+						.setProperty(PROPERTY_FORSENDELSE_BATCHNAVN, simple("${body.skanningmetadata.journalpost.batchnavn}"))
+						.to("direct:process_utgaaende")
+					.end() // aggregate
                 .end() // split
                 .process(new MdcRemoverProcessor())
                 .log(LoggingLevel.INFO, log, "Skanmotutgaaende behandlet ferdig fil=${file:absolute.path}.");
@@ -119,5 +121,7 @@ public class PostboksUtgaaendeRoute extends RouteBuilder {
                 .log(LoggingLevel.ERROR, log, "Skanmotutgaaende teknisk feil der " + KEY_LOGGING_INFO + ". ikke ble flyttet til feilområde. Må analyseres.")
                 .end()
                 .process(new MdcRemoverProcessor());
-    }
+
+        // @formatter:on
+	}
 }
