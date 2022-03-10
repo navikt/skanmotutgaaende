@@ -2,18 +2,24 @@ package no.nav.skanmotutgaaende;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotutgaaende.config.props.SkanmotutgaaendeProperties;
-import java.util.List;
-import java.util.zip.ZipException;
 import no.nav.skanmotutgaaende.exceptions.functional.AbstractSkanmotutgaaendeFunctionalException;
 import no.nav.skanmotutgaaende.metrics.DokCounter;
 import org.apache.camel.Exchange;
-import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.dataformat.zipfile.ZipSplitter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.zip.ZipException;
+
+import static no.nav.skanmotutgaaende.metrics.DokCounter.DOMAIN;
+import static no.nav.skanmotutgaaende.metrics.DokCounter.UTGAAENDE;
+import static org.apache.camel.Exchange.FILE_NAME_PRODUCED;
+import static org.apache.camel.LoggingLevel.ERROR;
+import static org.apache.camel.LoggingLevel.INFO;
+import static org.apache.camel.LoggingLevel.WARN;
 
 /**
  * @author Joakim Bjørnstad, Jbit AS
@@ -22,53 +28,55 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Component
 public class PostboksUtgaaendeRoute extends RouteBuilder {
-    public static final String PROPERTY_FORSENDELSE_ZIPNAME = "ForsendelseZipname";
-    public static final String PROPERTY_FORSENDELSE_BATCHNAVN = "ForsendelseBatchNavn";
-    public static final String PROPERTY_FORSENDELSE_FILEBASENAME = "ForsendelseFileBasename";
-    public static final String KEY_LOGGING_INFO = "fil=${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}, batch=${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}";
-    static final int FORVENTET_ANTALL_PER_FORSENDELSE = 2;
+	public static final String PROPERTY_FORSENDELSE_ZIPNAME = "ForsendelseZipname";
+	public static final String PROPERTY_FORSENDELSE_BATCHNAVN = "ForsendelseBatchNavn";
+	public static final String PROPERTY_FORSENDELSE_FILEBASENAME = "ForsendelseFileBasename";
+	public static final String KEY_LOGGING_INFO = "fil=${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}, batch=${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}";
+	static final int FORVENTET_ANTALL_PER_FORSENDELSE = 2;
 
-    private final SkanmotutgaaendeProperties skanmotutgaaendeProperties;
-    private final PostboksUtgaaendeService postboksUtgaaendeService;
-    private final ErrorMetricsProcessor errorMetricsProcessor;
+	private final SkanmotutgaaendeProperties skanmotutgaaendeProperties;
+	private final PostboksUtgaaendeService postboksUtgaaendeService;
+	private final ErrorMetricsProcessor errorMetricsProcessor;
 
-    @Inject
-    public PostboksUtgaaendeRoute(SkanmotutgaaendeProperties skanmotutgaaendeProperties, PostboksUtgaaendeService postboksUtgaaendeService) {
-        this.skanmotutgaaendeProperties = skanmotutgaaendeProperties;
-        this.postboksUtgaaendeService = postboksUtgaaendeService;
-        this.errorMetricsProcessor = new ErrorMetricsProcessor();
-    }
+	@Autowired
+	public PostboksUtgaaendeRoute(SkanmotutgaaendeProperties skanmotutgaaendeProperties, PostboksUtgaaendeService postboksUtgaaendeService) {
+		this.skanmotutgaaendeProperties = skanmotutgaaendeProperties;
+		this.postboksUtgaaendeService = postboksUtgaaendeService;
+		this.errorMetricsProcessor = new ErrorMetricsProcessor();
+	}
 
-    @Override
-    public void configure() throws Exception {
+	@Override
+	public void configure() {
+
+		// @formatter:off
         onException(Exception.class)
                 .handled(true)
                 .process(new MdcSetterProcessor())
                 .process(errorMetricsProcessor)
-                .log(LoggingLevel.ERROR, log, "Skanmotutgaaende feilet teknisk for " + KEY_LOGGING_INFO + ". ${exception}")
+                .log(ERROR, log, "Skanmotutgaaende feilet teknisk for " + KEY_LOGGING_INFO + ". ${exception}")
                 .setHeader(Exchange.FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}/${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}-teknisk.zip"))
                 .to("direct:avvik")
-                .log(LoggingLevel.ERROR, log, "Skanmotutgaaende skrev feiletzip=${header." + Exchange.FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".");
+                .log(ERROR, log, "Skanmotutgaaende skrev feiletzip=${header." + FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".");
 
         // Kjente funksjonelle feil
         onException(AbstractSkanmotutgaaendeFunctionalException.class)
                 .handled(true)
                 .process(new MdcSetterProcessor())
                 .process(errorMetricsProcessor)
-                .log(LoggingLevel.WARN, log, "Skanmotutgaaende feilet funksjonelt for " + KEY_LOGGING_INFO + ". ${exception}")
+                .log(WARN, log, "Skanmotutgaaende feilet funksjonelt for " + KEY_LOGGING_INFO + ". ${exception}")
                 .setHeader(Exchange.FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}/${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}.zip"))
                 .to("direct:avvik")
-                .log(LoggingLevel.WARN, log, "Skanmotutgaaende skrev feiletzip=${header." + Exchange.FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".");
+                .log(WARN, log, "Skanmotutgaaende skrev feiletzip=${header." + FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".");
 
         onException(ZipException.class)
                 .handled(true)
                 .process(new MdcSetterProcessor())
                 .process(errorMetricsProcessor)
-                .log(LoggingLevel.WARN, log, "Feil passord for en fil " + KEY_LOGGING_INFO + ". ${exception}")
+                .log(WARN, log, "Feil passord for en fil " + KEY_LOGGING_INFO + ". ${exception}")
                 .setHeader(Exchange.FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}.zip"))
                 .to("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.feilmappe}}" +
                         "?{{skanmotutgaaende.endpointconfig}}")
-                .log(LoggingLevel.WARN, log, "Skanmotutgaaende skrev feilet zip=${header." + Exchange.FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".")
+                .log(WARN, log, "Skanmotutgaaende skrev feilet zip=${header." + FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".")
                 .end()
                 .process(new MdcRemoverProcessor());
 
@@ -82,31 +90,31 @@ public class PostboksUtgaaendeRoute extends RouteBuilder {
                 "&move=processed" +
                 "&scheduler=spring&scheduler.cron={{skanmotutgaaende.schedule}}")
                 .routeId("read_zip_from_sftp")
-                .log(LoggingLevel.INFO, log, "Skanmotutgaaende starter behandling av fil=${file:absolute.path}.")
+                .log(INFO, log, "Skanmotutgaaende starter behandling av fil=${file:absolute.path}.")
                 .setProperty(PROPERTY_FORSENDELSE_ZIPNAME, simple("${file:name}"))
                 .setProperty(PROPERTY_FORSENDELSE_BATCHNAVN, simple("${file:name.noext.single}"))
                 .process(new MdcSetterProcessor())
                 .split(new ZipSplitter()).streaming()
-                .aggregate(simple("${file:name.noext.single}"), new PostboksUtgaaendeSkanningAggregator())
-                .completionSize(FORVENTET_ANTALL_PER_FORSENDELSE)
-                .completionTimeout(skanmotutgaaendeProperties.getCompletiontimeout().toMillis())
-                .setProperty(PROPERTY_FORSENDELSE_FILEBASENAME, simple("${exchangeProperty.CamelAggregatedCorrelationKey}"))
-                .process(new MdcSetterProcessor())
-                .process(exchange -> DokCounter.incrementCounter("antall_innkommende", List.of(DokCounter.DOMAIN, DokCounter.UTGAAENDE)))
-                .process(exchange -> exchange.getIn().getBody(PostboksUtgaaendeEnvelope.class).validate())
-                .bean(new SkanningmetadataUnmarshaller())
-                .setProperty(PROPERTY_FORSENDELSE_BATCHNAVN, simple("${body.skanningmetadata.journalpost.batchnavn}"))
-                .to("direct:process_utgaaende")
-                .end() // aggregate
+					.aggregate(simple("${file:name.noext.single}"), new PostboksUtgaaendeSkanningAggregator())
+						.completionSize(FORVENTET_ANTALL_PER_FORSENDELSE)
+						.completionTimeout(skanmotutgaaendeProperties.getCompletiontimeout().toMillis())
+						.setProperty(PROPERTY_FORSENDELSE_FILEBASENAME, simple("${exchangeProperty.CamelAggregatedCorrelationKey}"))
+						.process(new MdcSetterProcessor())
+						.process(exchange -> DokCounter.incrementCounter("antall_innkommende", List.of(DOMAIN, UTGAAENDE)))
+						.process(exchange -> exchange.getIn().getBody(PostboksUtgaaendeEnvelope.class).validate())
+						.bean(new SkanningmetadataUnmarshaller())
+						.setProperty(PROPERTY_FORSENDELSE_BATCHNAVN, simple("${body.skanningmetadata.journalpost.batchnavn}"))
+						.to("direct:process_utgaaende")
+					.end() // aggregate
                 .end() // split
                 .process(new MdcRemoverProcessor())
-                .log(LoggingLevel.INFO, log, "Skanmotutgaaende behandlet ferdig fil=${file:absolute.path}.");
+                .log(INFO, log, "Skanmotutgaaende behandlet ferdig fil=${file:absolute.path}.");
 
         from("direct:process_utgaaende")
                 .routeId("process_utgaaende")
                 .process(new MdcSetterProcessor())
                 .bean(postboksUtgaaendeService)
-                .process(exchange -> DokCounter.incrementCounter("antall_vellykkede", List.of(DokCounter.DOMAIN, DokCounter.UTGAAENDE)))
+                .process(exchange -> DokCounter.incrementCounter("antall_vellykkede", List.of(DOMAIN, UTGAAENDE)))
                 .process(new MdcRemoverProcessor());
 
         from("direct:avvik")
@@ -116,8 +124,10 @@ public class PostboksUtgaaendeRoute extends RouteBuilder {
                 .to("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.feilmappe}}" +
                         "?{{skanmotutgaaende.endpointconfig}}")
                 .otherwise()
-                .log(LoggingLevel.ERROR, log, "Skanmotutgaaende teknisk feil der " + KEY_LOGGING_INFO + ". ikke ble flyttet til feilområde. Må analyseres.")
+                .log(ERROR, log, "Skanmotutgaaende teknisk feil der " + KEY_LOGGING_INFO + ". ikke ble flyttet til feilområde. Må analyseres.")
                 .end()
                 .process(new MdcRemoverProcessor());
-    }
+
+        // @formatter:on
+	}
 }

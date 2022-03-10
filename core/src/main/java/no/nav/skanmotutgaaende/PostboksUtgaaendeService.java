@@ -6,9 +6,8 @@ import no.nav.skanmotutgaaende.domain.Skanningmetadata;
 import no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerService;
 import org.apache.camel.Body;
 import org.apache.camel.Handler;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
 
 /**
  * @author Joakim Bjørnstad, Jbit AS
@@ -18,7 +17,7 @@ import javax.inject.Inject;
 public class PostboksUtgaaendeService {
     private final LagreFildetaljerService lagreFildetaljerService;
 
-    @Inject
+    @Autowired
     public PostboksUtgaaendeService(LagreFildetaljerService lagreFildetaljerService) {
         this.lagreFildetaljerService = lagreFildetaljerService;
     }

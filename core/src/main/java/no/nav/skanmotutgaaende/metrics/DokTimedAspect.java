@@ -14,10 +14,12 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.bouncycastle.openpgp.PGPException;
 import org.slf4j.MDC;
 
 import java.lang.reflect.Method;
 import java.util.function.Function;
+import java.util.zip.ZipException;
 
 import static java.util.Arrays.asList;
 
@@ -98,6 +100,8 @@ public class DokTimedAspect {
     }
 
     private boolean isFunctionalException(Throwable e) {
-        return e instanceof AbstractSkanmotutgaaendeFunctionalException;
+        return e instanceof AbstractSkanmotutgaaendeFunctionalException
+                || e instanceof PGPException // Feil for PGP-kryptering
+                || e instanceof ZipException; // Feil for AES-kryptering
     }
 }

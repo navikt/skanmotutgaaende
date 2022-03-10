@@ -26,7 +26,6 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
 					<finalName>app</finalName>
-					<mainClass>no.nav.skanmotutgaaende.Application</mainClass>
 				</configuration>
 			</plugin>
 		</plugins>

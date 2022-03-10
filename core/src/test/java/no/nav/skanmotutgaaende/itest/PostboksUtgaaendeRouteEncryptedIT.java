@@ -1,24 +1,15 @@
 package no.nav.skanmotutgaaende.itest;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import wiremock.org.apache.commons.io.FileUtils;
 import wiremock.org.apache.commons.io.FilenameUtils;
 
-import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -27,11 +18,8 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.exactly;
-import static com.github.tomakehurst.wiremock.client.WireMock.put;
 import static com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -39,56 +27,28 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class PostboksUtgaaendeRouteEncryptedIT extends AbstractItest{
 
 	public static final String INNGAAENDE = "inngaaende";
 	public static final String FEILMAPPE = "feilmappe";
 
-		private final String ZIP_FILE_NAME_NO_EXTENSION = "01.07.2020_R123456789_1_1000";
-	private final String ZIP_FILENAME_NO_EXTENSION_BAD_PASSWORD = "29.10.2020_R123456789_6_9999";
-	private final String ZIP_FILENAME_NO_EXTENSION_BAD_ENCRYPTION = "01.07.2020_R123456789_2_1000";
-	private final String ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION = "01.07.2020_R100000000_1_1000_ordered_xml_first_big";
-	private final String ZIP_FILE_NAME_NOT_ENCRYPTED_ENC = "01.07.2020_R123456789_1_1000_NotEncrypted";
-
-	@Inject
+	@Autowired
 	private Path sshdPath;
 
 	@BeforeEach
 	void beforeEach() {
+		super.setUp();
 		final Path inngaaende = sshdPath.resolve(INNGAAENDE);
 		final Path processed = inngaaende.resolve("processed");
 		final Path feilmappe = sshdPath.resolve(FEILMAPPE);
 		try {
 			preparePath(inngaaende);
-		} catch (Exception e) {
-			//noop. Windows sliter med å slette filene, de blir kun satt til "unavailable"
-		}
-		try {
 			preparePath(processed);
-		} catch (Exception e) {
-			//noop. Windows sliter med å slette filene, de blir kun satt til "unavailable"
-		}
-		try {
 			preparePath(feilmappe);
 		} catch (Exception e) {
 			//noop. Windows sliter med å slette filene, de blir kun satt til "unavailable"
 		}
-	}
-
-	@AfterEach
-	void tearDown() {
-		WireMock.reset();
-		WireMock.resetAllRequests();
-		WireMock.removeAllMappings();
-		File dir = sshdPath.toFile();
-		for (File file : dir.listFiles()) {
-			file.delete();
-		}
-		File dirr = new File(String.valueOf(sshdPath.toAbsolutePath()));
-		dirr.delete();
 	}
 
 	@Test
@@ -102,6 +62,8 @@ public class PostboksUtgaaendeRouteEncryptedIT extends AbstractItest{
 		// FEIL - 01.07.2020_R123456789_0006 (mangler xml)
 		setUpHappyStubs();
 		setUpBadStubs();
+
+		final String ZIP_FILE_NAME_NO_EXTENSION = "01.07.2020_R123456789_1_1000";
 		copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_NO_EXTENSION + ".enc.zip");
 
 		await().atMost(15, SECONDS).untilAsserted(() -> {
@@ -140,6 +102,8 @@ public class PostboksUtgaaendeRouteEncryptedIT extends AbstractItest{
 		// OK   - 01.07.2020_R100000000_0059
 		setUpHappyStubs();
 		setUpBadStubs();
+
+		final String ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION = "01.07.2020_R100000000_1_1000_ordered_xml_first_big";
 		copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION + ".enc.zip");
 
 		await().atMost(25, SECONDS).untilAsserted(() -> {
@@ -170,6 +134,7 @@ public class PostboksUtgaaendeRouteEncryptedIT extends AbstractItest{
 		//ZipException: Bad password
 		//should be sent to feilmappe
 
+		final String ZIP_FILENAME_NO_EXTENSION_BAD_PASSWORD = "29.10.2020_R123456789_6_9999";
 		copyFileFromClasspathToInngaaende(ZIP_FILENAME_NO_EXTENSION_BAD_PASSWORD + ".enc.zip");
 
 		await().atMost(15, SECONDS).untilAsserted(() -> {
@@ -190,6 +155,7 @@ public class PostboksUtgaaendeRouteEncryptedIT extends AbstractItest{
 		//ZipException: En .enc-file kom inn men filene er ukrypterte
 		//should be sent to feilmappe
 
+		final String ZIP_FILE_NAME_NOT_ENCRYPTED_ENC = "01.07.2020_R123456789_1_1000_NotEncrypted";
 		copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_NOT_ENCRYPTED_ENC + ".enc.zip");
 
 		await().atMost(15, SECONDS).untilAsserted(() -> {
@@ -210,6 +176,7 @@ public class PostboksUtgaaendeRouteEncryptedIT extends AbstractItest{
 		//ZipException: Filene er ikke kryptert med AES men en annen krypteringsmetode
 		//should be sent to feilmappe
 
+		final String ZIP_FILENAME_NO_EXTENSION_BAD_ENCRYPTION = "01.07.2020_R123456789_2_1000";
 		copyFileFromClasspathToInngaaende(ZIP_FILENAME_NO_EXTENSION_BAD_ENCRYPTION + ".enc.zip");
 
 		await().atMost(15, SECONDS).untilAsserted(() -> {

@@ -1,10 +1,10 @@
 {
-  "NAMESPACE": "teamdokumenthandtering",
   "SRVSKANMOTUTGAAENDE": "/serviceuser/data/prod/srvskanmotutgaaende",
-  "SKANMOTUTGAAENDE_VAULT": "/kv/prod/fss/skanmotutgaaende/default",
   "SFTP_KEYS": "kv/prod/fss/skanmotutgaaende/keys",
   "SKANMOTUTGAAENDE_DOKARKIVJOURNALPOSTURL": "https://dokarkiv.intern.nav.no/rest/intern/journalpostapi/v1/journalpost",
   "SKANMOTUTGAAENDE_SCHEDULE": "0+0/15+*+*+*+*",
+  "SKANMOTUTGAAENDE_VAULT_BACKEND": "kv/prod/fss",
+  "SKANMOTUTGAAENDE_VAULT_KUBERNETESPATH": "kubernetes/prod/fss",
   "INGRESSES": [
     "https://skanmotutgaaende.intern.nav.no"
   ]
