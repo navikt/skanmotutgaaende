@@ -125,9 +125,7 @@ public class PostboksUtgaaendeRoutePGPEncrypted extends RouteBuilder {
 		from(PROCESS_PGP_ENCRYPTED)
 				.routeId(PROCESS_PGP_ENCRYPTED)
 				.process(new MdcSetterProcessor())
-				.log(INFO, log, "Skanmotutgaaende behandler " + KEY_LOGGING_INFO + ".")
 				.bean(postboksUtgaaendeService)
-				.log(INFO, log, "Skanmotutgaaende journalførte journalpostId=${body}. " + KEY_LOGGING_INFO + ".")
 				.process(exchange -> DokCounter.incrementCounter("antall_vellykkede", List.of(DOMAIN, UTGAAENDE)))
 				.process(new MdcRemoverProcessor());
 
