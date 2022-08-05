@@ -1,6 +1,7 @@
 package no.nav.skanmotutgaaende.lagrefildetaljer;
 
 import no.nav.skanmotutgaaende.config.props.SkanmotutgaaendeProperties;
+import no.nav.skanmotutgaaende.consumers.azure.AzureTokenConsumer;
 import no.nav.skanmotutgaaende.exceptions.functional.FunctionalExceptionHandled;
 import no.nav.skanmotutgaaende.exceptions.functional.LagreFilDetaljerFinnesIkkeException;
 import no.nav.skanmotutgaaende.exceptions.functional.SkanmotutgaaendeFunctionalException;
@@ -38,19 +39,19 @@ public class LagreFildetaljerConsumer {
 	private final String MOTTA_DOKUMENT_UTGAAENDE_SKANNING_TJENESTE = "mottaDokumentUtgaaendeSkanning";
 
 	private final RestTemplate restTemplate;
-	private final String dokarkivJournalpostUrl;
+	private final SkanmotutgaaendeProperties.AzureEndpoint dokarkiv;
+	private final AzureTokenConsumer azureTokenConsumer;
 
 	public LagreFildetaljerConsumer(
+			AzureTokenConsumer azureTokenConsumer,
 			RestTemplateBuilder restTemplateBuilder,
 			SkanmotutgaaendeProperties skanmotutgaaendeProperties
 	) {
-		this.dokarkivJournalpostUrl = skanmotutgaaendeProperties.getDokarkivjournalposturl();
+		this.azureTokenConsumer = azureTokenConsumer;
+		this.dokarkiv = skanmotutgaaendeProperties.getEndpoints().getDokarkiv();
 		this.restTemplate = restTemplateBuilder
 				.setReadTimeout(Duration.ofSeconds(150))
 				.setConnectTimeout(Duration.ofSeconds(5))
-				.basicAuthentication(
-						skanmotutgaaendeProperties.getServiceuser().getUsername(),
-						skanmotutgaaendeProperties.getServiceuser().getPassword())
 				.build();
 	}
 
@@ -60,7 +61,7 @@ public class LagreFildetaljerConsumer {
 			HttpHeaders headers = createHeaders();
 			HttpEntity<LagreFildetaljerRequest> requestEntity = new HttpEntity<>(lagreFildetaljerRequest, headers);
 
-			URI uri = UriComponentsBuilder.fromHttpUrl(dokarkivJournalpostUrl)
+			URI uri = UriComponentsBuilder.fromHttpUrl(dokarkiv.getUrl())
 					.pathSegment(journalpostId, MOTTA_DOKUMENT_UTGAAENDE_SKANNING_TJENESTE)
 					.build().toUri();
 			restTemplate.exchange(uri, PUT, requestEntity, LagreFildetaljerResponse.class)
@@ -85,6 +86,7 @@ public class LagreFildetaljerConsumer {
 
 	private HttpHeaders createHeaders() {
 		HttpHeaders headers = new HttpHeaders();
+		headers.setBearerAuth(azureTokenConsumer.getClientCredentialToken(dokarkiv.getScope()).getAccess_token());
 		headers.setContentType(APPLICATION_JSON);
 
 		if (MDC.get(MDC_CALL_ID) != null) {

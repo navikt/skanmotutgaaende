@@ -35,6 +35,22 @@
             <artifactId>spring-cloud-starter-vault-config</artifactId>
         </dependency>
 
+        <!-- retry -->
+        <dependency>
+            <groupId>io.github.resilience4j</groupId>
+            <artifactId>resilience4j-spring-boot2</artifactId>
+        </dependency>
+
+        <!-- caching -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-cache</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+        </dependency>
+
         <!-- Camel -->
         <dependency>
             <groupId>org.apache.camel.springboot</groupId>

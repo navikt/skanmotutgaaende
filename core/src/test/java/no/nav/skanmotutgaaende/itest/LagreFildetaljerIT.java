@@ -1,6 +1,5 @@
 package no.nav.skanmotutgaaende.itest;
 
-import no.nav.skanmotutgaaende.config.props.SkanmotutgaaendeProperties;
 import no.nav.skanmotutgaaende.exceptions.functional.SkanmotutgaaendeFunctionalException;
 import no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerConsumer;
 import no.nav.skanmotutgaaende.lagrefildetaljer.data.DokumentVariant;
@@ -9,7 +8,6 @@ import no.nav.skanmotutgaaende.lagrefildetaljer.data.Tilleggsopplysning;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -26,15 +24,12 @@ public class LagreFildetaljerIT extends AbstractItest {
 	private final String JOURNALPOST_ID = "001";
 	private final String JOURNALPOST_ID_INVALID = "002";
 
-	private LagreFildetaljerConsumer lagrefildetaljerConsumer;
-
 	@Autowired
-	private SkanmotutgaaendeProperties skanmotutgaaendeProperties;
+	private LagreFildetaljerConsumer lagrefildetaljerConsumer;
 
 	@BeforeEach
 	void setUpConsumer() {
 		super.setUp();
-		lagrefildetaljerConsumer = new LagreFildetaljerConsumer(new RestTemplateBuilder(), skanmotutgaaendeProperties);
 	}
 
 	@Test

@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotutgaaende.CoreConfig;
 import no.nav.skanmotutgaaende.config.props.IMVaultProperties;
 import no.nav.skanmotutgaaende.config.props.SkanmotutgaaendeProperties;
+import no.nav.skanmotutgaaende.consumers.azure.AzureTokenConsumer;
+import no.nav.skanmotutgaaende.consumers.azure.TokenResponse;
 import no.nav.skanmotutgaaende.metrics.DokCounter;
 import org.apache.camel.CamelContext;
 import org.apache.camel.spring.boot.CamelContextConfiguration;
@@ -14,11 +16,13 @@ import org.apache.sshd.server.config.keys.AuthorizedKeysAuthenticator;
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
 import org.apache.sshd.server.scp.ScpCommandFactory;
 import org.apache.sshd.server.subsystem.sftp.SftpSubsystemFactory;
+import org.mockito.Mockito;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -30,6 +34,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.Collections.singletonList;
+import static org.mockito.ArgumentMatchers.anyString;
 
 @Slf4j
 @Configuration
@@ -40,6 +45,19 @@ import static java.util.Collections.singletonList;
 })
 @Import({TestConfig.CamelTestStartupConfig.class, TestConfig.SshdSftpServerConfig.class, CoreConfig.class, DokCounter.class})
 public class TestConfig {
+
+    @Bean
+    @Primary
+    AzureTokenConsumer azureTokenConsumer() {
+        AzureTokenConsumer azureTokenConsumer = Mockito.mock(AzureTokenConsumer.class);
+        Mockito.when(azureTokenConsumer.getClientCredentialToken(anyString())).thenReturn(
+                TokenResponse.builder()
+                        .access_token("dummy")
+                        .build()
+        );
+
+        return azureTokenConsumer;
+    }
 
     @Configuration
     static class CamelTestStartupConfig {
