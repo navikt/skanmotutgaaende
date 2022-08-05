@@ -7,7 +7,7 @@
   "AZURE_APP_TOKEN_URL": "https://login.microsoftonline.com/62366534-1ec3-4962-8869-9b5535279d0b/oauth2/v2.0/token",
   "SKANMOTUTGAAENDE_PROXY_HOST": "webproxy.nais",
   "SKANMOTUTGAAENDE_PROXY_PORT": "8088",
-  "SKANMOTUTGAAENDE_ENDPOINTS_DOKARKIV_URL": "https://dokarkiv.intern.nav.no/rest/intern/journalpostapi/v1/journalpost",
+  "SKANMOTUTGAAENDE_ENDPOINTS_DOKARKIV_URL": "https://dokarkiv.intern.nav.no/rest/internal/journalpostapi/v1/journalpost",
   "SKANMOTUTGAAENDE_ENDPOINTS_DOKARKIV_SCOPE": "api://prod-fss.teamdokumenthandtering.dokarkiv/.default",
   "INGRESSES": [
     "https://skanmotutgaaende.intern.nav.no"
