@@ -1,5 +1,6 @@
 package no.nav.skanmotutgaaende.config.props;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -17,14 +18,14 @@ import java.time.Duration;
 @ConfigurationProperties("skanmotutgaaende")
 public class SkanmotutgaaendeProperties {
 
-    @NotNull
-    private String dokarkivjournalposturl;
+    private final Proxy proxy = new Proxy();
+    private final Endpoints endpoints = new Endpoints();
+    private final SftpProperties sftp = new SftpProperties();
+    private final FilomraadeProperties filomraade = new FilomraadeProperties();
+    private final ServiceUserProperties serviceuser = new ServiceUserProperties();
 
     @NotEmpty
     private String endpointuri;
-
-    @NotEmpty
-    private String endpointconfig;
 
     @NotNull
     private String schedule;
@@ -32,11 +33,39 @@ public class SkanmotutgaaendeProperties {
     @NotNull
     private Duration completiontimeout;
 
-    private final FilomraadeProperties filomraade = new FilomraadeProperties();
+    @Data
+    @Validated
+    public static class Proxy {
+        private String host;
+        private int port;
 
-    private final SftpProperties sftp = new SftpProperties();
+        public boolean isSet() {
+            return (host != null && !host.equals(""));
+        }
+    }
 
-    private final ServiceUserProperties serviceuser = new ServiceUserProperties();
+    @Data
+    @Validated
+    public static class Endpoints {
+
+        @NotNull
+        private AzureEndpoint dokarkiv;
+    }
+
+    @Data
+    @Validated
+    public static class AzureEndpoint {
+        /**
+         * Url til tjeneste som har azure autorisasjon
+         */
+        @NotEmpty
+        private String url;
+        /**
+         * Scope til azure client credential flow
+         */
+        @NotEmpty
+        private String scope;
+    }
 
     @Getter
     @Setter

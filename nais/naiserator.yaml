@@ -7,8 +7,6 @@ metadata:
     team: teamdokumenthandtering
 spec:
   env:
-    - name: SKANMOTUTGAAENDE_DOKARKIVJOURNALPOSTURL
-      value: {{ SKANMOTUTGAAENDE_DOKARKIVJOURNALPOSTURL }}
     - name: SKANMOTUTGAAENDE_SCHEDULE
       value: {{ SKANMOTUTGAAENDE_SCHEDULE }}
     - name: SKANMOTUTGAAENDE_SFTP_PRIVATEKEY
@@ -21,6 +19,16 @@ spec:
       value: {{ SKANMOTUTGAAENDE_VAULT_BACKEND }}
     - name: SKANMOTUTGAAENDE_VAULT_KUBERNETESPATH
       value: {{ SKANMOTUTGAAENDE_VAULT_KUBERNETESPATH }}
+    - name: SKANMOTUTGAAENDE_ENDPOINTS_DOKARKIV_URL
+      value: {{ SKANMOTUTGAAENDE_ENDPOINTS_DOKARKIV_URL }}
+    - name: SKANMOTUTGAAENDE_ENDPOINTS_DOKARKIV_SCOPE
+      value: {{ SKANMOTUTGAAENDE_ENDPOINTS_DOKARKIV_SCOPE }}
+    - name: SKANMOTUTGAAENDE_PROXY_HOST
+      value: {{ SKANMOTUTGAAENDE_PROXY_HOST }}
+    - name: SKANMOTUTGAAENDE_PROXY_PORT
+      value: "{{SKANMOTUTGAAENDE_PROXY_PORT}}"
+    - name: AZURE_APP_TOKEN_URL
+      value: {{ AZURE_APP_TOKEN_URL }}
   image: {{ image }}
   ingresses:
     {{#each INGRESSES}}
@@ -56,3 +64,6 @@ spec:
         mountPath: /var/run/secrets/nais.io/srvskanmotutgaaende
       - kvPath: {{ SFTP_KEYS }}
         mountPath: /var/run/secrets/nais.io/keys
+  azure:
+    application:
+      enabled: true
