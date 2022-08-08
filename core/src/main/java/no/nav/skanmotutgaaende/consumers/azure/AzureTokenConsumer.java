@@ -63,8 +63,6 @@ public class AzureTokenConsumer {
 		}
 	}
 
-
-
 	@Cacheable(AZURE_CACHE)
 	@Retry(name = AZURE_TOKEN_INSTANCE)
 	@CircuitBreaker(name = AZURE_TOKEN_INSTANCE)
