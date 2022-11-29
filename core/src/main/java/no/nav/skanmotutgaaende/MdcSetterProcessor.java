@@ -9,9 +9,6 @@ import static no.nav.skanmotutgaaende.PostboksUtgaaendeRoute.PROPERTY_FORSENDELS
 import static no.nav.skanmotutgaaende.PostboksUtgaaendeRoute.PROPERTY_FORSENDELSE_FILEBASENAME;
 import static no.nav.skanmotutgaaende.PostboksUtgaaendeRoute.PROPERTY_FORSENDELSE_ZIPNAME;
 
-/**
- * @author Joakim Bjørnstad, Jbit AS
- */
 public class MdcSetterProcessor implements Processor {
 
     @Override

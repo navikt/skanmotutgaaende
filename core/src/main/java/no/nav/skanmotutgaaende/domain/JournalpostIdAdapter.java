@@ -2,9 +2,6 @@ package no.nav.skanmotutgaaende.domain;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
-/**
- * @author Joakim Bjørnstad, Jbit AS
- */
 class JournalpostIdAdapter extends XmlAdapter<String, String> {
     @Override
     public String unmarshal(String s) throws Exception {

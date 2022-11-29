@@ -13,9 +13,6 @@ import static no.nav.skanmotutgaaende.PostboksUtgaaendeRoute.PROPERTY_FORSENDELS
 import static org.apache.commons.io.FilenameUtils.getBaseName;
 import static org.apache.commons.io.FilenameUtils.getExtension;
 
-/**
- * @author Joakim Bjørnstad, Jbit AS
- */
 @Slf4j
 public class PostboksUtgaaendeSkanningAggregator implements AggregationStrategy {
     public static final String XML_EXTENSION = "xml";
