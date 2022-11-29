@@ -4,9 +4,7 @@ Skanmotutgaaende mottek og arkiverer skanna utgåande dokument den mottek frå I
 
 Du finn meir informasjon om  [skanmotutgaaende på Confluence](https://confluence.adeo.no/display/BOA/skanmotutgaaende).
 
-Dekryptering av filer frå Iron Mountain kan skje på to måtar:
-- dekryptering av aes-krypterte filer
-- dekryptering av pgp-krypterte filer
+Filene vi mottar fra Iron mountain er kryptert med PGP-kryptering.
 
 I fylgjande lenke finn du [oppskrift for skifte av pgp-nøkkelpar](https://confluence.adeo.no/display/BOA/PGP-kryptering+for+filer).
 
