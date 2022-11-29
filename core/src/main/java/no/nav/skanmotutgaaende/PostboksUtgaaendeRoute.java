@@ -80,7 +80,6 @@ public class PostboksUtgaaendeRoute extends RouteBuilder {
         from("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.inngaaendemappe}}" +
                 "?{{skanmotutgaaende.endpointconfig}}" +
                 "&delay=" + TimeUnit.SECONDS.toMillis(60) +
-                "&antExclude=*enc.zip, *enc.ZIP" +
                 "&antInclude=*.zip,*.ZIP" +
                 "&initialDelay=1000" +
                 "&maxMessagesPerPoll=10" +
