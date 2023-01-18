@@ -1,10 +1,9 @@
-Skanmotutgaaende
-================
+# Skanmotutgaaende
 Skanmotutgaaende mottek og arkiverer skanna utgåande dokument den mottek frå Iron Mountain.
 
 Du finn meir informasjon om  [skanmotutgaaende på Confluence](https://confluence.adeo.no/display/BOA/skanmotutgaaende).
 
-Filene vi mottar fra Iron mountain er kryptert med PGP-kryptering.
+Filene vi mottek frå Iron Mountain er krypterte med PGP-kryptering.
 
 I fylgjande lenke finn du [oppskrift for skifte av pgp-nøkkelpar](https://confluence.adeo.no/display/BOA/PGP-kryptering+for+filer).
 
@@ -22,5 +21,5 @@ Måte nr. 2:
 * Legg inn ei .zip.pgp-fil på /inbound/skanmotutgaaende og vent til appen hentar fila (skjer kvart 5. minutt). Det kan vere praktisk å maile denne til seg sjølv dersom ein arbeider lokalt og skal hente den ut på utviklarimage.
 
 ## Førespurnadar
-Spørsmål om koda eller prosjektet kan stillast på Slack-kanalen til Team Dokumentløsninger:
-[\#Team Dokumentløsninger](https://nav-it.slack.com/client/T5LNAMWNA/C6W9E5GPJ)
+Spørsmål om koda eller prosjektet kan stillast
+på [Slack-kanalen for \#Team Dokumentløysingar](https://nav-it.slack.com/archives/C6W9E5GPJ).
