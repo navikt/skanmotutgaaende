@@ -2,6 +2,7 @@ package no.nav.skanmotutgaaende;
 
 import no.nav.skanmotutgaaende.domain.Skanningmetadata;
 import no.nav.skanmotutgaaende.exceptions.functional.InvalidMetadataException;
+import no.nav.skanmotutgaaende.exceptions.technical.SkanmotutgaaendeTechnicalException;
 import org.apache.camel.Body;
 import org.apache.camel.Handler;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -9,7 +10,6 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXNotRecognizedException;
 import org.xml.sax.SAXNotSupportedException;
 
-import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
@@ -20,38 +20,55 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.SchemaFactory;
 import java.io.ByteArrayInputStream;
 
+import static javax.xml.XMLConstants.ACCESS_EXTERNAL_DTD;
+import static javax.xml.XMLConstants.ACCESS_EXTERNAL_SCHEMA;
+import static javax.xml.stream.XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES;
+import static javax.xml.stream.XMLInputFactory.SUPPORT_DTD;
+import static javax.xml.stream.XMLInputFactory.newInstance;
+import static javax.xml.validation.SchemaFactory.newDefaultInstance;
+
 public class SkanningmetadataUnmarshaller {
-    @Handler
-    PostboksUtgaaendeEnvelope unmarshal(@Body PostboksUtgaaendeEnvelope envelope) {
-        try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(Skanningmetadata.class);
-            SchemaFactory schemaFactory = createXEEProtectedSchemaFactory();
-            Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-            jaxbUnmarshaller.setSchema(schemaFactory.newSchema(new StreamSource(this.getClass().getResourceAsStream("/postboks-utgaaende-3.0.0.xsd"))));
-            XMLInputFactory xmlInputFactory = createXEEProtectedXMLInputFactory();
-            XMLStreamReader xmlStreamReader = xmlInputFactory.createXMLStreamReader(new ByteArrayInputStream(envelope.getXml()));
-            final Skanningmetadata skanningmetadata = (Skanningmetadata) jaxbUnmarshaller.unmarshal(xmlStreamReader);
-            envelope.setSkanningmetadata(skanningmetadata);
-            return envelope;
-        } catch (JAXBException | XMLStreamException | SAXException e) {
-            final String message = ExceptionUtils.getRootCauseMessage(e);
-            throw new InvalidMetadataException("Kunne ikke unmarshalle xml: " + message, e);
-        }
-    }
 
-    // https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html
-    private XMLInputFactory createXEEProtectedXMLInputFactory() {
-        XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
-        xmlInputFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
-        xmlInputFactory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
-        return xmlInputFactory;
-    }
+	private final JAXBContext jaxbContext;
 
-    // https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html
-    private SchemaFactory createXEEProtectedSchemaFactory() throws SAXNotRecognizedException, SAXNotSupportedException {
-        SchemaFactory schemaFactory = SchemaFactory.newDefaultInstance();
-        schemaFactory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-        schemaFactory.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
-        return schemaFactory;
-    }
+	public SkanningmetadataUnmarshaller() {
+		try {
+			this.jaxbContext = JAXBContext.newInstance(Skanningmetadata.class);
+		} catch (JAXBException e) {
+			throw new SkanmotutgaaendeTechnicalException("Klarte ikke instansiere JAXBContext", e);
+		}
+	}
+
+	@Handler
+	PostboksUtgaaendeEnvelope unmarshal(@Body PostboksUtgaaendeEnvelope envelope) {
+		try {
+			SchemaFactory schemaFactory = createXEEProtectedSchemaFactory();
+			Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+			jaxbUnmarshaller.setSchema(schemaFactory.newSchema(new StreamSource(this.getClass().getResourceAsStream("/postboks-utgaaende-3.0.0.xsd"))));
+			XMLInputFactory xmlInputFactory = createXEEProtectedXMLInputFactory();
+			XMLStreamReader xmlStreamReader = xmlInputFactory.createXMLStreamReader(new ByteArrayInputStream(envelope.getXml()));
+			final Skanningmetadata skanningmetadata = (Skanningmetadata) jaxbUnmarshaller.unmarshal(xmlStreamReader);
+			envelope.setSkanningmetadata(skanningmetadata);
+			return envelope;
+		} catch (JAXBException | XMLStreamException | SAXException e) {
+			final String message = ExceptionUtils.getRootCauseMessage(e);
+			throw new InvalidMetadataException("Kunne ikke unmarshalle xml: " + message, e);
+		}
+	}
+
+	// https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html
+	private XMLInputFactory createXEEProtectedXMLInputFactory() {
+		XMLInputFactory xmlInputFactory = newInstance();
+		xmlInputFactory.setProperty(IS_SUPPORTING_EXTERNAL_ENTITIES, false);
+		xmlInputFactory.setProperty(SUPPORT_DTD, false);
+		return xmlInputFactory;
+	}
+
+	// https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html
+	private SchemaFactory createXEEProtectedSchemaFactory() throws SAXNotRecognizedException, SAXNotSupportedException {
+		SchemaFactory schemaFactory = newDefaultInstance();
+		schemaFactory.setProperty(ACCESS_EXTERNAL_DTD, "");
+		schemaFactory.setProperty(ACCESS_EXTERNAL_SCHEMA, "");
+		return schemaFactory;
+	}
 }
