@@ -23,10 +23,6 @@ spec:
       value: {{ SKANMOTUTGAAENDE_ENDPOINTS_DOKARKIV_URL }}
     - name: SKANMOTUTGAAENDE_ENDPOINTS_DOKARKIV_SCOPE
       value: {{ SKANMOTUTGAAENDE_ENDPOINTS_DOKARKIV_SCOPE }}
-    - name: SKANMOTUTGAAENDE_PROXY_HOST
-      value: {{ SKANMOTUTGAAENDE_PROXY_HOST }}
-    - name: SKANMOTUTGAAENDE_PROXY_PORT
-      value: "{{SKANMOTUTGAAENDE_PROXY_PORT}}"
     - name: AZURE_APP_TOKEN_URL
       value: {{ AZURE_APP_TOKEN_URL }}
   image: {{ image }}
@@ -64,6 +60,7 @@ spec:
         mountPath: /var/run/secrets/nais.io/srvskanmotutgaaende
       - kvPath: {{ SFTP_KEYS }}
         mountPath: /var/run/secrets/nais.io/keys
+  webproxy: true
   azure:
     application:
       enabled: true
