@@ -19,8 +19,4 @@ public class AzureProperties {
 	private String clientId;
 	@NotEmpty
 	private String clientSecret;
-	@NotEmpty
-	private String tenantId;
-	@NotEmpty
-	private String wellKnownUrl;
 }

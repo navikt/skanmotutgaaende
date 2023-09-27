@@ -1,17 +1,8 @@
 package no.nav.skanmotutgaaende.consumers.azure;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-@Getter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class TokenResponse {
-	private String access_token;
-	private String token_type;
-	private String expires_in;
-	private String error;
-}
+public record TokenResponse (
+		@JsonProperty(value = "access_token", required = true)
+		String access_token
+){}

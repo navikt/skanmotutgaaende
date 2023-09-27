@@ -4,7 +4,6 @@ import no.nav.skanmotutgaaende.domain.Journalpost;
 import no.nav.skanmotutgaaende.domain.SkanningInfo;
 import no.nav.skanmotutgaaende.domain.Skanningmetadata;
 import no.nav.skanmotutgaaende.exceptions.functional.InvalidMetadataException;
-import no.nav.skanmotutgaaende.validator.SkanningmetadataValidator;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -18,17 +17,15 @@ public class SkanningmetadataValidatorTest {
     private final String JPID_VALID = "123456789";
     private final String JPID_INVALID = "ugyldig id";
     private final String FILE_NAME_VALID = "filtest.zip";
-    private final String FILE_NAME_INVALID = "ikkeEtZipFilNavn";
-
 
     @Test
     public void shouldValidateSkanningmetadata() {
-        assertSkanningmetadataIsValid(getSkanningmetadata(JPID_VALID, FILE_NAME_VALID));
+        assertSkanningmetadataIsValid(getSkanningmetadata(JPID_VALID));
     }
 
     @Test
     public void shouldNotValidateInvalidJournalpostId() {
-        assertThrows(InvalidMetadataException.class, () -> skanningmetadataValidator.validate(getSkanningmetadata(JPID_INVALID, FILE_NAME_VALID)));
+        assertThrows(InvalidMetadataException.class, () -> skanningmetadataValidator.validate(getSkanningmetadata(JPID_INVALID)));
     }
 
     @Test
@@ -50,14 +47,14 @@ public class SkanningmetadataValidatorTest {
         skanningmetadataValidator.validate(skanningmetadata);
     }
 
-    private Skanningmetadata getSkanningmetadata(String journalpostId, String filNavn) {
+    private Skanningmetadata getSkanningmetadata(String journalpostId) {
         return Skanningmetadata.builder()
                 .journalpost(Journalpost.builder()
                         .journalpostId(journalpostId)
                         .mottakskanal("SKAN_IM")
                         .datoMottatt(new Date())
                         .batchnavn("test.zip")
-                        .filnavn(filNavn)
+                        .filnavn("filtest.zip")
                         .endorsernr("00001111NAV22")
                         .build())
                 .skanningInfo(SkanningInfo.builder()

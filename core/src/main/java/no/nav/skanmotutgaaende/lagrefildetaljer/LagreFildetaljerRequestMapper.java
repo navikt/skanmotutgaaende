@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 public class LagreFildetaljerRequestMapper {
@@ -33,12 +34,13 @@ public class LagreFildetaljerRequestMapper {
         String batchnavn = journalpost.getBatchnavn();
         String mottakskanal = journalpost.getMottakskanal();
 
-        List<Tilleggsopplysning> tilleggsopplysninger = List.of(
-                new Tilleggsopplysning(FYSISK_POSTBOKS_NOKKEL, skanningInfo.getFysiskPostboks()),
-                new Tilleggsopplysning(STREKKODE_POSTBOKS_NOKKEL, skanningInfo.getStrekkodePostboks()),
-                new Tilleggsopplysning(ENDORSERNR_NOKKEL, journalpost.getEndorsernr()),
-                new Tilleggsopplysning(ANTALL_SIDER_NOKKEL, journalpost.getAntallSider())
-        ).stream().filter(tilleggsopplysning -> notNullOrEmpty(tilleggsopplysning.getVerdi())).collect(Collectors.toList());
+        List<Tilleggsopplysning> tilleggsopplysninger = Stream.of(
+                        new Tilleggsopplysning(FYSISK_POSTBOKS_NOKKEL, skanningInfo.getFysiskPostboks()),
+                        new Tilleggsopplysning(STREKKODE_POSTBOKS_NOKKEL, skanningInfo.getStrekkodePostboks()),
+                        new Tilleggsopplysning(ENDORSERNR_NOKKEL, journalpost.getEndorsernr()),
+                        new Tilleggsopplysning(ANTALL_SIDER_NOKKEL, journalpost.getAntallSider())
+                ).filter(tilleggsopplysning -> notNullOrEmpty(tilleggsopplysning.getVerdi()))
+                .toList();
 
         DokumentVariant pdf = DokumentVariant.builder()
                 .filtype(PDFA)

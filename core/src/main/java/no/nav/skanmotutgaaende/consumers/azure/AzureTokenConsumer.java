@@ -13,7 +13,6 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.Duration;
 import java.util.Collections;
 
 import static no.nav.skanmotutgaaende.config.cache.LokalCacheConfig.AZURE_CACHE;

@@ -48,9 +48,7 @@ public class TestConfig {
 	AzureTokenConsumer azureTokenConsumer() {
 		AzureTokenConsumer azureTokenConsumer = Mockito.mock(AzureTokenConsumer.class);
 		Mockito.when(azureTokenConsumer.getClientCredentialToken(anyString())).thenReturn(
-				TokenResponse.builder()
-						.access_token("dummy")
-						.build()
+				new TokenResponse("dummy")
 		);
 
 		return azureTokenConsumer;

@@ -28,12 +28,12 @@ public class Journalpost {
     @XmlElement(required = true, name = "batchnavn")
     private String batchnavn;
 
-    @XmlElement(required = false, name = "filnavn")
+    @XmlElement(name = "filnavn")
     private String filnavn;
 
-    @XmlElement(required = false, name = "endorsernr")
+    @XmlElement(name = "endorsernr")
     private String endorsernr;
 
-    @XmlElement(required = false, name = "antallSider")
+    @XmlElement(name = "antallSider")
     private String antallSider;
 }

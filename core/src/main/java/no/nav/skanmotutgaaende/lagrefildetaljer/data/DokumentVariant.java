@@ -12,13 +12,13 @@ import jakarta.validation.constraints.NotNull;
 @AllArgsConstructor
 public class DokumentVariant {
     @NotNull(message = "Filtype kan ikke være null")
-    private final String filtype;
+    String filtype;
 
     @NotNull(message = "Variantformat kan ikke være null")
-    private final String variantformat;
+    String variantformat;
 
     @NotNull(message = "Fysisk dokument kan ikke være null")
-    private final byte[] fysiskDokument;
+    byte[] fysiskDokument;
 
-    private final String filnavn;
+    String filnavn;
 }

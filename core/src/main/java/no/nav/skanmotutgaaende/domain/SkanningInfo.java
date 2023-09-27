@@ -13,8 +13,7 @@ import jakarta.xml.bind.annotation.XmlElement;
 @AllArgsConstructor
 public class SkanningInfo {
 
-
-    @XmlElement(required = false, name = "fysiskPostboks")
+    @XmlElement(name = "fysiskPostboks")
     private String fysiskPostboks;
 
     @XmlElement(required = true, name = "strekkodePostboks")

@@ -18,7 +18,7 @@ import static no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerRequestMa
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class LagreFildetaljerIT extends AbstractItest {
+public class LagreFildetaljerIT extends AbstractIT {
 
 	private final byte[] DUMMY_FILE = "dummyfile".getBytes();
 	private final String JOURNALPOST_ID = "001";

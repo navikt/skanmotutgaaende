@@ -23,7 +23,7 @@ import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class PostboksUtgaaendeRoutePgpEncryptedIT extends AbstractItest {
+public class PostboksUtgaaendeRoutePgpEncryptedIT extends AbstractIT {
 	private static final String INNGAAENDE = "inngaaende";
 	private static final String FEILMAPPE = "feilmappe";
 
@@ -72,7 +72,7 @@ public class PostboksUtgaaendeRoutePgpEncryptedIT extends AbstractItest {
 			try {
 				assertThat(Files.list(sshdPath.resolve(FEILMAPPE)
 								.resolve(ZIP_FILE_NAME_NO_EXTENSION))
-						.collect(Collectors.toList())).hasSize(4);
+						.toList()).hasSize(4);
 			} catch (NoSuchFileException e) {
 				fail();
 			}
@@ -80,7 +80,7 @@ public class PostboksUtgaaendeRoutePgpEncryptedIT extends AbstractItest {
 
 		final List<String> feilmappeContents = Files.list(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION))
 				.map(p -> wiremock.org.apache.commons.io.FilenameUtils.getName(p.toAbsolutePath().toString()))
-				.collect(Collectors.toList());
+				.toList();
 		assertTrue(feilmappeContents.containsAll(List.of(
 				"01.07.2020_R123456784_0003.zip",
 				"01.07.2020_R123456784_0004.zip",
@@ -120,7 +120,7 @@ public class PostboksUtgaaendeRoutePgpEncryptedIT extends AbstractItest {
 			try {
 				assertThat(Files.list(sshdPath.resolve(FEILMAPPE)
 								.resolve(ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION))
-						.collect(Collectors.toList())).hasSize(4);
+						.toList()).hasSize(4);
 			} catch (NoSuchFileException e) {
 				fail();
 			}
@@ -128,7 +128,7 @@ public class PostboksUtgaaendeRoutePgpEncryptedIT extends AbstractItest {
 
 		final List<String> feilmappeContents = Files.list(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION))
 				.map(p -> wiremock.org.apache.commons.io.FilenameUtils.getName(p.toAbsolutePath().toString()))
-				.collect(Collectors.toList());
+				.toList();
 		assertTrue(feilmappeContents.containsAll(List.of(
 				"01.07.2020_R300000000_0003.zip",
 				"01.07.2020_R300000000_0004.zip",

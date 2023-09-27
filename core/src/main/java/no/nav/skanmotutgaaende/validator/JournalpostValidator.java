@@ -2,6 +2,8 @@ package no.nav.skanmotutgaaende.validator;
 
 import java.util.Date;
 
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+
 public class JournalpostValidator {
 
     public boolean isValidJournalpostId(String journalpostId) {
@@ -9,7 +11,7 @@ public class JournalpostValidator {
     }
 
     public boolean isValidMottakskanal(String mottakskanal) {
-        return isNonEmptyString(mottakskanal);
+        return isNotEmpty(mottakskanal);
     }
 
     public boolean isValidDatoMottatt(Date datoMottatt) {
@@ -17,23 +19,11 @@ public class JournalpostValidator {
     }
 
     public boolean isValidBatchNavn(String batchnavn) {
-        return isNonEmptyString(batchnavn);
-    }
-
-    public boolean isValidFilnavn(String filnavn) {
-        if (isNonEmptyString(filnavn) && filnavn.length() >= 5) {
-            String fileEnding = filnavn.substring(filnavn.length() - 4);
-            return '.' == fileEnding.charAt(0);
-        }
-        return false;
-    }
-
-    public boolean isValidEndorsernr(String endorsernr) {
-        return isNonEmptyString(endorsernr);
+        return isNotEmpty(batchnavn);
     }
 
     private boolean isNumeric(String string) {
-        if (isNonEmptyString(string)) {
+        if (isNotEmpty(string)) {
             try {
                 Float.parseFloat(string);
                 return true;
@@ -44,10 +34,4 @@ public class JournalpostValidator {
         return false;
     }
 
-    private boolean isNonEmptyString(String string) {
-        if (null != string) {
-            return string.length() > 0;
-        }
-        return false;
-    }
 }

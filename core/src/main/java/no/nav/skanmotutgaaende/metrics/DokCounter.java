@@ -30,19 +30,9 @@ public class DokCounter {
         DokCounter.meterRegistry = meterRegistry;
     }
 
-    public static void incrementCounter(Map<String, String> metadata){
-        metadata.forEach(DokCounter::incrementCounter);
-    }
     public static void incrementCounter(String key, List<String> tags) {
         Counter.builder(DOK_SKANMOTUTGAAENDE + key + TOTAL)
                 .tags(tags.toArray(new String[0]))
-                .register(meterRegistry)
-                .increment();
-    }
-
-    private static void incrementCounter(String key, String value){
-        Counter.builder(DOK_SKANMOTUTGAAENDE + key + TOTAL)
-                .tags(key, value)
                 .register(meterRegistry)
                 .increment();
     }
@@ -57,11 +47,11 @@ public class DokCounter {
     }
 
     private static String getErrorType(Throwable e){
-        if(e instanceof FunctionalExceptionHandled){
+        if (e instanceof FunctionalExceptionHandled) {
             return FUNCTIONAL_ERROR_HANDLED;
-        }else if(e instanceof AbstractSkanmotutgaaendeFunctionalException){
+        } else if (e instanceof AbstractSkanmotutgaaendeFunctionalException) {
             return FUNCTIONAL_ERROR;
-        }else
+        } else
             return TECHNICAL_ERROR;
     }
 
