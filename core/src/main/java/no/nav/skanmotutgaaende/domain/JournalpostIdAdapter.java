@@ -1,6 +1,6 @@
 package no.nav.skanmotutgaaende.domain;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 class JournalpostIdAdapter extends XmlAdapter<String, String> {
     @Override
