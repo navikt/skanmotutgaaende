@@ -3,7 +3,6 @@ package no.nav.skanmotutgaaende;
 import io.micrometer.core.instrument.MeterRegistry;
 import no.nav.skanmotutgaaende.config.props.IMVaultProperties;
 import no.nav.skanmotutgaaende.config.props.SkanmotutgaaendeProperties;
-import no.nav.skanmotutgaaende.config.props.WebProxyProperties;
 import no.nav.skanmotutgaaende.consumers.azure.AzureProperties;
 import no.nav.skanmotutgaaende.metrics.DokTimedAspect;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
@@ -24,8 +23,7 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 @EnableConfigurationProperties({
         SkanmotutgaaendeProperties.class,
         IMVaultProperties.class,
-        AzureProperties.class,
-        WebProxyProperties.class
+        AzureProperties.class
 })
 @Configuration
 @ComponentScan
@@ -37,21 +35,16 @@ public class ApplicationConfig {
     }
 
     @Bean
-    public ClientHttpRequestFactory azureTokenHttpRequestFactory(WebProxyProperties webProxyProperties) {
+    public ClientHttpRequestFactory azureTokenHttpRequestFactory() {
+
         var readTimeout = SocketConfig.custom().setSoTimeout(Timeout.ofSeconds(20)).build();
         var connectionManager = new PoolingHttpClientConnectionManager();
-        connectionManager.setMaxTotal(40);
-        connectionManager.setDefaultMaxPerRoute(10);
         connectionManager.setDefaultSocketConfig(readTimeout);
 
-        var httpClient = webProxyProperties.getProxy()
-                .map(proxy -> HttpClients.custom()
-                        .setConnectionManager(connectionManager)
-                        .setProxy(proxy)
-                        .build())
-                .orElseGet(() -> HttpClients.custom()
-                        .setConnectionManager(connectionManager)
-                        .build());
+        var httpClient =  HttpClients.custom()
+                .setConnectionManager(connectionManager)
+                .useSystemProperties()
+                .build();
 
         var clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
         clientHttpRequestFactory.setConnectTimeout(3_000);
