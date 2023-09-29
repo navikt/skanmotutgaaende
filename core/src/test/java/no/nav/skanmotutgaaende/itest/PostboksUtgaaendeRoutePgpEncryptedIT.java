@@ -1,6 +1,7 @@
 package no.nav.skanmotutgaaende.itest;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,8 +72,8 @@ public class PostboksUtgaaendeRoutePgpEncryptedIT extends AbstractIT {
 		await().atMost(15, SECONDS).untilAsserted(() -> {
 			try {
 				assertThat(Files.list(sshdPath.resolve(FEILMAPPE)
-								.resolve(ZIP_FILE_NAME_NO_EXTENSION))
-						.toList()).hasSize(4);
+								.resolve(ZIP_FILE_NAME_NO_EXTENSION)))
+						.hasSize(4);
 			} catch (NoSuchFileException e) {
 				fail();
 			}
@@ -119,16 +120,19 @@ public class PostboksUtgaaendeRoutePgpEncryptedIT extends AbstractIT {
 		await().atMost(25, SECONDS).untilAsserted(() -> {
 			try {
 				assertThat(Files.list(sshdPath.resolve(FEILMAPPE)
-								.resolve(ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION))
-						.toList()).hasSize(4);
+								.resolve(ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION)))
+						.hasSize(4);
 			} catch (NoSuchFileException e) {
 				fail();
 			}
 		});
 
 		final List<String> feilmappeContents = Files.list(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION))
-				.map(p -> wiremock.org.apache.commons.io.FilenameUtils.getName(p.toAbsolutePath().toString()))
+				.map(Path::getFileName)
+				.map(Path::toString)
+				.map(FilenameUtils::getName)
 				.toList();
+
 		assertTrue(feilmappeContents.containsAll(List.of(
 				"01.07.2020_R300000000_0003.zip",
 				"01.07.2020_R300000000_0004.zip",

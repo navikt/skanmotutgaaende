@@ -67,16 +67,18 @@ public class PostboksUtgaaendeRouteIT extends AbstractIT {
 		await().atMost(15, SECONDS).untilAsserted(() -> {
 			try {
 				assertThat(Files.list(sshdPath.resolve(FEILMAPPE)
-						.resolve(ZIP_FILE_NAME_NO_EXTENSION))
-						.collect(Collectors.toList())).hasSize(4);
+						.resolve(ZIP_FILE_NAME_NO_EXTENSION)))
+						.hasSize(4);
 			} catch (NoSuchFileException e) {
 				fail();
 			}
 		});
 
 		final List<String> feilmappeContents = Files.list(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION))
-				.map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
+				.map(Path::getFileName)
+				.map(Path::toString)
 				.toList();
+
 		assertTrue(feilmappeContents.containsAll(List.of(
 				"01.07.2020_R123456780_0003.zip",
 				"01.07.2020_R123456780_0004.zip",
@@ -105,8 +107,8 @@ public class PostboksUtgaaendeRouteIT extends AbstractIT {
 		await().atMost(15, SECONDS).untilAsserted(() -> {
 			try {
 				assertThat(Files.list(sshdPath.resolve(FEILMAPPE)
-						.resolve(ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION))
-						.toList()).hasSize(4);
+						.resolve(ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION)))
+						.hasSize(4);
 			} catch (NoSuchFileException e) {
 				fail();
 			}
