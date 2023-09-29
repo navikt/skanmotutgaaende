@@ -10,9 +10,10 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXNotRecognizedException;
 import org.xml.sax.SAXNotSupportedException;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Unmarshaller;
+
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
@@ -24,8 +25,8 @@ import static javax.xml.XMLConstants.ACCESS_EXTERNAL_DTD;
 import static javax.xml.XMLConstants.ACCESS_EXTERNAL_SCHEMA;
 import static javax.xml.stream.XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES;
 import static javax.xml.stream.XMLInputFactory.SUPPORT_DTD;
-import static javax.xml.stream.XMLInputFactory.newInstance;
 import static javax.xml.validation.SchemaFactory.newDefaultInstance;
+
 
 public class SkanningmetadataUnmarshaller {
 
@@ -44,7 +45,7 @@ public class SkanningmetadataUnmarshaller {
 		try {
 			SchemaFactory schemaFactory = createXEEProtectedSchemaFactory();
 			Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-			jaxbUnmarshaller.setSchema(schemaFactory.newSchema(new StreamSource(this.getClass().getResourceAsStream("/postboks-utgaaende-3.0.0.xsd"))));
+			jaxbUnmarshaller.setSchema(schemaFactory.newSchema(new StreamSource(SkanningmetadataUnmarshaller.class.getResourceAsStream("/postboks-utgaaende-3.0.0.xsd"))));
 			XMLInputFactory xmlInputFactory = createXEEProtectedXMLInputFactory();
 			XMLStreamReader xmlStreamReader = xmlInputFactory.createXMLStreamReader(new ByteArrayInputStream(envelope.getXml()));
 			final Skanningmetadata skanningmetadata = (Skanningmetadata) jaxbUnmarshaller.unmarshal(xmlStreamReader);
@@ -58,7 +59,7 @@ public class SkanningmetadataUnmarshaller {
 
 	// https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html
 	private XMLInputFactory createXEEProtectedXMLInputFactory() {
-		XMLInputFactory xmlInputFactory = newInstance();
+		XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
 		xmlInputFactory.setProperty(IS_SUPPORTING_EXTERNAL_ENTITIES, false);
 		xmlInputFactory.setProperty(SUPPORT_DTD, false);
 		return xmlInputFactory;

@@ -2,24 +2,17 @@ package no.nav.skanmotutgaaende.consumers.azure;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
-import no.nav.skanmotutgaaende.config.props.SkanmotutgaaendeProperties;
-import org.apache.http.HttpHost;
-import org.apache.http.conn.HttpClientConnectionManager;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.Duration;
 import java.util.Collections;
 
 import static no.nav.skanmotutgaaende.config.cache.LokalCacheConfig.AZURE_CACHE;
@@ -37,30 +30,11 @@ public class AzureTokenConsumer {
 
 	public AzureTokenConsumer(AzureProperties azureProperties,
 							  RestTemplateBuilder restTemplateBuilder,
-							  HttpClientConnectionManager httpClientConnectionManager,
-							  SkanmotutgaaendeProperties skanmotutgaaendeProperties) {
-		final CloseableHttpClient httpClient = createHttpClient(skanmotutgaaendeProperties.getProxy(), httpClientConnectionManager);
+							  ClientHttpRequestFactory azureTokenHttpRequestFactory) {
 		this.restTemplate = restTemplateBuilder
-				.setConnectTimeout(Duration.ofSeconds(3))
-				.setReadTimeout(Duration.ofSeconds(20))
-				.requestFactory(() -> new HttpComponentsClientHttpRequestFactory(httpClient))
+				.requestFactory(() -> azureTokenHttpRequestFactory)
 				.build();
 		this.azureProperties = azureProperties;
-	}
-
-	private CloseableHttpClient createHttpClient(SkanmotutgaaendeProperties.Proxy proxy,
-												 HttpClientConnectionManager httpClientConnectionManager) {
-		if (proxy.isSet()) {
-			final HttpHost proxyHost = new HttpHost(proxy.getHost(), proxy.getPort());
-			return HttpClients.custom()
-					.setRoutePlanner(new DefaultProxyRoutePlanner(proxyHost))
-					.setConnectionManager(httpClientConnectionManager)
-					.build();
-		} else {
-			return HttpClients.custom()
-					.setConnectionManager(httpClientConnectionManager)
-					.build();
-		}
 	}
 
 	@Cacheable(AZURE_CACHE)

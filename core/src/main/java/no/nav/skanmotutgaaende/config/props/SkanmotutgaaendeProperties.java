@@ -1,5 +1,7 @@
 package no.nav.skanmotutgaaende.config.props;
 
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -7,8 +9,6 @@ import lombok.ToString;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import java.time.Duration;
 
 @Getter
@@ -18,7 +18,6 @@ import java.time.Duration;
 @ConfigurationProperties("skanmotutgaaende")
 public class SkanmotutgaaendeProperties {
 
-    private final Proxy proxy = new Proxy();
     private final Endpoints endpoints = new Endpoints();
     private final SftpProperties sftp = new SftpProperties();
     private final FilomraadeProperties filomraade = new FilomraadeProperties();
@@ -32,17 +31,6 @@ public class SkanmotutgaaendeProperties {
 
     @NotNull
     private Duration completiontimeout;
-
-    @Data
-    @Validated
-    public static class Proxy {
-        private String host;
-        private int port;
-
-        public boolean isSet() {
-            return (host != null && !host.equals(""));
-        }
-    }
 
     @Data
     @Validated

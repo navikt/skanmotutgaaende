@@ -24,7 +24,7 @@ import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class PostboksUtgaaendeRouteIT extends AbstractItest {
+public class PostboksUtgaaendeRouteIT extends AbstractIT {
 
 	public static final String INNGAAENDE = "inngaaende";
 	public static final String FEILMAPPE = "feilmappe";
@@ -67,16 +67,18 @@ public class PostboksUtgaaendeRouteIT extends AbstractItest {
 		await().atMost(15, SECONDS).untilAsserted(() -> {
 			try {
 				assertThat(Files.list(sshdPath.resolve(FEILMAPPE)
-						.resolve(ZIP_FILE_NAME_NO_EXTENSION))
-						.collect(Collectors.toList())).hasSize(4);
+						.resolve(ZIP_FILE_NAME_NO_EXTENSION)))
+						.hasSize(4);
 			} catch (NoSuchFileException e) {
 				fail();
 			}
 		});
 
 		final List<String> feilmappeContents = Files.list(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION))
-				.map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
-				.collect(Collectors.toList());
+				.map(Path::getFileName)
+				.map(Path::toString)
+				.toList();
+
 		assertTrue(feilmappeContents.containsAll(List.of(
 				"01.07.2020_R123456780_0003.zip",
 				"01.07.2020_R123456780_0004.zip",
@@ -105,8 +107,8 @@ public class PostboksUtgaaendeRouteIT extends AbstractItest {
 		await().atMost(15, SECONDS).untilAsserted(() -> {
 			try {
 				assertThat(Files.list(sshdPath.resolve(FEILMAPPE)
-						.resolve(ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION))
-						.collect(Collectors.toList())).hasSize(4);
+						.resolve(ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION)))
+						.hasSize(4);
 			} catch (NoSuchFileException e) {
 				fail();
 			}
@@ -114,7 +116,7 @@ public class PostboksUtgaaendeRouteIT extends AbstractItest {
 
 		final List<String> feilmappeContents = Files.list(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION))
 				.map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
-				.collect(Collectors.toList());
+				.toList();
 		assertTrue(feilmappeContents.containsAll(List.of(
 				"01.07.2020_R100000000_0003.zip",
 				"01.07.2020_R200000000_0004.zip",
@@ -134,7 +136,7 @@ public class PostboksUtgaaendeRouteIT extends AbstractItest {
 			try {
 				final List<String> feilmappeContents = Files.list(sshdPath.resolve(FEILMAPPE))
 						.map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
-						.collect(Collectors.toList());
+						.toList();
 				assertTrue(feilmappeContents.contains(ZIP_FILE_NAME_NO_EXTENSION_ENCRYPTED + ".zip"));
 			} catch (NoSuchFileException e) {
 				fail();

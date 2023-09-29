@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
 
@@ -15,16 +15,16 @@ import java.util.List;
 public class LagreFildetaljerRequest {
 
     @JsonFormat(pattern="yyyy-MM-dd")
-    private final Date datoMottatt;
+    Date datoMottatt;
 
     @NotNull(message = "Mottakskanal kan ikke være null")
-    private final String mottakskanal;
+    String mottakskanal;
 
-    private final List<Tilleggsopplysning> tilleggsopplysninger;
+    List<Tilleggsopplysning> tilleggsopplysninger;
 
-    private final String batchnavn;
+    String batchnavn;
 
     @NotNull(message = "Dokumentvarianter kan ikke være null")
-    private final List<DokumentVariant> dokumentvarianter;
+    List<DokumentVariant> dokumentvarianter;
 
 }

@@ -1,15 +1,15 @@
 package no.nav.skanmotutgaaende.domain;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 class JournalpostIdAdapter extends XmlAdapter<String, String> {
     @Override
-    public String unmarshal(String s) throws Exception {
+    public String unmarshal(String s) {
         return removeLeadingZeros(s);
     }
 
     @Override
-    public String marshal(String s) throws Exception {
+    public String marshal(String s) {
         return removeLeadingZeros(s);
     }
 

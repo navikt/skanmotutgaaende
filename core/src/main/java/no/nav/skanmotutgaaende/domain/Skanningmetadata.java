@@ -7,8 +7,8 @@ import lombok.NoArgsConstructor;
 import no.nav.skanmotutgaaende.exceptions.functional.InvalidMetadataException;
 import no.nav.skanmotutgaaende.validator.SkanningmetadataValidator;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 @Getter
 @NoArgsConstructor

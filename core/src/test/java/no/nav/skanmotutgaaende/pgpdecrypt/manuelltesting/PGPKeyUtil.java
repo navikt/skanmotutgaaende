@@ -58,14 +58,14 @@ public class PGPKeyUtil {
 		// we just loop through the collection till we find a key suitable for encryption, in the real
 		// world you would probably want to be a bit smarter about this.
 
-		Iterator keyRingIter = pgpPub.getKeyRings();
+		Iterator<PGPPublicKeyRing> keyRingIter = pgpPub.getKeyRings();
 		while (keyRingIter.hasNext()) {
 
-			PGPPublicKeyRing keyRing = (PGPPublicKeyRing) keyRingIter.next();
+			PGPPublicKeyRing keyRing = keyRingIter.next();
 
-			Iterator keyIter = keyRing.getPublicKeys();
+			Iterator<PGPPublicKey> keyIter = keyRing.getPublicKeys();
 			while (keyIter.hasNext()) {
-				PGPPublicKey key = (PGPPublicKey) keyIter.next();
+				PGPPublicKey key = keyIter.next();
 
 				if (key.isEncryptionKey()) {
 					return key;

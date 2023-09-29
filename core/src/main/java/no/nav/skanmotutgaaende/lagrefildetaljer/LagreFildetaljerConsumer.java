@@ -64,8 +64,7 @@ public class LagreFildetaljerConsumer {
 			URI uri = UriComponentsBuilder.fromHttpUrl(dokarkiv.getUrl())
 					.pathSegment(journalpostId, MOTTA_DOKUMENT_UTGAAENDE_SKANNING_TJENESTE)
 					.build().toUri();
-			restTemplate.exchange(uri, PUT, requestEntity, LagreFildetaljerResponse.class)
-					.getBody();
+			restTemplate.exchange(uri, PUT, requestEntity, LagreFildetaljerResponse.class);
 
 		} catch (HttpClientErrorException e) {
 			if (NOT_FOUND.equals(e.getStatusCode())) {
@@ -86,7 +85,7 @@ public class LagreFildetaljerConsumer {
 
 	private HttpHeaders createHeaders() {
 		HttpHeaders headers = new HttpHeaders();
-		headers.setBearerAuth(azureTokenConsumer.getClientCredentialToken(dokarkiv.getScope()).getAccess_token());
+		headers.setBearerAuth(azureTokenConsumer.getClientCredentialToken(dokarkiv.getScope()).access_token());
 		headers.setContentType(APPLICATION_JSON);
 
 		if (MDC.get(MDC_CALL_ID) != null) {

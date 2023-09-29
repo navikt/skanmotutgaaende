@@ -23,7 +23,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 )
 @AutoConfigureWireMock(port = 0)
 @ActiveProfiles("itest")
-public class AbstractItest {
+public abstract class AbstractIT {
 
 	final String URL_DOKARKIV_JOURNALPOST_GEN = "/rest/intern/journalpostapi/v1/journalpost/\\d+/mottaDokumentUtgaaendeSkanning";
 
