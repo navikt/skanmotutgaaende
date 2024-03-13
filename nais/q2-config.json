@@ -4,8 +4,7 @@
   "SKANMOTUTGAAENDE_SCHEDULE": "0+*/5+*+*+*+*",
   "SKANMOTUTGAAENDE_VAULT_BACKEND": "kv/preprod/fss",
   "SKANMOTUTGAAENDE_VAULT_KUBERNETESPATH": "kubernetes/preprod/fss",
-  "AZURE_APP_TOKEN_URL": "https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/oauth2/v2.0/token",
-  "SKANMOTUTGAAENDE_ENDPOINTS_DOKARKIV_URL": "https://dokarkiv.dev.intern.nav.no/rest/internal/journalpostapi/v1/journalpost",
+  "SKANMOTUTGAAENDE_ENDPOINTS_DOKARKIV_URL": "\"http://dokarkiv.teamdokumenthandtering.svc.nais.local/rest/internal/journalpostapi/v1/journalpost",
   "SKANMOTUTGAAENDE_ENDPOINTS_DOKARKIV_SCOPE": "api://dev-fss.teamdokumenthandtering.dokarkiv/.default",
   "INGRESSES": [
     "https://skanmotutgaaende.dev.intern.nav.no"
