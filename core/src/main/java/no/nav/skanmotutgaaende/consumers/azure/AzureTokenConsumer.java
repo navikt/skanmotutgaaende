@@ -44,10 +44,10 @@ public class AzureTokenConsumer {
 		try {
 			HttpHeaders headers = createHeaders();
 			String form = "grant_type=client_credentials&scope=" + scope + "&client_id=" +
-					azureProperties.getClientId() + "&client_secret=" + azureProperties.getClientSecret();
+					azureProperties.appClientId() + "&client_secret=" + azureProperties.appClientSecret();
 			HttpEntity<String> requestEntity = new HttpEntity<>(form, headers);
 
-			return restTemplate.exchange(azureProperties.getTokenUrl(), POST, requestEntity, TokenResponse.class)
+			return restTemplate.exchange(azureProperties.openidConfigTokenEndpoint(), POST, requestEntity, TokenResponse.class)
 					.getBody();
 		} catch (HttpClientErrorException | HttpServerErrorException e) {
 			throw new AzureTokenException(String.format("Klarte ikke hente token fra Azure. Feilet med httpstatus=%s. Feilmelding=%s", e.getStatusCode(), e.getMessage()), e);

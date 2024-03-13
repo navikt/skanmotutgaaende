@@ -7,16 +7,12 @@ import org.springframework.validation.annotation.Validated;
 import jakarta.validation.constraints.NotEmpty;
 
 /**
- * Konfigurert av naiserator. https://doc.nais.io/security/auth/azure-ad/#runtime-variables-credentials
+ * Konfigurert av naiserator. https://doc.nais.io/security/auth/azure-ad/usage/#variables-for-acquiring-tokens:~:text=nais.io/azure/-,Variables%20for%20Acquiring%20Tokens,-%C2%B6
  */
-@Data
 @Validated
-@ConfigurationProperties("azure.app")
-public class AzureProperties {
-	@NotEmpty
-	private String tokenUrl;
-	@NotEmpty
-	private String clientId;
-	@NotEmpty
-	private String clientSecret;
-}
+@ConfigurationProperties(prefix = "azure")
+public record AzureProperties(
+		@NotEmpty String openidConfigTokenEndpoint,
+		@NotEmpty String appClientId,
+		@NotEmpty String appClientSecret
+){}
