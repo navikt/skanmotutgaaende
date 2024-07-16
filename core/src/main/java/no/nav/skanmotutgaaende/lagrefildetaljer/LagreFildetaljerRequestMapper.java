@@ -33,6 +33,7 @@ public class LagreFildetaljerRequestMapper {
         Date datoMotatt = journalpost.getDatoMottatt();
         String batchnavn = journalpost.getBatchnavn();
         String mottakskanal = journalpost.getMottakskanal();
+		String pdfFilnavn = appendFileType(filepair.getName(), FILTYPE_PDF);
 
         List<Tilleggsopplysning> tilleggsopplysninger = Stream.of(
                         new Tilleggsopplysning(FYSISK_POSTBOKS_NOKKEL, skanningInfo.getFysiskPostboks()),
@@ -42,11 +43,11 @@ public class LagreFildetaljerRequestMapper {
                 ).filter(tilleggsopplysning -> notNullOrEmpty(tilleggsopplysning.getVerdi()))
                 .toList();
 
-        DokumentVariant pdf = DokumentVariant.builder()
+		DokumentVariant pdf = DokumentVariant.builder()
                 .filtype(PDFA)
                 .variantformat(VARIANTFORMAT_ARKIV)
                 .fysiskDokument(filepair.getPdf())
-                .filnavn(appendFileType(filepair.getName(), FILTYPE_PDF))
+                .filnavn(pdfFilnavn)
                 .build();
 
         DokumentVariant xml = DokumentVariant.builder()
@@ -61,6 +62,7 @@ public class LagreFildetaljerRequestMapper {
                 .mottakskanal(mottakskanal)
                 .tilleggsopplysninger(tilleggsopplysninger)
                 .batchnavn(batchnavn)
+				.eksternReferanseId(pdfFilnavn)
                 .dokumentvarianter(List.of(pdf, xml))
                 .build();
     }

@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class LagreFildetaljerIT extends AbstractIT {
 
+	public static final String FILPAIR_NAVN = "data_005";
 	private final byte[] DUMMY_FILE = "dummyfile".getBytes();
 	private final String JOURNALPOST_ID = "001";
 	private final String JOURNALPOST_ID_INVALID = "002";
@@ -62,18 +63,19 @@ public class LagreFildetaljerIT extends AbstractIT {
 								.verdi("1408")
 								.build()
 				))
+				.eksternReferanseId(FILPAIR_NAVN + ".pdf")
 				.dokumentvarianter(Arrays.asList(
 						DokumentVariant.builder()
 								.filtype("pdf")
 								.variantformat("ARKIV")
 								.fysiskDokument(DUMMY_FILE)
-								.filnavn("data_005.pdf")
+								.filnavn(FILPAIR_NAVN + ".pdf")
 								.build(),
 						DokumentVariant.builder()
 								.filtype("xml")
 								.variantformat("ORIGINAL")
 								.fysiskDokument(DUMMY_FILE)
-								.filnavn("data_005.xml")
+								.filnavn(FILPAIR_NAVN + ".xml")
 								.build()))
 				.build();
 	}
