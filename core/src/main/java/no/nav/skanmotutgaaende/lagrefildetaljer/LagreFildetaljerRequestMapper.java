@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Component
@@ -33,7 +32,7 @@ public class LagreFildetaljerRequestMapper {
         Date datoMotatt = journalpost.getDatoMottatt();
         String batchnavn = journalpost.getBatchnavn();
         String mottakskanal = journalpost.getMottakskanal();
-		String pdfFilnavn = appendFileType(filepair.getName(), FILTYPE_PDF);
+        String pdfFilnavn = createFilename(filepair, FILTYPE_PDF);
 
         List<Tilleggsopplysning> tilleggsopplysninger = Stream.of(
                         new Tilleggsopplysning(FYSISK_POSTBOKS_NOKKEL, skanningInfo.getFysiskPostboks()),
@@ -43,7 +42,7 @@ public class LagreFildetaljerRequestMapper {
                 ).filter(tilleggsopplysning -> notNullOrEmpty(tilleggsopplysning.getVerdi()))
                 .toList();
 
-		DokumentVariant pdf = DokumentVariant.builder()
+        DokumentVariant pdf = DokumentVariant.builder()
                 .filtype(PDFA)
                 .variantformat(VARIANTFORMAT_ARKIV)
                 .fysiskDokument(filepair.getPdf())
@@ -54,7 +53,7 @@ public class LagreFildetaljerRequestMapper {
                 .filtype(XML)
                 .variantformat(VARIANTFORMAT_SKANNING_META)
                 .fysiskDokument(filepair.getXml())
-                .filnavn(appendFileType(filepair.getName(), FILTYPE_XML))
+                .filnavn(createFilename(filepair, FILTYPE_XML))
                 .build();
 
         return LagreFildetaljerRequest.builder()
@@ -62,7 +61,7 @@ public class LagreFildetaljerRequestMapper {
                 .mottakskanal(mottakskanal)
                 .tilleggsopplysninger(tilleggsopplysninger)
                 .batchnavn(batchnavn)
-				.eksternReferanseId(pdfFilnavn)
+                .eksternReferanseId(pdfFilnavn)
                 .dokumentvarianter(List.of(pdf, xml))
                 .build();
     }
@@ -71,7 +70,7 @@ public class LagreFildetaljerRequestMapper {
         return string != null && !string.isBlank();
     }
 
-    private static String appendFileType(String filename, String filetype) {
-        return filename + "." + filetype;
+    private static String createFilename(Filepair filepair, String filetype) {
+        return filepair.getName() + "." + filetype;
     }
 }
