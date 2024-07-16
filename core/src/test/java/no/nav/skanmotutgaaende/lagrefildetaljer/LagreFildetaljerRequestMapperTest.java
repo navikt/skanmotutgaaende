@@ -66,6 +66,7 @@ public class LagreFildetaljerRequestMapperTest {
         assertEquals(FYSISK_POSTBOKS, getTillegsopplysningerVerdiFromNokkel(lagreFildetaljerRequest.getTilleggsopplysninger(), FYSISK_POSTBOKS_NOKKEL));
         assertEquals(STREKKODE_POSTBOKS, getTillegsopplysningerVerdiFromNokkel(lagreFildetaljerRequest.getTilleggsopplysninger(), STREKKODE_POSTBOKS_NOKKEL));
         assertEquals(ENDORSERNR, getTillegsopplysningerVerdiFromNokkel(lagreFildetaljerRequest.getTilleggsopplysninger(), ENDORSERNR_NOKKEL));
+        assertEquals(FILNAVN_PDF, lagreFildetaljerRequest.getEksternReferanseId());
 
         AtomicInteger pdfCounter = new AtomicInteger();
         AtomicInteger xmlCounter = new AtomicInteger();
@@ -115,6 +116,7 @@ public class LagreFildetaljerRequestMapperTest {
         );
         assertEquals(1, lagreFildetaljerRequest.getTilleggsopplysninger().size());
         assertEquals(STREKKODE_POSTBOKS, getTillegsopplysningerVerdiFromNokkel(lagreFildetaljerRequest.getTilleggsopplysninger(), "strekkodePostboks"));
+        assertEquals(FILNAVN_PDF, lagreFildetaljerRequest.getEksternReferanseId());
         assertThrows(NoSuchElementException.class, () -> getTillegsopplysningerVerdiFromNokkel(lagreFildetaljerRequest.getTilleggsopplysninger(), "endorsernr"));
         assertThrows(NoSuchElementException.class, () -> getTillegsopplysningerVerdiFromNokkel(lagreFildetaljerRequest.getTilleggsopplysninger(), "fysiskPostboks"));
     }

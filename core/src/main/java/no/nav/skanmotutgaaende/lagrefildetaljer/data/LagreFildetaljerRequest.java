@@ -27,4 +27,5 @@ public class LagreFildetaljerRequest {
     @NotNull(message = "Dokumentvarianter kan ikke være null")
     List<DokumentVariant> dokumentvarianter;
 
+    String eksternReferanseId;
 }
