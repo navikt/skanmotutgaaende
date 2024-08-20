@@ -2,7 +2,7 @@ package no.nav.skanmotutgaaende.lagrefildetaljer;
 
 import no.nav.skanmotutgaaende.config.props.SkanmotutgaaendeProperties;
 import no.nav.skanmotutgaaende.consumers.azure.AzureTokenConsumer;
-import no.nav.skanmotutgaaende.exceptions.functional.FunctionalExceptionHandled;
+import no.nav.skanmotutgaaende.exceptions.functional.JournalpostConflictException;
 import no.nav.skanmotutgaaende.exceptions.functional.LagreFilDetaljerFinnesIkkeException;
 import no.nav.skanmotutgaaende.exceptions.functional.SkanmotutgaaendeFunctionalException;
 import no.nav.skanmotutgaaende.exceptions.technical.SkanmotutgaaendeTechnicalException;
@@ -71,7 +71,7 @@ public class LagreFildetaljerConsumer {
 				throw new LagreFilDetaljerFinnesIkkeException(String.format("lagreFilDetaljer feilet funksjonelt med statusKode=%s. Feilmelding=%s", e
 						.getStatusCode(), e.getResponseBodyAsString()), e);
 			} else if (CONFLICT.equals(e.getStatusCode())) {
-				throw new FunctionalExceptionHandled(String.format("lagreFilDetaljer feilet funksjonelt med statusKode=%s. Feilmelding=%s", e
+				throw new JournalpostConflictException(String.format("lagreFilDetaljer feilet funksjonelt med statusKode=%s. Feilmelding=%s", e
 						.getStatusCode(), e.getResponseBodyAsString()), e);
 			} else {
 				throw new SkanmotutgaaendeFunctionalException(String.format("lagreFilDetaljer feilet funksjonelt med statusKode=%s. Feilmelding=%s", e

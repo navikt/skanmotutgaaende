@@ -12,7 +12,6 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.exactly;
 import static com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor;
@@ -23,17 +22,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static wiremock.org.apache.commons.io.FilenameUtils.getName;
 
 public class PostboksUtgaaendeRoutePgpEncryptedIT extends AbstractIT {
-	private static final String INNGAAENDE = "inngaaende";
-	private static final String FEILMAPPE = "feilmappe";
 
 	@Autowired
 	private Path sshdPath;
 
 	@BeforeEach
 	void beforeEach() {
-		super.setUp();
 		final Path inngaaende = sshdPath.resolve(INNGAAENDE);
 		final Path processed = inngaaende.resolve("processed");
 		final Path feilmappe = sshdPath.resolve(FEILMAPPE);
@@ -72,22 +69,33 @@ public class PostboksUtgaaendeRoutePgpEncryptedIT extends AbstractIT {
 		await().atMost(15, SECONDS).untilAsserted(() -> {
 			try {
 				assertThat(Files.list(sshdPath.resolve(FEILMAPPE)
-								.resolve(ZIP_FILE_NAME_NO_EXTENSION)))
-						.hasSize(4);
+						.resolve(ZIP_FILE_NAME_NO_EXTENSION)))
+						.hasSize(2);
+				assertThat(Files.list(sshdPath.resolve(FAGPOST_MAPPE)
+						.resolve(ZIP_FILE_NAME_NO_EXTENSION)))
+						.hasSize(2);
 			} catch (NoSuchFileException e) {
 				fail();
 			}
 		});
 
 		final List<String> feilmappeContents = Files.list(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION))
-				.map(p -> wiremock.org.apache.commons.io.FilenameUtils.getName(p.toAbsolutePath().toString()))
+				.map(p -> getName(p.toAbsolutePath().toString()))
 				.toList();
 		assertTrue(feilmappeContents.containsAll(List.of(
-				"01.07.2020_R123456784_0003.zip",
-				"01.07.2020_R123456784_0004.zip",
-				"01.07.2020_R123456784_0005.zip",
-				"01.07.2020_R123456784_0006.zip"
+				"01.07.2020_R123456784_0005-teknisk.zip",
+				"01.07.2020_R123456784_0006-teknisk.zip"
 		)));
+
+		final List<String> fagpostMappeContents = Files.list(sshdPath.resolve(FAGPOST_MAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION))
+				.map(p -> getName(p.toAbsolutePath().toString()))
+				.toList();
+
+		assertTrue(fagpostMappeContents.containsAll(List.of(
+				"01.07.2020_R123456784_0003.zip",
+				"01.07.2020_R123456784_0004.zip"
+		)));
+
 		verify(exactly(3), putRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
 	}
 
@@ -105,14 +113,13 @@ public class PostboksUtgaaendeRoutePgpEncryptedIT extends AbstractIT {
 		// OK   - 01.07.2020_R300000000_0001
 		// OK   - 01.07.2020_R300000000_0002 (mangler filnavn og fysiskPostboks)
 		// FEIL - 01.07.2020_R300000000_0003 (valideringsfeil, mangler journalpostid)
-		// FEIL - 01.07.2020_R300000000_0004 (vil feile hos dokarkiv 400_Bad_Request)
 		// FEIL - 01.07.2020_R300000000_0005 (mangler pdf)
 		// FEIL - 01.07.2020_R300000000_0006 (mangler xml)
 		// OK   - 01.07.2020_R300000000_0007
 		// ...
 		// OK   - 01.07.2020_R300000000_0059
 		setUpHappyStubs();
-		setUpBadStubs();
+		setUpConflictStubs();
 
 		final String ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION = "01.07.2020_R300000000_1_1000_ordered_xml_first_big";
 		copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION + ".zip.pgp");
@@ -120,8 +127,12 @@ public class PostboksUtgaaendeRoutePgpEncryptedIT extends AbstractIT {
 		await().atMost(25, SECONDS).untilAsserted(() -> {
 			try {
 				assertThat(Files.list(sshdPath.resolve(FEILMAPPE)
-								.resolve(ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION)))
-						.hasSize(4);
+						.resolve(ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION)))
+						.hasSize(2);
+
+				assertThat(Files.list(sshdPath.resolve(FAGPOST_MAPPE)
+						.resolve(ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION)))
+						.hasSize(2);
 			} catch (NoSuchFileException e) {
 				fail();
 			}
@@ -134,11 +145,19 @@ public class PostboksUtgaaendeRoutePgpEncryptedIT extends AbstractIT {
 				.toList();
 
 		assertTrue(feilmappeContents.containsAll(List.of(
-				"01.07.2020_R300000000_0003.zip",
-				"01.07.2020_R300000000_0004.zip",
-				"01.07.2020_R300000000_0005.zip",
-				"01.07.2020_R300000000_0006.zip"
+				"01.07.2020_R300000000_0005-teknisk.zip",
+				"01.07.2020_R300000000_0006-teknisk.zip"
 		)));
+
+		final List<String> fagpostMappeContents = Files.list(sshdPath.resolve(FAGPOST_MAPPE).resolve(ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION))
+				.map(p -> getName(p.toAbsolutePath().toString()))
+				.toList();
+
+		assertTrue(fagpostMappeContents.containsAll(List.of(
+				"01.07.2020_R300000000_0003.zip",
+				"01.07.2020_R300000000_0004.zip"
+		)));
+
 		verify(exactly(56), putRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
 	}
 

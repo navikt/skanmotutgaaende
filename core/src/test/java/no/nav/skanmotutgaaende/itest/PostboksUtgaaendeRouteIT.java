@@ -12,7 +12,6 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.exactly;
 import static com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor;
@@ -26,9 +25,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class PostboksUtgaaendeRouteIT extends AbstractIT {
 
-	public static final String INNGAAENDE = "inngaaende";
-	public static final String FEILMAPPE = "feilmappe";
-
 	private final String ZIP_FILE_NAME_NO_EXTENSION = "01.07.2020_R123456780_1_1000";
 	private final String ZIP_FILE_NAME_NO_EXTENSION_ENCRYPTED = "01.07.2020_R123456780_1_1000.encrypted";
 	private final String ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION = "01.07.2020_R200000000_1_1000_ordered_xml_first_big";
@@ -38,7 +34,7 @@ public class PostboksUtgaaendeRouteIT extends AbstractIT {
 
 	@BeforeEach
 	void beforeEach() {
-		super.setUp();
+
 		final Path inngaaende = sshdPath.resolve(INNGAAENDE);
 		final Path processed = inngaaende.resolve("processed");
 		final Path feilmappe = sshdPath.resolve(FEILMAPPE);
@@ -68,7 +64,10 @@ public class PostboksUtgaaendeRouteIT extends AbstractIT {
 			try {
 				assertThat(Files.list(sshdPath.resolve(FEILMAPPE)
 						.resolve(ZIP_FILE_NAME_NO_EXTENSION)))
-						.hasSize(4);
+						.hasSize(2);
+				assertThat(Files.list(sshdPath.resolve(FAGPOST_MAPPE)
+						.resolve(ZIP_FILE_NAME_NO_EXTENSION)))
+						.hasSize(2);
 			} catch (NoSuchFileException e) {
 				fail();
 			}
@@ -80,11 +79,19 @@ public class PostboksUtgaaendeRouteIT extends AbstractIT {
 				.toList();
 
 		assertTrue(feilmappeContents.containsAll(List.of(
-				"01.07.2020_R123456780_0003.zip",
-				"01.07.2020_R123456780_0004.zip",
-				"01.07.2020_R123456780_0005.zip",
-				"01.07.2020_R123456780_0006.zip"
+				"01.07.2020_R123456780_0005-teknisk.zip",
+				"01.07.2020_R123456780_0006-teknisk.zip"
 		)));
+
+		final List<String> fagpostmappeContents = Files.list(sshdPath.resolve(FAGPOST_MAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION))
+				.map(p -> p.getFileName().toString())
+				.toList();
+
+		assertTrue(fagpostmappeContents.containsAll(List.of(
+				"01.07.2020_R123456780_0003.zip",
+				"01.07.2020_R123456780_0004.zip"
+		)));
+
 		verify(exactly(3), putRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
 	}
 
@@ -94,35 +101,48 @@ public class PostboksUtgaaendeRouteIT extends AbstractIT {
 		// OK   - 01.07.2020_R100000000_0001
 		// OK   - 01.07.2020_R100000000_0002 (mangler filnavn og fysiskPostboks)
 		// FEIL - 01.07.2020_R100000000_0003 (valideringsfeil, mangler journalpostid)
-		// FEIL - 01.07.2020_R200000000_0004 (vil feile hos dokarkiv 400_Bad_Request)
+		// FEIL - 01.07.2020_R200000000_0004 (vil feile hos dokarkiv 409_Conflict)
 		// FEIL - 01.07.2020_R100000000_0005 (mangler pdf)
 		// FEIL - 01.07.2020_R100000000_0006 (mangler xml)
 		// OK   - 01.07.2020_R100000000_0007
 		// ...
 		// OK   - 01.07.2020_R100000000_0059
 		setUpHappyStubs();
-		setUpBadStubs();
+		setUpConflictStubs();
 		copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION + ".zip");
 
 		await().atMost(15, SECONDS).untilAsserted(() -> {
 			try {
 				assertThat(Files.list(sshdPath.resolve(FEILMAPPE)
 						.resolve(ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION)))
-						.hasSize(4);
+						.hasSize(2);
+				assertThat(Files.list(sshdPath.resolve(FAGPOST_MAPPE)
+						.resolve(ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION)))
+						.hasSize(2);
 			} catch (NoSuchFileException e) {
 				fail();
 			}
 		});
 
 		final List<String> feilmappeContents = Files.list(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION))
-				.map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
+				.map(Path::getFileName)
+				.map(Path::toString)
 				.toList();
+		;
 		assertTrue(feilmappeContents.containsAll(List.of(
-				"01.07.2020_R100000000_0003.zip",
-				"01.07.2020_R200000000_0004.zip",
-				"01.07.2020_R100000000_0005.zip",
-				"01.07.2020_R100000000_0006.zip"
+				"01.07.2020_R100000000_0005-teknisk.zip",
+				"01.07.2020_R100000000_0006-teknisk.zip"
 		)));
+
+		final List<String> fagpostmappeContents = Files.list(sshdPath.resolve(FAGPOST_MAPPE).resolve(ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION))
+				.map(p -> p.getFileName().toString())
+				.toList();
+
+		assertTrue(fagpostmappeContents.containsAll(List.of(
+				"01.07.2020_R100000000_0003.zip",
+				"01.07.2020_R200000000_0004.zip"
+		)));
+
 		verify(exactly(56), putRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
 	}
 

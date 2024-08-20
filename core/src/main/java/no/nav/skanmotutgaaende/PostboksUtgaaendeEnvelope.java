@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import no.nav.skanmotutgaaende.domain.Skanningmetadata;
-import no.nav.skanmotutgaaende.exceptions.functional.ForsendelseNotCompleteException;
+import no.nav.skanmotutgaaende.exceptions.technical.ForsendelseNotCompleteException;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveOutputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;

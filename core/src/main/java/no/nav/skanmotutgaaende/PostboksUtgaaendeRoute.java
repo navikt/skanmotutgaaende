@@ -62,8 +62,8 @@ public class PostboksUtgaaendeRoute extends RouteBuilder {
                 .process(errorMetricsProcessor)
                 .log(WARN, log, "Skanmotutgaaende feilet funksjonelt for " + KEY_LOGGING_INFO + ". ${exception}")
                 .setHeader(Exchange.FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}/${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}.zip"))
-                .to("direct:avvik")
-                .log(WARN, log, "Skanmotutgaaende skrev feiletzip=${header." + FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".");
+                .to("direct:fagpostavvik")
+                .log(WARN, log, "Skanmotutgaaende skrev feiletzip=${header." + FILE_NAME_PRODUCED + "} til fagpostmappe. " + KEY_LOGGING_INFO + ".");
 
         onException(ZipException.class)
                 .handled(true)
@@ -113,16 +113,27 @@ public class PostboksUtgaaendeRoute extends RouteBuilder {
                 .process(exchange -> DokCounter.incrementCounter("antall_vellykkede", List.of(DOMAIN, UTGAAENDE)))
                 .process(new MdcRemoverProcessor());
 
-        from("direct:avvik")
-                .routeId("avvik")
+        from("direct:fagpostavvik")
+                .routeId("fagpostavvik")
                 .choice().when(body().isInstanceOf(PostboksUtgaaendeEnvelope.class))
                 .setBody(simple("${body.createZip}"))
-                .to("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.feilmappe}}" +
+                .to("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.fagpostmappe}}" +
                         "?{{skanmotutgaaende.endpointconfig}}")
                 .otherwise()
-                .log(ERROR, log, "Skanmotutgaaende teknisk feil der " + KEY_LOGGING_INFO + ". ikke ble flyttet til feilområde. Må analyseres.")
+                .log(ERROR, log, "Skanmotutgaaende funksjonell feil der " + KEY_LOGGING_INFO + ". ikke ble flyttet til fagpostmappe. Må analyseres.")
                 .end()
                 .process(new MdcRemoverProcessor());
+
+		from("direct:avvik")
+				.routeId("avvik")
+				.choice().when(body().isInstanceOf(PostboksUtgaaendeEnvelope.class))
+				.setBody(simple("${body.createZip}"))
+				.to("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.feilmappe}}" +
+						"?{{skanmotutgaaende.endpointconfig}}")
+				.otherwise()
+				.log(ERROR, log, "Skanmotutgaaende teknisk feil der " + KEY_LOGGING_INFO + ". ikke ble flyttet til feilområde. Må analyseres.")
+				.end()
+				.process(new MdcRemoverProcessor());
 
         // @formatter:on
 	}
