@@ -3,12 +3,11 @@ package no.nav.skanmotutgaaende.metrics;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import no.nav.skanmotutgaaende.exceptions.functional.AbstractSkanmotutgaaendeFunctionalException;
-import no.nav.skanmotutgaaende.exceptions.functional.FunctionalExceptionHandled;
+import no.nav.skanmotutgaaende.exceptions.functional.JournalpostConflictException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Map;
 
 @Component
 public class DokCounter {
@@ -47,7 +46,7 @@ public class DokCounter {
     }
 
     private static String getErrorType(Throwable e){
-        if (e instanceof FunctionalExceptionHandled) {
+        if (e instanceof JournalpostConflictException) {
             return FUNCTIONAL_ERROR_HANDLED;
         } else if (e instanceof AbstractSkanmotutgaaendeFunctionalException) {
             return FUNCTIONAL_ERROR;

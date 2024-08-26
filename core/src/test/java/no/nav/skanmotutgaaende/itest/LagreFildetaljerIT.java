@@ -5,7 +5,6 @@ import no.nav.skanmotutgaaende.lagrefildetaljer.LagreFildetaljerConsumer;
 import no.nav.skanmotutgaaende.lagrefildetaljer.data.DokumentVariant;
 import no.nav.skanmotutgaaende.lagrefildetaljer.data.LagreFildetaljerRequest;
 import no.nav.skanmotutgaaende.lagrefildetaljer.data.Tilleggsopplysning;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -22,25 +21,22 @@ public class LagreFildetaljerIT extends AbstractIT {
 
 	private static final String FILEPAIR_NAME = "data_005";
 	private static final byte[] DUMMY_FILE = "dummyfile".getBytes();
-	private static final String JOURNALPOST_ID = "001";
-	private static final String JOURNALPOST_ID_INVALID = "002";
+	private static final String JOURNALPOST_ID = "4000004";
+	private static final String JOURNALPOST_ID_INVALID = "4000005";
 
 	@Autowired
 	private LagreFildetaljerConsumer lagrefildetaljerConsumer;
 
-	@BeforeEach
-	void setUpConsumer() {
-		super.setUp();
-	}
-
 	@Test
 	public void shouldLagreFildetaljer() {
+		setUpHappyStubs();
 		LagreFildetaljerRequest request = createLagreFildetaljerRequest();
 		assertDoesNotThrow(() -> lagrefildetaljerConsumer.lagreFilDetaljer(request, JOURNALPOST_ID));
 	}
 
 	@Test
 	public void shoulfFailIfInvalidRequest() {
+		setUpBadStubs();
 		LagreFildetaljerRequest request = createLagreFildetaljerRequest();
 		assertThrows(SkanmotutgaaendeFunctionalException.class, () -> lagrefildetaljerConsumer.lagreFilDetaljer(request, JOURNALPOST_ID_INVALID));
 	}

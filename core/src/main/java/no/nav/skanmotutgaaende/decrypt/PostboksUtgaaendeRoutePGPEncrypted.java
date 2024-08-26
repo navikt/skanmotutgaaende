@@ -56,6 +56,7 @@ public class PostboksUtgaaendeRoutePGPEncrypted extends RouteBuilder {
 	@Override
 	public void configure() {
 		String PGP_AVVIK = "direct:pgp_encrypted_avvik_utgaaende";
+		String PGP_FAGPOST_AVVIK = "direct:pgp_encrypted_fagpost_avvik";
 		String PROCESS_PGP_ENCRYPTED = "direct:pgp_encrypted_process_utgaaende";
 
 		// @formatter:off
@@ -89,7 +90,7 @@ public class PostboksUtgaaendeRoutePGPEncrypted extends RouteBuilder {
 				.process(new ErrorMetricsProcessor())
 				.log(WARN, log, "Skanmotutgaaende-pgp feilet funksjonelt for " + KEY_LOGGING_INFO + ". ${exception}")
 				.setHeader(FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}/${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}.zip"))
-				.to(PGP_AVVIK)
+				.to(PGP_FAGPOST_AVVIK)
 				.log(WARN, log, "Skanmotutgaaende-pgp skrev feiletzip=${header." + FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".");
 
 		from("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.inngaaendemappe}}" +
@@ -137,6 +138,17 @@ public class PostboksUtgaaendeRoutePGPEncrypted extends RouteBuilder {
 						"?{{skanmotutgaaende.endpointconfig}}")
 				.otherwise()
 				.log(ERROR, log, "Skanmotutgaaende teknisk feil der " + KEY_LOGGING_INFO + ". ikke ble flyttet til feilområde. Må analyseres.")
+				.end()
+				.process(new MdcRemoverProcessor());
+
+		from(PGP_FAGPOST_AVVIK)
+				.routeId("pgp_encrypted_fagpost_avvik")
+				.choice().when(body().isInstanceOf(PostboksUtgaaendeEnvelope.class))
+				.setBody(simple("${body.createZip}"))
+				.to("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.fagpostmappe}}" +
+						"?{{skanmotutgaaende.endpointconfig}}")
+				.otherwise()
+				.log(ERROR, log, "Skanmotutgaaende funksjonell feil der " + KEY_LOGGING_INFO + ". ikke ble flyttet til feilområde. Må analyseres.")
 				.end()
 				.process(new MdcRemoverProcessor());
 
