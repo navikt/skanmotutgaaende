@@ -1,7 +1,5 @@
 package no.nav.skanmotutgaaende.validator;
 
-import java.util.Date;
-
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 public class JournalpostValidator {
@@ -12,10 +10,6 @@ public class JournalpostValidator {
 
     public boolean isValidMottakskanal(String mottakskanal) {
         return isNotEmpty(mottakskanal);
-    }
-
-    public boolean isValidDatoMottatt(Date datoMottatt) {
-        return true; // No current restrictions
     }
 
     public boolean isValidBatchNavn(String batchnavn) {

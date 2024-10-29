@@ -128,7 +128,7 @@ public class PostboksUtgaaendeRouteIT extends AbstractIT {
 				.map(Path::getFileName)
 				.map(Path::toString)
 				.toList();
-		;
+
 		assertTrue(feilmappeContents.containsAll(List.of(
 				"01.07.2020_R100000000_0005-teknisk.zip",
 				"01.07.2020_R100000000_0006-teknisk.zip"
