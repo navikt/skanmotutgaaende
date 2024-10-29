@@ -6,14 +6,11 @@ import org.bouncycastle.openpgp.PGPPublicKey;
 import org.bouncycastle.openpgp.PGPPublicKeyRing;
 import org.bouncycastle.openpgp.PGPPublicKeyRingCollection;
 import org.bouncycastle.openpgp.PGPSecretKey;
-import org.bouncycastle.openpgp.PGPSecretKeyRing;
 import org.bouncycastle.openpgp.PGPSecretKeyRingCollection;
 import org.bouncycastle.openpgp.PGPUtil;
 import org.bouncycastle.openpgp.operator.jcajce.JcaKeyFingerprintCalculator;
 import org.bouncycastle.openpgp.operator.jcajce.JcePBESecretKeyDecryptorBuilder;
 
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
@@ -76,45 +73,4 @@ public class PGPKeyUtil {
 		throw new IllegalArgumentException("Can't find encryption key in key ring.");
 	}
 
-	public static PGPSecretKey readSecretKey(String fileName) throws IOException, PGPException {
-		InputStream keyIn = new BufferedInputStream(new FileInputStream(fileName));
-		PGPSecretKey secKey = readSecretKey(keyIn);
-		keyIn.close();
-		return secKey;
-	}
-
-	/**
-	 * A simple routine that opens a key ring file and loads the first available key
-	 * suitable for signature generation.
-	 *
-	 * @param input stream to read the secret key ring collection from.
-	 * @return a secret key.
-	 * @throws IOException  on a problem with using the input stream.
-	 * @throws PGPException if there is an issue parsing the input stream.
-	 */
-	public static PGPSecretKey readSecretKey(InputStream input) throws IOException, PGPException {
-		PGPSecretKeyRingCollection pgpSec = new PGPSecretKeyRingCollection(
-				PGPUtil.getDecoderStream(input), new JcaKeyFingerprintCalculator());
-
-		//
-		// we just loop through the collection till we find a key suitable for encryption, in the real
-		// world you would probably want to be a bit smarter about this.
-		//
-
-		Iterator keyRingIter = pgpSec.getKeyRings();
-		while (keyRingIter.hasNext()) {
-			PGPSecretKeyRing keyRing = (PGPSecretKeyRing) keyRingIter.next();
-
-			Iterator keyIter = keyRing.getSecretKeys();
-			while (keyIter.hasNext()) {
-				PGPSecretKey key = (PGPSecretKey) keyIter.next();
-
-				if (key.isSigningKey()) {
-					return key;
-				}
-			}
-		}
-
-		throw new IllegalArgumentException("Can't find signing key in key ring.");
-	}
 }

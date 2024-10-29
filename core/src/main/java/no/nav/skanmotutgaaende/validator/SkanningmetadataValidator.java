@@ -34,9 +34,6 @@ public class SkanningmetadataValidator {
         if (!journalpostValidator.isValidMottakskanal(journalpost.getMottakskanal())) {
             throw new InvalidMetadataException("Mottakskanal is not valid: " + journalpost.getMottakskanal());
         }
-        if (!journalpostValidator.isValidDatoMottatt(journalpost.getDatoMottatt())) {
-            throw new InvalidMetadataException("DatoMottatt is not valid: " + journalpost.getDatoMottatt());
-        }
         if (!journalpostValidator.isValidBatchNavn(journalpost.getBatchnavn())) {
             throw new InvalidMetadataException("Batchnavn is not valid: " + journalpost.getBatchnavn());
         }

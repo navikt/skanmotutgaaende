@@ -62,7 +62,7 @@ public class PGPDecryptUtil {
 		}
 	}
 
-	private static InputStream findPrivateKeyAndDecrypt(InputStream privateKeyStream, char[] passwd, PGPEncryptedDataList encryptedDataList) throws IOException, PGPException, NoSuchProviderException {
+	private static InputStream findPrivateKeyAndDecrypt(InputStream privateKeyStream, char[] passwd, PGPEncryptedDataList encryptedDataList) throws IOException, PGPException {
 		// Find secret key (private key)
 		PGPPrivateKey pgpPrivateKey = null;
 		PGPPublicKeyEncryptedData publicKeyEncryptedData = null;
