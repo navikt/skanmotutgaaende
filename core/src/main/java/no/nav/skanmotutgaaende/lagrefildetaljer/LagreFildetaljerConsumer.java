@@ -13,6 +13,8 @@ import org.slf4j.MDC;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
@@ -28,6 +30,9 @@ import static no.nav.skanmotutgaaende.lagrefildetaljer.NavHeaders.NAV_CONSUMER_I
 import static no.nav.skanmotutgaaende.mdc.MDCConstants.MDC_CALL_ID;
 import static no.nav.skanmotutgaaende.metrics.MetricLabels.DOK_METRIC;
 import static no.nav.skanmotutgaaende.metrics.MetricLabels.PROCESS_NAME;
+import static no.nav.skanmotutgaaende.utils.RetryConstants.MAX_RETRIES;
+import static no.nav.skanmotutgaaende.utils.RetryConstants.MULTIPLIER_SHORT;
+import static no.nav.skanmotutgaaende.utils.RetryConstants.RETRY_DELAY;
 import static org.springframework.http.HttpMethod.PUT;
 import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
@@ -56,6 +61,9 @@ public class LagreFildetaljerConsumer {
 	}
 
 	@Metrics(value = DOK_METRIC, extraTags = {PROCESS_NAME, "lagreFilDetaljer"}, percentiles = {0.5, 0.95}, histogram = true)
+	@Retryable(retryFor = SkanmotutgaaendeTechnicalException.class,
+			maxAttempts = MAX_RETRIES,
+			backoff = @Backoff(delay = RETRY_DELAY, multiplier = MULTIPLIER_SHORT))
 	public void lagreFilDetaljer(LagreFildetaljerRequest lagreFildetaljerRequest, String journalpostId) {
 		try {
 			HttpHeaders headers = createHeaders();
