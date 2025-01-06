@@ -30,7 +30,7 @@
         <commons-io.version>2.18.0</commons-io.version>
         <logstash-logback-encoder.version>8.0</logstash-logback-encoder.version>
         <bouncycastle.version>1.79</bouncycastle.version>
-        <resilience4j.version>2.2.0</resilience4j.version>
+        <resilience4j.version>2.3.0</resilience4j.version>
 
         <sshd-core.version>2.14.0</sshd-core.version>
         <spring-cloud-contract-wiremock.version>4.1.4</spring-cloud-contract-wiremock.version>
