@@ -18,6 +18,7 @@
     <modules>
         <module>app</module>
         <module>core</module>
+        <module>utgaaende</module>
     </modules>
 
     <properties>
@@ -29,8 +30,8 @@
         <commons-compress.version>1.27.1</commons-compress.version>
         <commons-io.version>2.18.0</commons-io.version>
         <logstash-logback-encoder.version>8.0</logstash-logback-encoder.version>
-        <bouncycastle.version>1.79</bouncycastle.version>
-        <resilience4j.version>2.2.0</resilience4j.version>
+        <bouncycastle.version>1.80</bouncycastle.version>
+        <context-propagation.version>1.1.2</context-propagation.version>
 
         <sshd-core.version>2.14.0</sshd-core.version>
         <spring-cloud-contract-wiremock.version>4.1.4</spring-cloud-contract-wiremock.version>
@@ -46,7 +47,11 @@
                 <artifactId>core</artifactId>
                 <version>${project.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>no.nav.skanmotutgaaende</groupId>
+                <artifactId>utgaaende</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.apache.camel.springboot</groupId>
                 <artifactId>camel-spring-boot-dependencies</artifactId>
@@ -74,18 +79,16 @@
                 <artifactId>commons-io</artifactId>
                 <version>${commons-io.version}</version>
             </dependency>
-
-            <!-- retry -->
             <dependency>
-                <groupId>io.github.resilience4j</groupId>
-                <artifactId>resilience4j-spring-boot2</artifactId>
-                <version>${resilience4j.version}</version>
+                <groupId>io.micrometer</groupId>
+                <artifactId>context-propagation</artifactId>
+                <version>${context-propagation.version}</version>
             </dependency>
 
             <!-- decrypt pgp-->
             <dependency>
                 <groupId>org.bouncycastle</groupId>
-                <artifactId>bcprov-jdk18on</artifactId>
+                <artifactId>bcutil-jdk18on</artifactId>
                 <version>${bouncycastle.version}</version>
             </dependency>
             <dependency>
@@ -169,6 +172,4 @@
             </plugin>
         </plugins>
     </build>
-
-
 </project>

@@ -1,10 +1,8 @@
 package no.nav.skanmotutgaaende;
 
-import io.micrometer.core.instrument.MeterRegistry;
 import no.nav.skanmotutgaaende.config.props.IMVaultProperties;
 import no.nav.skanmotutgaaende.config.props.SkanmotutgaaendeProperties;
 import no.nav.skanmotutgaaende.consumers.azure.AzureProperties;
-import no.nav.skanmotutgaaende.metrics.DokTimedAspect;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.core5.http.io.SocketConfig;
@@ -21,35 +19,30 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 @EnableAutoConfiguration
 @EnableAspectJAutoProxy
 @EnableConfigurationProperties({
-        SkanmotutgaaendeProperties.class,
-        IMVaultProperties.class,
-        AzureProperties.class
+		SkanmotutgaaendeProperties.class,
+		IMVaultProperties.class,
+		AzureProperties.class
 })
 @Configuration
 @ComponentScan
 public class ApplicationConfig {
 
-    @Bean
-    public DokTimedAspect timedAspect(MeterRegistry registry) {
-        return new DokTimedAspect(registry);
-    }
+	@Bean
+	public ClientHttpRequestFactory azureTokenHttpRequestFactory() {
 
-    @Bean
-    public ClientHttpRequestFactory azureTokenHttpRequestFactory() {
+		var readTimeout = SocketConfig.custom().setSoTimeout(Timeout.ofSeconds(20)).build();
+		var connectionManager = new PoolingHttpClientConnectionManager();
+		connectionManager.setDefaultSocketConfig(readTimeout);
 
-        var readTimeout = SocketConfig.custom().setSoTimeout(Timeout.ofSeconds(20)).build();
-        var connectionManager = new PoolingHttpClientConnectionManager();
-        connectionManager.setDefaultSocketConfig(readTimeout);
+		var httpClient = HttpClients.custom()
+				.setConnectionManager(connectionManager)
+				.useSystemProperties()
+				.build();
 
-        var httpClient =  HttpClients.custom()
-                .setConnectionManager(connectionManager)
-                .useSystemProperties()
-                .build();
+		var clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
+		clientHttpRequestFactory.setConnectTimeout(3_000);
 
-        var clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
-        clientHttpRequestFactory.setConnectTimeout(3_000);
-
-        return clientHttpRequestFactory;
-    }
+		return clientHttpRequestFactory;
+	}
 
 }
