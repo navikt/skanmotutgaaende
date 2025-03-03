@@ -9,6 +9,7 @@ import org.slf4j.MDC;
 import org.springframework.boot.autoconfigure.codec.CodecProperties;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -43,7 +44,7 @@ public class LagreFildetaljerConsumer {
 	}
 
 	@Retryable(retryFor = SkanmotutgaaendeTechnicalException.class)
-	public void lagreFilDetaljer(LagreFildetaljerRequest lagreFildetaljerRequest, String journalpostId) {
+	public void lagreFilDetaljer(@Validated LagreFildetaljerRequest lagreFildetaljerRequest, String journalpostId) {
 		webClient.put()
 				.uri(uriBuilder -> uriBuilder
 						.path("/{journalpostId}/mottaDokumentUtgaaendeSkanning")
@@ -53,11 +54,11 @@ public class LagreFildetaljerConsumer {
 				.bodyValue(lagreFildetaljerRequest)
 				.retrieve()
 				.toBodilessEntity()
-				.onErrorMap(WebClientResponseException.class, err -> handleError(err, journalpostId))
+				.onErrorMap(WebClientResponseException.class, err -> mapError(err, journalpostId))
 				.block();
 	}
 
-	private Throwable handleError(WebClientResponseException webException, String journalpostId) throws SkanmotutgaaendeFunctionalException {
+	private Throwable mapError(WebClientResponseException webException, String journalpostId) throws SkanmotutgaaendeFunctionalException {
 		if (webException.getStatusCode().is4xxClientError()) {
 			if (CONFLICT.equals(webException.getStatusCode())) {
 				throw new JournalpostConflictException(format("lagreFilDetaljer feilet funksjonelt med journalpostId=%s, statusKode=%s. Feilmelding=%s", journalpostId,

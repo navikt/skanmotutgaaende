@@ -12,7 +12,6 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.stream.Stream;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.exactly;
 import static com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor;
@@ -23,7 +22,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.junit.platform.commons.util.StringUtils.isBlank;
 
 public class PostboksUtgaaendeRouteIT extends AbstractIT {
 
@@ -75,7 +73,7 @@ public class PostboksUtgaaendeRouteIT extends AbstractIT {
 			}
 		});
 
-		final List<String> feilmappeContents = antallProsesserteFiler(FEILMAPPE, ZIP_FILE_NAME_NO_EXTENSION).stream()
+		final List<String> feilmappeContents = fetchFileSecurely(sshdPath, FEILMAPPE, ZIP_FILE_NAME_NO_EXTENSION).stream()
 				.map(Path::getFileName)
 				.map(Path::toString)
 				.toList();
@@ -85,7 +83,7 @@ public class PostboksUtgaaendeRouteIT extends AbstractIT {
 				"01.07.2020_R123456780_0006-teknisk.zip"
 		)));
 
-		final List<String> fagpostmappeContents = antallProsesserteFiler(FAGPOST_MAPPE, ZIP_FILE_NAME_NO_EXTENSION).stream()
+		final List<String> fagpostmappeContents = fetchFileSecurely(sshdPath, FAGPOST_MAPPE, ZIP_FILE_NAME_NO_EXTENSION).stream()
 				.map(p -> p.getFileName().toString())
 				.toList();
 
@@ -126,7 +124,7 @@ public class PostboksUtgaaendeRouteIT extends AbstractIT {
 			}
 		});
 
-		final List<String> feilmappeContents = antallProsesserteFiler(FEILMAPPE, ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION).stream()
+		final List<String> feilmappeContents = fetchFileSecurely(sshdPath, FEILMAPPE, ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION).stream()
 				.map(Path::getFileName)
 				.map(Path::toString)
 				.toList();
@@ -136,7 +134,7 @@ public class PostboksUtgaaendeRouteIT extends AbstractIT {
 				"01.07.2020_R100000000_0005-teknisk.zip"
 		)));
 
-		final List<String> fagpostmappeContents = antallProsesserteFiler(FAGPOST_MAPPE, ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION).stream()
+		final List<String> fagpostmappeContents = fetchFileSecurely(sshdPath, FAGPOST_MAPPE, ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION).stream()
 				.map(p -> p.getFileName().toString())
 				.toList();
 
@@ -155,7 +153,7 @@ public class PostboksUtgaaendeRouteIT extends AbstractIT {
 		copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_NO_EXTENSION_ENCRYPTED + ".zip");
 
 		await().atMost(15, SECONDS).untilAsserted(() -> {
-			final List<String> feilmappeContents = antallProsesserteFiler(FEILMAPPE, null).stream()
+			final List<String> feilmappeContents = fetchFileSecurely(sshdPath, FEILMAPPE, null).stream()
 					.map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
 					.toList();
 			assertTrue(feilmappeContents.contains(ZIP_FILE_NAME_NO_EXTENSION_ENCRYPTED + ".zip"));
@@ -172,16 +170,5 @@ public class PostboksUtgaaendeRouteIT extends AbstractIT {
 
 	private void copyFileFromClasspathToInngaaende(final String zipfilename) throws IOException {
 		Files.copy(new ClassPathResource(zipfilename).getInputStream(), sshdPath.resolve(INNGAAENDE).resolve(zipfilename));
-	}
-
-	private List<Path> antallProsesserteFiler(String path, String file) throws IOException {
-		if (isBlank(file)) {
-			try (Stream<Path> files = Files.list(sshdPath.resolve(path))) {
-				return files.toList();
-			}
-		}
-		try (Stream<Path> files = Files.list(sshdPath.resolve(path).resolve(file))) {
-			return files.toList();
-		}
 	}
 }
