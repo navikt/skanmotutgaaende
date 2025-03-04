@@ -18,6 +18,9 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipException;
 
+import static no.nav.skanmotutgaaende.metrics.DokCounter.DOMAIN;
+import static no.nav.skanmotutgaaende.metrics.DokCounter.UTGAAENDE;
+import static no.nav.skanmotutgaaende.metrics.DokCounter.incrementCounter;
 import static org.apache.camel.Exchange.FILE_NAME_PRODUCED;
 import static org.apache.camel.LoggingLevel.ERROR;
 import static org.apache.camel.LoggingLevel.INFO;
@@ -98,7 +101,7 @@ public class PostboksUtgaaendeRoute extends RouteBuilder {
 						.completionTimeout(skanmotutgaaendeProperties.getCompletiontimeout().toMillis())
 						.setProperty(PROPERTY_FORSENDELSE_FILEBASENAME, simple("${exchangeProperty.CamelAggregatedCorrelationKey}"))
 						.process(new MdcSetterProcessor())
-						.process(exchange -> DokCounter.incrementCounter("antall_innkommende", List.of(DokCounter.DOMAIN, DokCounter.UTGAAENDE)))
+						.process(exchange -> incrementCounter("antall_innkommende", List.of(DOMAIN, UTGAAENDE)))
 						.process(exchange -> exchange.getIn().getBody(PostboksUtgaaendeEnvelope.class).validate())
 						.bean(new SkanningmetadataUnmarshaller())
 						.setProperty(PROPERTY_FORSENDELSE_BATCHNAVN, simple("${body.skanningmetadata.journalpost.batchnavn}"))
@@ -112,7 +115,7 @@ public class PostboksUtgaaendeRoute extends RouteBuilder {
                 .routeId("process_utgaaende")
                 .process(new MdcSetterProcessor())
                 .bean(postboksUtgaaendeService)
-                .process(exchange -> DokCounter.incrementCounter("antall_vellykkede", List.of(DokCounter.DOMAIN, DokCounter.UTGAAENDE)))
+                .process(exchange -> incrementCounter("antall_vellykkede", List.of(DOMAIN, UTGAAENDE)))
                 .process(new MdcRemoverProcessor());
 
         from("direct:fagpostavvik")

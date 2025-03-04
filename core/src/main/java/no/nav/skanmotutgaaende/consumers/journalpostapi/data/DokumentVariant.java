@@ -3,14 +3,12 @@ package no.nav.skanmotutgaaende.consumers.journalpostapi.data;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Value;
+import lombok.Data;
 
 
-@Value
+@Data
 @Builder
-@AllArgsConstructor
 public class DokumentVariant {
     @NotBlank(message = "Filtype kan ikke være null")
     String filtype;
@@ -18,8 +16,8 @@ public class DokumentVariant {
     @NotBlank(message = "Variantformat kan ikke være null")
     String variantformat;
 
-    @NotNull(message = "Fysisk dokument kan ikke være null")
-    byte[] fysiskDokument;
+	@NotNull(message = "Fysisk dokument kan ikke være null")
+	byte[] fysiskDokument;
 
-    String filnavn;
+	String filnavn;
 }
