@@ -16,6 +16,10 @@
 			<groupId>no.nav.skanmotutgaaende</groupId>
 			<artifactId>core</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>no.nav.skanmotutgaaende</groupId>
+			<artifactId>utgaaende</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
