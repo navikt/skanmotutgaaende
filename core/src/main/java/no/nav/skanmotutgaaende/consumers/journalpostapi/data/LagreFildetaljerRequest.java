@@ -1,6 +1,6 @@
 package no.nav.skanmotutgaaende.consumers.journalpostapi.data;
 
-import jakarta.validation.constraints.NotNull;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Data;
 
@@ -11,6 +11,7 @@ import java.util.List;
 @Builder
 public class LagreFildetaljerRequest {
 
+	@JsonFormat(pattern = "yyyy-MM-dd")
 	Date datoMottatt;
 
 	String mottakskanal;
@@ -19,7 +20,6 @@ public class LagreFildetaljerRequest {
 
 	String batchnavn;
 
-	@NotNull(message = "Dokumentvarianter kan ikke være null")
 	List<DokumentVariant> dokumentvarianter;
 
 	String eksternReferanseId;
