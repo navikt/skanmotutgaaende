@@ -1,7 +1,5 @@
 package no.nav.skanmotutgaaende.consumers.journalpostapi.data;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
@@ -13,10 +11,8 @@ import java.util.List;
 @Builder
 public class LagreFildetaljerRequest {
 
-	@JsonFormat(pattern = "yyyy-MM-dd")
 	Date datoMottatt;
 
-	@NotBlank(message = "Mottakskanal kan ikke være null")
 	String mottakskanal;
 
 	List<Tilleggsopplysning> tilleggsopplysninger;

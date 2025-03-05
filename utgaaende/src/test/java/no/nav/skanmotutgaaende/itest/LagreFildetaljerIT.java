@@ -1,6 +1,5 @@
 package no.nav.skanmotutgaaende.itest;
 
-import jakarta.validation.ConstraintViolationException;
 import no.nav.skanmotutgaaende.consumers.journalpostapi.LagreFildetaljerConsumer;
 import no.nav.skanmotutgaaende.consumers.journalpostapi.data.DokumentVariant;
 import no.nav.skanmotutgaaende.consumers.journalpostapi.data.LagreFildetaljerRequest;
@@ -40,14 +39,6 @@ public class LagreFildetaljerIT extends AbstractIT {
 		setUpHappyStubs();
 		LagreFildetaljerRequest request = createLagreFildetaljerRequest(MOTTAKSKANAL);
 		assertDoesNotThrow(() -> lagrefildetaljerConsumer.lagreFilDetaljer(request, JOURNALPOST_ID));
-	}
-
-	@Test
-	public void shouldFailIfMottaksKanalErNull() {
-		setUpHappyStubs();
-		LagreFildetaljerRequest request = createLagreFildetaljerRequest(null);
-		assertThrows(ConstraintViolationException.class, () -> lagrefildetaljerConsumer.lagreFilDetaljer(request, JOURNALPOST_ID),
-				"Mottakskanal kan ikke være null");
 	}
 
 	@Test

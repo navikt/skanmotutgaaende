@@ -1,6 +1,5 @@
 package no.nav.skanmotutgaaende.consumers.journalpostapi;
 
-import jakarta.validation.Valid;
 import no.nav.skanmotutgaaende.config.props.SkanmotutgaaendeProperties;
 import no.nav.skanmotutgaaende.consumers.journalpostapi.data.LagreFildetaljerRequest;
 import no.nav.skanmotutgaaende.exceptions.functional.JournalpostConflictException;
@@ -10,7 +9,6 @@ import org.slf4j.MDC;
 import org.springframework.boot.autoconfigure.codec.CodecProperties;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -24,7 +22,6 @@ import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId;
 
-@Validated
 @Component
 public class LagreFildetaljerConsumer {
 
@@ -46,7 +43,7 @@ public class LagreFildetaljerConsumer {
 	}
 
 	@Retryable(retryFor = SkanmotutgaaendeTechnicalException.class)
-	public void lagreFilDetaljer(@Valid LagreFildetaljerRequest lagreFildetaljerRequest, String journalpostId) {
+	public void lagreFilDetaljer(LagreFildetaljerRequest lagreFildetaljerRequest, String journalpostId) {
 		webClient.put()
 				.uri(uriBuilder -> uriBuilder
 						.path("/{journalpostId}/mottaDokumentUtgaaendeSkanning")
