@@ -1,5 +1,6 @@
 {
   "SRVSKANMOTUTGAAENDE": "/serviceuser/data/dev/srvskanmotutgaaende",
+  "SRVJIRADOKDISTAVSTEMMING": "/serviceuser/data/dev/srvjiradokdistavstemming",
   "SFTP_KEYS": "kv/preprod/fss/skanmotutgaaende/keys",
   "SKANMOTUTGAAENDE_VAULT_BACKEND": "kv/preprod/fss",
   "SKANMOTUTGAAENDE_VAULT_KUBERNETESPATH": "kubernetes/preprod/fss",
