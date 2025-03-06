@@ -19,15 +19,18 @@ import java.time.Duration;
 public class SkanmotutgaaendeProperties {
 
     private final Endpoints endpoints = new Endpoints();
+    private final Utgaaende utgaaende = new Utgaaende();
+    private final Avstem avstem = new Avstem();
     private final SftpProperties sftp = new SftpProperties();
     private final FilomraadeProperties filomraade = new FilomraadeProperties();
     private final ServiceUserProperties serviceuser = new ServiceUserProperties();
+    private final JiraConfigProperties jira = new JiraConfigProperties();
 
     @NotEmpty
     private String endpointuri;
 
-    @NotNull
-    private String schedule;
+    @NotEmpty
+    private String endpointconfig;
 
     @NotNull
     private Duration completiontimeout;
@@ -55,6 +58,23 @@ public class SkanmotutgaaendeProperties {
         private String scope;
     }
 
+    @Data
+    @Validated
+    public static class Utgaaende {
+        @NotEmpty
+        private String schedule;
+    }
+
+    @Data
+    @Validated
+    public static class Avstem {
+        @NotEmpty
+        private String schedule;
+
+        private boolean startup;
+
+    }
+
     @Getter
     @Setter
     @Validated
@@ -65,6 +85,9 @@ public class SkanmotutgaaendeProperties {
 
         @NotEmpty
         private String feilmappe;
+
+        @NotEmpty
+        private String avstemmappe;
     }
 
     @Getter
@@ -103,6 +126,18 @@ public class SkanmotutgaaendeProperties {
         private String port;
     }
 
+    @Data
+    @Validated
+    public static class JiraConfigProperties {
+        @NotEmpty
+        private String username;
+
+        @NotEmpty
+        private String password;
+
+        @NotEmpty
+        private String url;
+    }
 }
 
 
