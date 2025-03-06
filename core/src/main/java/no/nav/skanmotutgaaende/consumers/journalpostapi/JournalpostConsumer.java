@@ -27,7 +27,7 @@ import static org.springframework.security.oauth2.client.web.reactive.function.c
 @Component
 public class JournalpostConsumer {
 
-	private static final String INTERN_JOURNALPOST_API_PATH = "/internal/journalpostapi/v1/journalpost";
+	private static final String INTERNAL_JOURNALPOST_API_PATH = "/internal/journalpostapi/v1/journalpost/";
 	private final WebClient webClient;
 
 	public JournalpostConsumer(
@@ -49,7 +49,7 @@ public class JournalpostConsumer {
 	public void lagreFilDetaljer(LagreFildetaljerRequest lagreFildetaljerRequest, String journalpostId) {
 		webClient.put()
 				.uri(uriBuilder -> uriBuilder
-						.path(INTERN_JOURNALPOST_API_PATH + "{journalpostId}/mottaDokumentUtgaaendeSkanning")
+						.path(INTERNAL_JOURNALPOST_API_PATH + "{journalpostId}/mottaDokumentUtgaaendeSkanning")
 						.build(journalpostId))
 				.header(NAV_CALL_ID, MDC.get(MDC_CALL_ID))
 				.attributes(clientRegistrationId(CLIENT_REGISTRATION_DOKARKIV))
