@@ -23,12 +23,12 @@ import static org.apache.camel.Exchange.FILE_NAME_ONLY;
 @Component
 public class OpprettJiraService {
 
+	private static final List<String> LABEL = List.of("Skanmotutgaaende_avvik");
 	private static final String DESCRIPTION = "Se vedlegg for en oversikt over manglende avstemmingsreferanser for skannede dokumenter fra Skanmotutgaaende \n";
-	public static final String SUMMARY = "Skanmotutgaaende: Manglende avstemmingsreferanser for skannede dokumenter";
 	private static final String JIRA_BRUKER_NAVN = "srvjiradokdistavstemming";
+	private static final String SUMMARY = "Skanmotutgaaende: Manglende avstemmingsreferanser for skannede dokumenter";
 	public static final String ANTALL_FILER_AVSTEMT = "Antall filer avstemt";
 	public static final String ANTALL_FILER_FEILET = "Antall filer feilet";
-	private static final List<String> LABEL = List.of("Skanmotutgaaende_avvik");
 
 	private final JiraService jiraService;
 
@@ -46,7 +46,7 @@ public class OpprettJiraService {
 
 			Integer antallAvstemt = exchange.getProperty(ANTALL_FILER_AVSTEMT, Integer.class);
 			Integer antallFeilet = exchange.getProperty(ANTALL_FILER_FEILET, Integer.class);
-			JiraRequest jiraRequest = mapJiraRequest(csvByte, antallAvstemt, antallFeilet, avstemmingsfilDato);
+			JiraRequest jiraRequest = mapJiraRequest(csvByte, antallAvstemt, antallFeilet);
 
 			return jiraService.opprettJiraOppgaveMedVedlegg(jiraRequest);
 		} catch (JiraClientException e) {
@@ -63,7 +63,7 @@ public class OpprettJiraService {
 				.build());
 	}
 
-	private JiraRequest mapJiraRequest(byte[] csvByte, int antallAvstemt, int antallFeilet, LocalDate avstemmingsfilDato) {
+	private JiraRequest mapJiraRequest(byte[] csvByte, int antallAvstemt, int antallFeilet) {
 		return JiraRequest.builder()
 				.summary(SUMMARY)
 				.description(prettifySummary(DESCRIPTION, antallAvstemt, antallFeilet))

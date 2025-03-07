@@ -69,12 +69,12 @@ public class JournalpostConsumer {
 				.bodyValue(avstemmingReferanser)
 				.retrieve()
 				.bodyToMono(FeilendeAvstemmingReferanser.class)
-				.onErrorMap(WebClientResponseException.class, err -> mapAvstemReferanserError(err, "avstemReferanser"))
+				.onErrorMap(err -> mapAvstemReferanserError(err, "avstemReferanser"))
 				.block();
 	}
 
-	private Throwable mapLagreFilDetaljerError(WebClientResponseException webException, String journalpostId) {
-		if (webException.getStatusCode().is4xxClientError()) {
+	private Throwable mapLagreFilDetaljerError(Throwable error, String journalpostId) {
+		if (error instanceof WebClientResponseException webException && webException.getStatusCode().is4xxClientError()) {
 			if (CONFLICT.equals(webException.getStatusCode())) {
 				throw new JournalpostConflictException(format("lagreFilDetaljer feilet funksjonelt med journalpostId=%s, statusKode=%s. Feilmelding=%s", journalpostId,
 						webException.getStatusCode(), webException.getResponseBodyAsString()), webException);
@@ -82,15 +82,14 @@ public class JournalpostConsumer {
 			throw new SkanmotutgaaendeFunctionalException(format("lagreFilDetaljer feilet funksjonelt med statusKode=%s. Feilmelding=%s",
 					webException.getStatusCode(), webException.getMessage()), webException);
 		}
-		throw new SkanmotutgaaendeTechnicalException(format("lagreFilDetaljer feilet teknisk med statusKode=%s. Feilmelding=%s", webException
-				.getStatusCode(), webException.getResponseBodyAsString()), webException);
+		throw new SkanmotutgaaendeTechnicalException(format("lagreFilDetaljer feilet teknisk med feilmelding=%s", error.getMessage()), error);
 	}
 
-	private Throwable mapAvstemReferanserError(WebClientResponseException webException, String tjeneste) {
-		if (webException.getStatusCode().is4xxClientError()) {
+	private Throwable mapAvstemReferanserError(Throwable error, String tjeneste) {
+		if (error instanceof WebClientResponseException webException && webException.getStatusCode().is4xxClientError()) {
 			throw new SkanmotutgaaendeFunctionalException(format("%s feilet funksjonelt med statusKode=%s. Feilmelding=%s", tjeneste,
 					webException.getStatusCode(), webException.getMessage()), webException);
 		}
-		throw new SkanmotutgaaendeTechnicalException(format("%s feilet teknisk med Feilmelding=%s", tjeneste, webException.getMessage()), webException);
+		throw new SkanmotutgaaendeTechnicalException(format("%s feilet teknisk med Feilmelding=%s", tjeneste, error.getMessage()), error);
 	}
 }
