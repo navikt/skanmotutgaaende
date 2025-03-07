@@ -46,7 +46,7 @@ public class OpprettJiraService {
 
 			Integer antallAvstemt = exchange.getProperty(ANTALL_FILER_AVSTEMT, Integer.class);
 			Integer antallFeilet = exchange.getProperty(ANTALL_FILER_FEILET, Integer.class);
-			JiraRequest jiraRequest = mapJiraRequest(csvByte, antallAvstemt, antallFeilet);
+			JiraRequest jiraRequest = mapJiraRequest(csvByte, antallAvstemt, antallFeilet, avstemmingsfilDato);
 
 			return jiraService.opprettJiraOppgaveMedVedlegg(jiraRequest);
 		} catch (JiraClientException e) {
@@ -63,13 +63,14 @@ public class OpprettJiraService {
 				.build());
 	}
 
-	private JiraRequest mapJiraRequest(byte[] csvByte, int antallAvstemt, int antallFeilet) {
+	private JiraRequest mapJiraRequest(byte[] csvByte, int antallAvstemt, int antallFeilet, LocalDate avstemmingsfilDato) {
 		return JiraRequest.builder()
 				.summary(SUMMARY)
 				.description(prettifySummary(DESCRIPTION, antallAvstemt, antallFeilet))
 				.reporterName(JIRA_BRUKER_NAVN)
 				.labels(LABEL)
 				.vedlegg(csvByte)
+				.avstemmingsfilDato(avstemmingsfilDato)
 				.build();
 	}
 
