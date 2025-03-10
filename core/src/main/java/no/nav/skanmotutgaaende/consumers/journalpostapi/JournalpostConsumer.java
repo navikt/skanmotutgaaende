@@ -69,7 +69,7 @@ public class JournalpostConsumer {
 				.bodyValue(avstemmingReferanser)
 				.retrieve()
 				.bodyToMono(FeilendeAvstemmingReferanser.class)
-				.onErrorMap(err -> mapAvstemReferanserError(err, "avstemReferanser"))
+				.onErrorMap(Throwable.class, err -> mapAvstemReferanserError(err, "avstemReferanser"))
 				.block();
 	}
 
@@ -87,9 +87,9 @@ public class JournalpostConsumer {
 
 	private Throwable mapAvstemReferanserError(Throwable error, String tjeneste) {
 		if (error instanceof WebClientResponseException webException && webException.getStatusCode().is4xxClientError()) {
-			throw new SkanmotutgaaendeFunctionalException(format("%s feilet funksjonelt med statusKode=%s. Feilmelding=%s", tjeneste,
+			return new SkanmotutgaaendeFunctionalException(format("%s feilet funksjonelt med statusKode=%s. Feilmelding=%s", tjeneste,
 					webException.getStatusCode(), webException.getMessage()), webException);
 		}
-		throw new SkanmotutgaaendeTechnicalException(format("%s feilet teknisk med Feilmelding=%s", tjeneste, error.getMessage()), error);
+		return new SkanmotutgaaendeTechnicalException(format("%s feilet teknisk med Feilmelding=%s", tjeneste, error.getMessage()), error);
 	}
 }
