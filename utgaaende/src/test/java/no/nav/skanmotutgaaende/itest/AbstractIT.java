@@ -35,8 +35,8 @@ public abstract class AbstractIT {
 	public static final String INNGAAENDE = "inngaaende";
 	public static final String FEILMAPPE = "feilmappe";
 	public static final String FAGPOST_MAPPE = "fagpostmappe";
-	final String URL_DOKARKIV_JOURNALPOST_GEN = "/rest/intern/journalpostapi/v1/journalpost/\\d+/mottaDokumentUtgaaendeSkanning";
-	String URL_DOKARKIV_JOURNALPOST_BAD_REQUEST = "/rest/intern/journalpostapi/v1/journalpost/4000004/mottaDokumentUtgaaendeSkanning";
+	final String URL_DOKARKIV_JOURNALPOST_GEN = "/rest/internal/journalpostapi/v1/journalpost/\\d+/mottaDokumentUtgaaendeSkanning";
+	String URL_DOKARKIV_JOURNALPOST_BAD_REQUEST = "/rest/internal/journalpostapi/v1/journalpost/4000004/mottaDokumentUtgaaendeSkanning";
 
 	void setUpHappyStubs() {
 		stubFor(put(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)).willReturn(aResponse()

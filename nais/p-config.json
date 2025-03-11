@@ -1,10 +1,11 @@
 {
   "SRVSKANMOTUTGAAENDE": "/serviceuser/data/prod/srvskanmotutgaaende",
+  "SRVJIRADOKDISTAVSTEMMING": "/serviceuser/data/prod/srvjiradokdistavstemming",
   "SFTP_KEYS": "kv/prod/fss/skanmotutgaaende/keys",
-  "SKANMOTUTGAAENDE_SCHEDULE": "0+0/15+*+*+*+*",
   "SKANMOTUTGAAENDE_VAULT_BACKEND": "kv/prod/fss",
   "SKANMOTUTGAAENDE_VAULT_KUBERNETESPATH": "kubernetes/prod/fss",
-  "SKANMOTUTGAAENDE_ENDPOINTS_DOKARKIV_URL": "http://dokarkiv.teamdokumenthandtering.svc.nais.local/rest/internal/journalpostapi/v1/journalpost",
+  "SKANMOTUTGAAENDE_JIRA_URL": "https://jira.adeo.no",
+  "SKANMOTUTGAAENDE_ENDPOINTS_DOKARKIV_URL": "http://dokarkiv.teamdokumenthandtering.svc.nais.local/rest",
   "SKANMOTUTGAAENDE_ENDPOINTS_DOKARKIV_SCOPE": "api://prod-fss.teamdokumenthandtering.dokarkiv/.default",
   "INGRESSES": [
     "https://skanmotutgaaende.intern.nav.no"

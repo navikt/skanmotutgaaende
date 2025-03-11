@@ -1,6 +1,8 @@
 package no.nav.skanmotutgaaende.consumers.journalpostapi;
 
 import no.nav.skanmotutgaaende.config.props.SkanmotutgaaendeProperties;
+import no.nav.skanmotutgaaende.consumers.journalpostapi.data.AvstemmingReferanser;
+import no.nav.skanmotutgaaende.consumers.journalpostapi.data.FeilendeAvstemmingReferanser;
 import no.nav.skanmotutgaaende.consumers.journalpostapi.data.LagreFildetaljerRequest;
 import no.nav.skanmotutgaaende.exceptions.functional.JournalpostConflictException;
 import no.nav.skanmotutgaaende.exceptions.functional.SkanmotutgaaendeFunctionalException;
@@ -13,6 +15,8 @@ import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+import java.util.function.Function;
+
 import static java.lang.String.format;
 import static no.nav.skanmotutgaaende.consumers.azure.AzureOAuthEnabledWebClientConfig.CLIENT_REGISTRATION_DOKARKIV;
 import static no.nav.skanmotutgaaende.consumers.journalpostapi.NavHeaders.NAV_CALL_ID;
@@ -23,11 +27,12 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId;
 
 @Component
-public class LagreFildetaljerConsumer {
+public class JournalpostConsumer {
 
+	private static final String INTERNAL_JOURNALPOST_API_PATH = "/internal/journalpostapi/v1/journalpost/";
 	private final WebClient webClient;
 
-	public LagreFildetaljerConsumer(
+	public JournalpostConsumer(
 			WebClient webClient,
 			SkanmotutgaaendeProperties skanmotutgaaendeProperties,
 			CodecProperties codecProperties
@@ -46,27 +51,49 @@ public class LagreFildetaljerConsumer {
 	public void lagreFilDetaljer(LagreFildetaljerRequest lagreFildetaljerRequest, String journalpostId) {
 		webClient.put()
 				.uri(uriBuilder -> uriBuilder
-						.path("/{journalpostId}/mottaDokumentUtgaaendeSkanning")
+						.path(INTERNAL_JOURNALPOST_API_PATH + "{journalpostId}/mottaDokumentUtgaaendeSkanning")
 						.build(journalpostId))
 				.header(NAV_CALL_ID, MDC.get(MDC_CALL_ID))
 				.attributes(clientRegistrationId(CLIENT_REGISTRATION_DOKARKIV))
 				.bodyValue(lagreFildetaljerRequest)
 				.retrieve()
 				.toBodilessEntity()
-				.onErrorMap(WebClientResponseException.class, err -> mapError(err, journalpostId))
+				.onErrorMap(err -> mapLagreFilDetaljerError(err, journalpostId))
 				.block();
 	}
 
-	private Throwable mapError(WebClientResponseException webException, String journalpostId) throws SkanmotutgaaendeFunctionalException {
-		if (webException.getStatusCode().is4xxClientError()) {
+	@Retryable(retryFor = SkanmotutgaaendeTechnicalException.class)
+	public FeilendeAvstemmingReferanser avstemReferanser(AvstemmingReferanser avstemmingReferanser) {
+		return webClient.post()
+				.uri("/journalpostapi/v1/avstemReferanser")
+				.header(NAV_CALL_ID, MDC.get(MDC_CALL_ID))
+				.attributes(clientRegistrationId(CLIENT_REGISTRATION_DOKARKIV))
+				.bodyValue(avstemmingReferanser)
+				.retrieve()
+				.bodyToMono(FeilendeAvstemmingReferanser.class)
+				.onErrorMap(mapAvstemReferanserError())
+				.block();
+	}
+
+	private Throwable mapLagreFilDetaljerError(Throwable error, String journalpostId) {
+		if (error instanceof WebClientResponseException webException && webException.getStatusCode().is4xxClientError()) {
 			if (CONFLICT.equals(webException.getStatusCode())) {
-				throw new JournalpostConflictException(format("lagreFilDetaljer feilet funksjonelt med journalpostId=%s, statusKode=%s. Feilmelding=%s", journalpostId,
+				return new JournalpostConflictException(format("lagreFilDetaljer feilet funksjonelt med journalpostId=%s, statusKode=%s. Feilmelding=%s", journalpostId,
 						webException.getStatusCode(), webException.getResponseBodyAsString()), webException);
 			}
-			throw new SkanmotutgaaendeFunctionalException(format("lagreFilDetaljer feilet funksjonelt med statusKode=%s. Feilmelding=%s",
+			return new SkanmotutgaaendeFunctionalException(format("lagreFilDetaljer feilet funksjonelt med statusKode=%s. Feilmelding=%s",
 					webException.getStatusCode(), webException.getMessage()), webException);
 		}
-		throw new SkanmotutgaaendeTechnicalException(format("lagreFilDetaljer feilet teknisk med statusKode=%s. Feilmelding=%s", webException
-				.getStatusCode(), webException.getResponseBodyAsString()), webException);
+		return new SkanmotutgaaendeTechnicalException(format("lagreFilDetaljer feilet teknisk med feilmelding=%s", error.getMessage()), error);
+	}
+
+	private Function<? super Throwable, ? extends Throwable> mapAvstemReferanserError() {
+		return error -> {
+			if (error instanceof WebClientResponseException webException && webException.getStatusCode().is4xxClientError()) {
+				return new SkanmotutgaaendeFunctionalException(format("avstemReferanser feilet funksjonelt med statusKode=%s. Feilmelding=%s",
+						webException.getStatusCode(), webException.getMessage()), webException);
+			}
+			return new SkanmotutgaaendeTechnicalException(format("avstemReferanser feilet teknisk med Feilmelding=%s", error.getMessage()), error);
+		};
 	}
 }

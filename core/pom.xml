@@ -43,6 +43,12 @@
             <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
 
+        <!-- jira -->
+        <dependency>
+            <groupId>no.nav.dok-common</groupId>
+            <artifactId>jiraapi</artifactId>
+        </dependency>
+
         <!-- caching -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -1,6 +1,6 @@
 package no.nav.skanmotutgaaende.itest;
 
-import no.nav.skanmotutgaaende.consumers.journalpostapi.LagreFildetaljerConsumer;
+import no.nav.skanmotutgaaende.consumers.journalpostapi.JournalpostConsumer;
 import no.nav.skanmotutgaaende.consumers.journalpostapi.data.DokumentVariant;
 import no.nav.skanmotutgaaende.consumers.journalpostapi.data.LagreFildetaljerRequest;
 import no.nav.skanmotutgaaende.consumers.journalpostapi.data.Tilleggsopplysning;
@@ -27,7 +27,7 @@ public class LagreFildetaljerIT extends AbstractIT {
 	private final String MOTTAKSKANAL = "SKAN_IM";
 
 	@Autowired
-	private LagreFildetaljerConsumer lagrefildetaljerConsumer;
+	private JournalpostConsumer lagrefildetaljerConsumer;
 
 	@BeforeEach
 	public void setUp() {
