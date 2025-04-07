@@ -30,7 +30,7 @@
 
         <commons-compress.version>1.27.1</commons-compress.version>
         <commons-io.version>2.18.0</commons-io.version>
-        <logstash-logback-encoder.version>8.0</logstash-logback-encoder.version>
+        <logstash-logback-encoder.version>8.1</logstash-logback-encoder.version>
         <bouncycastle.version>1.80</bouncycastle.version>
         <context-propagation.version>1.1.2</context-propagation.version>
         <jiraapi.version>1.1.4</jiraapi.version>
