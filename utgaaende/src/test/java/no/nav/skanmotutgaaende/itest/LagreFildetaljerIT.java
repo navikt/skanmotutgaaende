@@ -24,7 +24,6 @@ public class LagreFildetaljerIT extends AbstractIT {
 	private static final byte[] DUMMY_FILE = "dummyfile".getBytes();
 	private static final String JOURNALPOST_ID = "4000004";
 	private static final String JOURNALPOST_ID_INVALID = "4000005";
-	private final String MOTTAKSKANAL = "SKAN_IM";
 
 	@Autowired
 	private JournalpostConsumer lagrefildetaljerConsumer;
@@ -37,21 +36,21 @@ public class LagreFildetaljerIT extends AbstractIT {
 	@Test
 	public void shouldLagreFildetaljer() {
 		setUpHappyStubs();
-		LagreFildetaljerRequest request = createLagreFildetaljerRequest(MOTTAKSKANAL);
+		LagreFildetaljerRequest request = createLagreFildetaljerRequest();
 		assertDoesNotThrow(() -> lagrefildetaljerConsumer.lagreFilDetaljer(request, JOURNALPOST_ID));
 	}
 
 	@Test
 	public void shoulfFailIfInvalidRequest() {
 		setUpBadStubs();
-		LagreFildetaljerRequest request = createLagreFildetaljerRequest(MOTTAKSKANAL);
+		LagreFildetaljerRequest request = createLagreFildetaljerRequest();
 		assertThrows(SkanmotutgaaendeFunctionalException.class, () -> lagrefildetaljerConsumer.lagreFilDetaljer(request, JOURNALPOST_ID_INVALID));
 	}
 
-	private LagreFildetaljerRequest createLagreFildetaljerRequest(String mottakskanal) {
+	private LagreFildetaljerRequest createLagreFildetaljerRequest() {
 		return LagreFildetaljerRequest.builder()
 				.datoMottatt(new Date())
-				.mottakskanal(mottakskanal)
+				.mottakskanal("SKAN_IM")
 				.batchnavn("xml_pdf_pairs_testdata.zip")
 				.tilleggsopplysninger(Arrays.asList(
 						Tilleggsopplysning.builder()

@@ -46,7 +46,7 @@ public class AvstemRouteIT extends AbstractItest {
 		stubJiraOpprettOppgave();
 		stubPostAvstemJournalpost("journalpostapi/avstem.json");
 
-		copyFileFromClasspathToAvstem(AVSTEMMINGSFIL);
+		copyFileFromClasspathToAvstem();
 
 		Path filePath = sshdPath.resolve(AVSTEMMINGSFILMAPPE).resolve(AVSTEMMINGSFIL);
 		assertThat(Files.exists(filePath)).isTrue();
@@ -70,7 +70,7 @@ public class AvstemRouteIT extends AbstractItest {
 	public void shouldNotOpprettJiraWhenFeilendeAvstemReferanserIsNull() throws IOException {
 		stubPostAvstemJournalpost("journalpostapi/null-avstem.json");
 
-		copyFileFromClasspathToAvstem(AVSTEMMINGSFIL);
+		copyFileFromClasspathToAvstem();
 
 		Path filePath = sshdPath.resolve(AVSTEMMINGSFILMAPPE).resolve(AVSTEMMINGSFIL);
 
@@ -92,7 +92,7 @@ public class AvstemRouteIT extends AbstractItest {
 		stubPostAvstemJournalpost("journalpostapi/avstem.json");
 
 
-		copyFileFromClasspathToAvstem(AVSTEMMINGSFIL);
+		copyFileFromClasspathToAvstem();
 
 		Path filePath = sshdPath.resolve(AVSTEMMINGSFILMAPPE).resolve(AVSTEMMINGSFIL);
 		assertThat(Files.exists(filePath)).isTrue();
@@ -129,8 +129,8 @@ public class AvstemRouteIT extends AbstractItest {
 		verify(1, getRequestedFor(urlMatching(JIRA_PROJECT_URL)));
 	}
 
-	private void copyFileFromClasspathToAvstem(final String txtFilename) throws IOException {
-		Files.copy(new ClassPathResource(txtFilename).getInputStream(), sshdPath.resolve(AVSTEMMINGSFILMAPPE).resolve(txtFilename));
+	private void copyFileFromClasspathToAvstem() throws IOException {
+		Files.copy(new ClassPathResource(AvstemRouteIT.AVSTEMMINGSFIL).getInputStream(), sshdPath.resolve(AVSTEMMINGSFILMAPPE).resolve(AvstemRouteIT.AVSTEMMINGSFIL));
 	}
 
 	private void preparePath(Path path) {
@@ -140,7 +140,7 @@ public class AvstemRouteIT extends AbstractItest {
 			} else {
 				FileUtils.cleanDirectory(path.toFile());
 			}
-		} catch (IOException e) {
+		} catch (IOException ignored) {
 
 		}
 	}

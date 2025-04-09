@@ -18,7 +18,6 @@ import org.bouncycastle.openpgp.operator.jcajce.JcePublicKeyDataDecryptorFactory
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.NoSuchProviderException;
 import java.util.Iterator;
 
 import static no.nav.skanmotutgaaende.pgpdecrypt.manuelltesting.PGPKeyUtil.findSecretKey;
@@ -36,7 +35,7 @@ public class PGPDecryptUtil {
 			InputStream encryptedDataStream,
 			InputStream privateKeyStream,
 			char[] passwd)
-			throws IOException, NoSuchProviderException, PGPException {
+			throws IOException, PGPException {
 		InputStream in = PGPUtil.getDecoderStream(encryptedDataStream);
 
 		try (privateKeyStream) {
@@ -57,7 +56,7 @@ public class PGPDecryptUtil {
 				throw new PGPException("PGP-kryptert melding har en ukjent datatype.");
 			}
 		} catch (PGPException e) {
-			log.error("DecryptFile feilet med melding: " + e.getMessage(), e);
+			log.error("DecryptFile feilet med melding: {}", e.getMessage(), e);
 			throw e;
 		}
 	}
@@ -75,7 +74,7 @@ public class PGPDecryptUtil {
 		while (pgpPrivateKey == null && it.hasNext()) {
 			publicKeyEncryptedData = (PGPPublicKeyEncryptedData) it.next();
 
-			pgpPrivateKey = findSecretKey(pgpKeyRing, publicKeyEncryptedData.getKeyID(), passwd);
+			pgpPrivateKey = findSecretKey(pgpKeyRing, publicKeyEncryptedData.getKeyIdentifier().getKeyId(), passwd);
 		}
 
 		if (pgpPrivateKey == null) {

@@ -7,7 +7,6 @@ import no.nav.skanmotutgaaende.MdcSetterProcessor;
 import no.nav.skanmotutgaaende.SkanningmetadataUnmarshaller;
 import no.nav.skanmotutgaaende.config.props.SkanmotutgaaendeProperties;
 import no.nav.skanmotutgaaende.exceptions.functional.AbstractSkanmotutgaaendeFunctionalException;
-import no.nav.skanmotutgaaende.metrics.DokCounter;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.dataformat.zipfile.ZipSplitter;
