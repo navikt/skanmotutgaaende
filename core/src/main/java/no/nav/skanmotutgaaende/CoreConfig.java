@@ -2,7 +2,6 @@ package no.nav.skanmotutgaaende;
 
 import no.nav.dok.jiraapi.JiraProperties;
 import no.nav.dok.jiraapi.JiraService;
-import no.nav.dok.jiraapi.JiraServiceImp;
 import no.nav.dok.jiraapi.client.JiraClient;
 import no.nav.skanmotutgaaende.config.props.SkanmotutgaaendeProperties;
 import org.springframework.context.annotation.Bean;
@@ -14,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
 public class CoreConfig {
 	@Bean
 	public JiraService jiraService(JiraClient jiraClient) {
-		return new JiraServiceImp(jiraClient);
+		return new JiraService(jiraClient);
 	}
 
 	@Bean
