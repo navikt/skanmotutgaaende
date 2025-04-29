@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.dok.jiraapi.JiraRequest;
 import no.nav.dok.jiraapi.JiraResponse;
 import no.nav.dok.jiraapi.JiraService;
+import no.nav.dok.jiraapi.client.JiraClient;
 import no.nav.dok.jiracore.exception.JiraClientException;
 import no.nav.skanmotutgaaende.exceptions.functional.SkanmotutgaaendeFunctionalException;
 import org.apache.camel.Exchange;
@@ -16,6 +17,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static java.time.DayOfWeek.MONDAY;
+import static no.nav.dok.jiracore.config.JiraConstant.ANSVARLIG_TEAM_FAGPOST;
 import static no.nav.skanmotutgaaende.mdc.MDCConstants.EXCHANGE_AVSTEMT_DATO;
 import static org.apache.camel.Exchange.FILE_NAME_ONLY;
 
@@ -31,40 +33,44 @@ public class OpprettJiraService {
 	public static final String ANTALL_FILER_FEILET = "Antall filer feilet";
 
 	private final JiraService jiraService;
+	private final JiraClient jiraClient;
 
-	public OpprettJiraService(JiraService jiraService) {
+	public OpprettJiraService(JiraService jiraService, JiraClient jiraClient) {
 		this.jiraService = jiraService;
+		this.jiraClient = jiraClient;
 	}
 
 	@Handler
 	public JiraResponse opprettAvstemJiraOppgave(byte[] csvByte, Exchange exchange) {
 		LocalDate avstemmingsfilDato = exchange.getProperty(EXCHANGE_AVSTEMT_DATO, LocalDate.class);
+		Integer antallAvstemt = exchange.getProperty(ANTALL_FILER_AVSTEMT, Integer.class);
+		Integer antallFeilet = exchange.getProperty(ANTALL_FILER_FEILET, Integer.class);
+		return opprettAvstemJiraOppgave(csvByte, antallAvstemt, antallFeilet, avstemmingsfilDato);
+	}
+
+	private JiraResponse opprettAvstemJiraOppgave(byte[] csvByte, Integer antallAvstemt, Integer antallFeilet, LocalDate avstemmingsfilDato) {
 		try {
 			if (csvByte == null) {
 				return opprettJiraForManglendeAvstemmingsfil(avstemmingsfilDato);
 			}
 
-			Integer antallAvstemt = exchange.getProperty(ANTALL_FILER_AVSTEMT, Integer.class);
-			Integer antallFeilet = exchange.getProperty(ANTALL_FILER_FEILET, Integer.class);
-			JiraRequest jiraRequest = mapJiraRequest(csvByte, antallAvstemt, antallFeilet, avstemmingsfilDato);
-
-			return jiraService.opprettJiraOppgaveMedVedlegg(jiraRequest);
+			return opprettJiraForAvstemmingsfil(csvByte, antallAvstemt, antallFeilet, avstemmingsfilDato);
 		} catch (JiraClientException e) {
 			throw new SkanmotutgaaendeFunctionalException("kunne ikke opprette jira oppgave", e);
 		}
 	}
 
 	private JiraResponse opprettJiraForManglendeAvstemmingsfil(LocalDate avstemmingsfilDato) {
-		return jiraService.opprettJiraOppgave(JiraRequest.builder()
-				.summary("Skanmotutgaaende: Avstemmingfil mangler for " + avstemmingsfilDato)
-				.description("Skanmotutgaaende fant ikke avstemmingsfil for " + avstemmingsfilDato + ". Undersøk tilfellet og evt. kontakt Iron Mountain.")
-				.reporterName(JIRA_BRUKER_NAVN)
-				.labels(LABEL)
-				.build());
+		return jiraService.opprettJiraIKTOppgave(JiraRequest.builder()
+						.summary("Skanmotutgaaende: Avstemmingfil mangler for " + avstemmingsfilDato)
+						.description("Skanmotutgaaende fant ikke avstemmingsfil for " + avstemmingsfilDato + ". Undersøk tilfellet og kontakt evt. Iron Mountain.")
+						.labels(LABEL)
+						.build(),
+				ANSVARLIG_TEAM_FAGPOST);
 	}
 
-	private JiraRequest mapJiraRequest(byte[] csvByte, int antallAvstemt, int antallFeilet, LocalDate avstemmingsfilDato) {
-		return JiraRequest.builder()
+	private JiraResponse opprettJiraForAvstemmingsfil(byte[] csvByte, Integer antallAvstemt, Integer antallFeilet, LocalDate avstemmingsfilDato) {
+		JiraRequest jiraRequest = JiraRequest.builder()
 				.summary(SUMMARY)
 				.description(prettifySummary(DESCRIPTION, antallAvstemt, antallFeilet))
 				.reporterName(JIRA_BRUKER_NAVN)
@@ -72,6 +78,11 @@ public class OpprettJiraService {
 				.vedlegg(csvByte)
 				.avstemmingsfilDato(avstemmingsfilDato)
 				.build();
+
+		JiraResponse jiraResponse = jiraService.opprettJiraIKTOppgave(jiraRequest, ANSVARLIG_TEAM_FAGPOST);
+		jiraClient.leggTilVedlegg(jiraResponse.jiraIssueKey(), jiraRequest);
+
+		return jiraResponse;
 	}
 
 	public static String prettifySummary(String melding, int antallAvstemt, int antallFeilet) {
@@ -80,7 +91,6 @@ public class OpprettJiraService {
 				.append("\nAntall filer avstemt: ").append(antallAvstemt)
 				.append("\nAntall filer funnet: ").append(antallAvstemt - antallFeilet)
 				.append("\nAntall filer feilet: ").append(antallFeilet).toString();
-
 	}
 
 	/**
