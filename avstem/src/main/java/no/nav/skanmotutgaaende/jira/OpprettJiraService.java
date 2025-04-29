@@ -63,7 +63,7 @@ public class OpprettJiraService {
 	private JiraResponse opprettJiraForManglendeAvstemmingsfil(LocalDate avstemmingsfilDato) {
 		return jiraService.opprettJiraIKTOppgave(JiraRequest.builder()
 						.summary("Skanmotutgaaende: Avstemmingfil mangler for " + avstemmingsfilDato)
-						.description("Skanmotutgaaende fant ikke avstemmingsfil for " + avstemmingsfilDato + ". Undersøk tilfellet og evt. kontakt Iron Mountain.")
+						.description("Skanmotutgaaende fant ikke avstemmingsfil for " + avstemmingsfilDato + ". Undersøk tilfellet og kontakt evt. Iron Mountain.")
 						.labels(LABEL)
 						.build(),
 				ANSVARLIG_TEAM_FAGPOST);
