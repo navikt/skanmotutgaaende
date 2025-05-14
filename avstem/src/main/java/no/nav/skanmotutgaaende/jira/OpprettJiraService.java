@@ -27,7 +27,6 @@ public class OpprettJiraService {
 
 	private static final List<String> LABEL = List.of("Skanmotutgaaende_avvik");
 	private static final String DESCRIPTION = "Se vedlegg for en oversikt over manglende avstemmingsreferanser for skannede dokumenter fra Skanmotutgaaende \n";
-	private static final String JIRA_BRUKER_NAVN = "srvjiradokdistavstemming";
 	private static final String SUMMARY = "Skanmotutgaaende: Manglende avstemmingsreferanser for skannede dokumenter";
 	public static final String ANTALL_FILER_AVSTEMT = "Antall filer avstemt";
 	public static final String ANTALL_FILER_FEILET = "Antall filer feilet";
@@ -73,7 +72,6 @@ public class OpprettJiraService {
 		JiraRequest jiraRequest = JiraRequest.builder()
 				.summary(SUMMARY)
 				.description(prettifySummary(DESCRIPTION, antallAvstemt, antallFeilet))
-				.reporterName(JIRA_BRUKER_NAVN)
 				.labels(LABEL)
 				.vedlegg(csvByte)
 				.avstemmingsfilDato(avstemmingsfilDato)
