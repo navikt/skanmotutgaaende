@@ -6,7 +6,7 @@ import no.nav.dok.jiraapi.JiraResponse;
 import no.nav.dok.jiraapi.JiraService;
 import no.nav.dok.jiraapi.client.JiraClient;
 import no.nav.dok.jiracore.exception.JiraClientException;
-import no.nav.skanmotutgaaende.exceptions.functional.SkanmotutgaaendeFunctionalException;
+import no.nav.skanmotutgaaende.exceptions.technical.SkanmotutgaaendeTechnicalException;
 import org.apache.camel.Exchange;
 import org.apache.camel.Handler;
 import org.springframework.stereotype.Component;
@@ -55,7 +55,7 @@ public class OpprettJiraService {
 
 			return opprettJiraForAvstemmingsfil(csvByte, antallAvstemt, antallFeilet, avstemmingsfilDato);
 		} catch (JiraClientException e) {
-			throw new SkanmotutgaaendeFunctionalException("kunne ikke opprette jira oppgave", e);
+			throw new SkanmotutgaaendeTechnicalException("kunne ikke opprette jira oppgave", e);
 		}
 	}
 

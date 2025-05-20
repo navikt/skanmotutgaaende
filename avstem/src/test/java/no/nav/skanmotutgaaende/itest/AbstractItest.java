@@ -29,9 +29,8 @@ public abstract class AbstractItest {
 
 	public static final String URL_DOKARKIV_AVSTEMREFERANSER = "/rest/journalpostapi/v1/avstemReferanser";
 	public static final String JIRA_OPPRETTE_URL = "/rest/api/2/issue";
-	public static final String JIRA_VEDLEGG_URL = "/rest/api/2/issue/MMA-134/attachments";
+	public static final String JIRA_VEDLEGG_URL = "/rest/api/2/issue/IKT-134/attachments";
 	public static final String JIRA_PROJECT_URL = "/rest/api/2/project/IKT";
-
 
 	public void setUpStubs() {
 		stubAzureToken();
@@ -65,20 +64,20 @@ public abstract class AbstractItest {
 	}
 
 	public static void jiraHappyGetIssue() {
-		stubFor(get(urlMatching(JIRA_OPPRETTE_URL + "/MMA-134"))
+		stubFor(get(urlMatching(JIRA_OPPRETTE_URL + "/IKT-134"))
 				.willReturn(aResponse().withStatus(OK.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("jira/jiraresponse.json")));
 	}
 
 	public static void jiraHappyUpdateSak() {
-		stubFor(post(urlMatching(JIRA_OPPRETTE_URL + "/MMA-134/transitions"))
+		stubFor(post(urlMatching(JIRA_OPPRETTE_URL + "/IKT-134/transitions"))
 				.willReturn(aResponse().withStatus(HttpStatus.NO_CONTENT.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)));
 	}
 
 	public static void stubJiraHentProject() {
-		stubFor(get(urlMatching(JIRA_PROJECT_URL))
+		stubFor(get(JIRA_PROJECT_URL)
 				.willReturn(aResponse().withStatus(OK.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("jira/project.json")));
@@ -93,6 +92,6 @@ public abstract class AbstractItest {
 		stubFor(post(urlMatching(JIRA_OPPRETTE_URL))
 				.willReturn(aResponse().withStatus(BAD_REQUEST.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-						.withBodyFile("jira/jiraresponse.json")));
+						.withBody("\"bad_request\"")));
 	}
 }

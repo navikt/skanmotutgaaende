@@ -19,6 +19,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
+import static java.time.Duration.ofMillis;
 import static java.time.Duration.ofSeconds;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -48,13 +49,18 @@ public class AvstemRouteIT extends AbstractItest {
 
 		copyFileFromClasspathToAvstem();
 
-		Path filePath = sshdPath.resolve(AVSTEMMINGSFILMAPPE).resolve(AVSTEMMINGSFIL);
-		assertThat(Files.exists(filePath)).isTrue();
-		assertAntallProsesserteFiler(0);
+		// Vent til filer ligger klare
+		await().atMost(ofSeconds(5))
+				.untilAsserted(() -> {
+					assertAntallUbehandledeFiler(1);
+					assertAntallProsesserteFiler(0);
+				});
 
 		await()
 				.atMost(ofSeconds(15))
+				.pollDelay(ofMillis(500))
 				.untilAsserted(() -> {
+					assertAntallUbehandledeFiler(0);
 					assertAntallProsesserteFiler(1);
 					verifyRequest();
 				});
@@ -79,11 +85,11 @@ public class AvstemRouteIT extends AbstractItest {
 
 		await()
 				.atMost(ofSeconds(15))
+				.pollDelay(ofMillis(500))
 				.untilAsserted(() -> {
 					assertAntallProsesserteFiler(1);
 					verify(1, postRequestedFor(urlMatching(URL_DOKARKIV_AVSTEMREFERANSER)));
 				});
-
 	}
 
 	@Test
@@ -91,32 +97,30 @@ public class AvstemRouteIT extends AbstractItest {
 		stubBadRequestJiraOpprettOppgave();
 		stubPostAvstemJournalpost("journalpostapi/avstem.json");
 
-
 		copyFileFromClasspathToAvstem();
 
 		Path filePath = sshdPath.resolve(AVSTEMMINGSFILMAPPE).resolve(AVSTEMMINGSFIL);
 		assertThat(Files.exists(filePath)).isTrue();
 		assertAntallProsesserteFiler(0);
 
-		await()
-				.atMost(ofSeconds(15))
+		await().atMost(ofSeconds(15))
+				.pollDelay(ofMillis(500))
 				.untilAsserted(() -> {
-					assertAntallProsesserteFiler(0);
-					assertAntallUbehandletFiler(2);
+					verify(1, postRequestedFor(urlMatching(JIRA_OPPRETTE_URL)));
 				});
+		assertAntallProsesserteFiler(0);
+		assertAntallUbehandledeFiler(1);
 	}
 
 	@Test
-	public void shouldOpprettJiraOppgaveWhenAvstemmingsfilIsMissing() {
-		stubBadRequestJiraOpprettOppgave();
+	public void shouldOpprettJiraOppgaveWhenAvstemmingsfilIsMissing() throws InterruptedException {
+		stubJiraOpprettOppgave();
+		Thread.sleep(1000);
 
-		Path filePath = sshdPath.resolve(AVSTEMMINGSFILMAPPE).resolve(AVSTEMMINGSFIL);
-		assertThat(Files.exists(filePath)).isFalse();
-		assertAntallProsesserteFiler(0);
-
-		await()
-				.atMost(ofSeconds(20))
+		await().atMost(ofSeconds(15))
+				.pollDelay(ofMillis(500))
 				.untilAsserted(() -> {
+					assertAntallUbehandledeFiler(0);
 					assertAntallProsesserteFiler(0);
 					verify(1, getRequestedFor(urlMatching(JIRA_PROJECT_URL)));
 					verify(1, postRequestedFor(urlMatching(JIRA_OPPRETTE_URL)));
@@ -148,14 +152,16 @@ public class AvstemRouteIT extends AbstractItest {
 	@SneakyThrows
 	private void assertAntallProsesserteFiler(int forventetAntallFiler) {
 		try (Stream<Path> files = Files.list(sshdPath.resolve(AVSTEMMINGSFILMAPPE).resolve(PROCESSED))) {
-			assertThat(files.collect(Collectors.toSet())).hasSize(forventetAntallFiler);
+			assertThat(files.filter(path -> !Files.isDirectory(path))
+					.collect(Collectors.toSet())).hasSize(forventetAntallFiler);
 		}
 	}
 
 	@SneakyThrows
-	private void assertAntallUbehandletFiler(int forventetAntallFiler) {
+	private void assertAntallUbehandledeFiler(int forventetAntallFiler) {
 		try (Stream<Path> files = Files.list(sshdPath.resolve(AVSTEMMINGSFILMAPPE))) {
-			assertThat(files.collect(Collectors.toSet())).hasSize(forventetAntallFiler);
+			assertThat(files.filter(path -> !Files.isDirectory(path))
+					.collect(Collectors.toSet())).hasSize(forventetAntallFiler);
 		}
 	}
 }

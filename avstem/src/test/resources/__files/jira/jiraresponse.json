@@ -2,7 +2,7 @@
   "expand": "renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations",
   "id": "534999",
   "self": "https://jira-q1.adeo.no/rest/api/2/issue/534999",
-  "key": "MMA-134",
+  "key": "IKT-134",
   "status" : {
     "name" : "Klar til arbeid"
   },
@@ -57,7 +57,7 @@
     },
     "customfield_20514": null,
     "votes": {
-      "self": "https://jira-q1.adeo.no/rest/api/2/issue/MMA-134/votes",
+      "self": "https://jira-q1.adeo.no/rest/api/2/issue/IKT-134/votes",
       "votes": 0,
       "hasVoted": false
     },
@@ -99,7 +99,7 @@
     "project": {
       "self": "https://jira-q1.adeo.no/rest/api/2/project/19377",
       "id": "19377",
-      "key": "MMA",
+      "key": "IKT",
       "name": "Team Dokument",
       "avatarUrls": {
         "48x48": "https://jira-q1.adeo.no/secure/projectavatar?pid=19377&avatarId=14697",
@@ -126,7 +126,7 @@
     "customfield_20625": null,
     "customfield_21710": null,
     "watches": {
-      "self": "https://jira-q1.adeo.no/rest/api/2/issue/MMA-134/watchers",
+      "self": "https://jira-q1.adeo.no/rest/api/2/issue/IKT-134/watchers",
       "watchCount": 1,
       "isWatching": false
     },
