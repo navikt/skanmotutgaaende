@@ -2,7 +2,7 @@
   "expand": "description,lead,url,projectKeys",
   "self": "https://jira-q1.adeo.no/rest/api/2/project/19377",
   "id": "19377",
-  "key": "MMA",
+  "key": "IKT",
   "description": "",
   "lead": {
     "self": "https://jira-q1.adeo.no/rest/api/2/user?username=F138006",
@@ -369,7 +369,7 @@
     {
       "self": "https://jira-q1.adeo.no/rest/api/2/version/32273",
       "id": "32273",
-      "description": "Tilhører Epos MMA-9",
+      "description": "Tilhører Epos IKT-9",
       "name": "URbrev",
       "archived": false,
       "released": false,

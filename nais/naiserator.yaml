@@ -47,9 +47,9 @@ spec:
     max: 1
   resources:
     limits:
-      cpu: 2000m
       memory: 2048Mi
     requests:
+      cpu: 20m
       memory: 1024Mi
   vault:
     enabled: true
@@ -64,3 +64,7 @@ spec:
   azure:
     application:
       enabled: true
+  observability:
+    logging:
+      destinations:
+        - id: elastic

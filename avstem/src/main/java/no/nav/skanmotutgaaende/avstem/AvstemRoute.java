@@ -1,9 +1,7 @@
 package no.nav.skanmotutgaaende.avstem;
 
-import no.nav.dok.jiracore.exception.JiraClientException;
 import no.nav.skanmotutgaaende.MdcSetterProcessor;
 import no.nav.skanmotutgaaende.RemoveMdcProcessor;
-import no.nav.skanmotutgaaende.exceptions.functional.AbstractSkanmotutgaaendeFunctionalException;
 import no.nav.skanmotutgaaende.jira.OpprettJiraService;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.file.GenericFileOperationFailedException;
@@ -20,7 +18,6 @@ import static no.nav.skanmotutgaaende.mdc.MDCConstants.EXCHANGE_AVSTEMT_DATO;
 import static org.apache.camel.Exchange.FILE_NAME;
 import static org.apache.camel.LoggingLevel.ERROR;
 import static org.apache.camel.LoggingLevel.INFO;
-import static org.apache.camel.LoggingLevel.WARN;
 
 @Component
 public class AvstemRoute extends RouteBuilder {
@@ -40,20 +37,13 @@ public class AvstemRoute extends RouteBuilder {
 
 		// @formatter:off
 		onException(Exception.class)
-				.handled(true)
 				.process(new MdcSetterProcessor())
-				.log(WARN, log, "Skanmotutgaaende feilet teknisk, Exception:${exception}");
-
-		onException(AbstractSkanmotutgaaendeFunctionalException.class, JiraClientException.class)
-				.handled(true)
-				.useOriginalMessage()
-				.log(WARN, log, "Skanmotutgaaende feilet å prossessere avstemmingsfil. Exception:${exception};" );
+				.logStackTrace(true)
+				.log(ERROR, log, "Skanmotutgaaende feilet teknisk. ${exception}");
 
 		onException(GenericFileOperationFailedException.class)
-				.handled(true)
 				.process(new MdcSetterProcessor())
 				.log(ERROR, log, "Skanmotutgaaende fant ikke avstemmingsfil for ${exchangeProperty." + EXCHANGE_AVSTEMT_DATO + "}. Undersøk tilfellet og evt. kontakt Iron Mountain. Exception:${exception}");
-
 
 		from("cron:tab?schedule={{skanmotutgaaende.avstem.schedule}}")
 				.pollEnrich("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.avstemmappe}}" +
@@ -67,7 +57,7 @@ public class AvstemRoute extends RouteBuilder {
 				.choice()
 					.when(header(FILE_NAME).isNull())
 						.process(exchange -> exchange.setProperty(EXCHANGE_AVSTEMT_DATO, finnForrigeVirkedag()))
-						.log(ERROR, log, "Skanmotutgaaende fant ikke avstemmingsfil for ${exchangeProperty." + EXCHANGE_AVSTEMT_DATO + "}. Undersøk tilfellet og evt. ser opprettet Jira-sak.")
+						.log(ERROR, log, "Skanmotutgaaende fant ikke avstemmingsfil for ${exchangeProperty." + EXCHANGE_AVSTEMT_DATO + "}. Undersøk tilfellet og se opprettet Jira-sak.")
 						.bean(opprettJiraService)
 						.log(INFO, log, "Skanmotutgaaende opprettet jira-sak med key=${body.jiraIssueKey} for manglende avstemmingsfil.")
 				.otherwise()
@@ -86,7 +76,7 @@ public class AvstemRoute extends RouteBuilder {
 						exchange.getIn().setBody(avstemmingsReferanser);
 					})
 					.setProperty(ANTALL_FILER_AVSTEMT, simple("${body.size}"))
-					.log(INFO, log, "hentet ${body.size} avstemmingReferanser fra sftp server")
+					.log(INFO, log, "Skanmotutgaaende hentet ${body.size} avstemmingReferanser fra sftp server")
 					.bean(avstemService)
 					.choice()
 						.when(simple("${body}").isNotNull())
@@ -94,7 +84,7 @@ public class AvstemRoute extends RouteBuilder {
 							.log(INFO, log, "Skanmotutgaaende fant ${body.size} feilende avstemmingsreferanser")
 							.marshal().csv()
 							.bean(opprettJiraService)
-							.log(INFO, log, "Har opprettet Jira-sak=${body.jiraIssueKey} for feilende skanmotutgaaende avstemmingsreferanser")
+							.log(INFO, log, "Skanmotutgaaende har opprettet Jira-sak=${body.jiraIssueKey} for feilende skanmotutgaaende avstemmingsreferanser")
 							.process(new RemoveMdcProcessor())
 					.endChoice()
 				.endChoice()
