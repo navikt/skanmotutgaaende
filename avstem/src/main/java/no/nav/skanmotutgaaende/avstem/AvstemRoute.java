@@ -45,11 +45,12 @@ public class AvstemRoute extends RouteBuilder {
 				.process(new MdcSetterProcessor())
 				.log(ERROR, log, "Skanmotutgaaende fant ikke avstemmingsfil for ${exchangeProperty." + EXCHANGE_AVSTEMT_DATO + "}. Undersøk tilfellet og evt. kontakt Iron Mountain. Exception:${exception}");
 
-		from("cron:tab?schedule={{skanmotutgaaende.avstem.schedule}}")
-				.pollEnrich("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.avstemmappe}}" +
-						"?{{skanmotutgaaende.endpointconfig}}" +
-						"&antInclude=*.txt,*.TXT" +
-						"&move=processed", CONNECTION_TIMEOUT)
+		from("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.avstemmappe}}" +
+				"?{{skanmotutgaaende.endpointconfig}}" +
+				"&antInclude=*.txt,*.TXT" +
+				"&initialDelay=1000" +
+				"&move=processed" +
+				"&scheduler=spring&scheduler.cron={{skanmotutgaaende.avstem.schedule}}")
 				.routeId("avstem_routeid")
 				.autoStartup("{{skanmotutgaaende.avstem.startup}}")
 				.log(INFO, log, "Skanmotutgaaende starter cron jobb for å avstemme referanser...")
