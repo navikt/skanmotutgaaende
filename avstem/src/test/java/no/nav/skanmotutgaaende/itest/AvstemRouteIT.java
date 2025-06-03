@@ -29,6 +29,7 @@ public class AvstemRouteIT extends AbstractItest {
 	private static final String AVSTEMMINGSFILMAPPE = "avstemmappe";
 	private static final String PROCESSED = "processed";
 	private static final String AVSTEMMINGSFIL = "04.01.2024_avstemmingsfil_1.txt";
+	private static final String AVSTEMMINGSFIL2 = "04.01.2024_avstemmingsfil_2.txt";
 
 	@Autowired
 	private Path sshdPath;
@@ -49,26 +50,19 @@ public class AvstemRouteIT extends AbstractItest {
 
 		copyFileFromClasspathToAvstem();
 
-		// Vent til filer ligger klare
-		await().atMost(ofSeconds(5))
-				.untilAsserted(() -> {
-					assertAntallUbehandledeFiler(1);
-					assertAntallProsesserteFiler(0);
-				});
-
 		await()
 				.atMost(ofSeconds(15))
 				.pollDelay(ofMillis(500))
 				.untilAsserted(() -> {
 					assertAntallUbehandledeFiler(0);
-					assertAntallProsesserteFiler(1);
+					assertAntallProsesserteFiler(2);
 					verifyRequest();
 				});
 
 		try (Stream<Path> files = Files.list(sshdPath.resolve(AVSTEMMINGSFILMAPPE).resolve(PROCESSED))) {
 			List<String> processedMappe = files.map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
 					.toList();
-			assertThat(processedMappe).containsExactly(AVSTEMMINGSFIL);
+			assertThat(processedMappe).containsExactly(AVSTEMMINGSFIL, AVSTEMMINGSFIL2);
 		}
 	}
 
@@ -109,7 +103,7 @@ public class AvstemRouteIT extends AbstractItest {
 					verify(1, postRequestedFor(urlMatching(JIRA_OPPRETTE_URL)));
 				});
 		assertAntallProsesserteFiler(0);
-		assertAntallUbehandledeFiler(1);
+		assertAntallUbehandledeFiler(2);
 	}
 
 	@Test
@@ -128,13 +122,14 @@ public class AvstemRouteIT extends AbstractItest {
 	}
 
 	private void verifyRequest() {
-		verify(1, postRequestedFor(urlMatching(URL_DOKARKIV_AVSTEMREFERANSER)));
-		verify(1, postRequestedFor(urlMatching(JIRA_OPPRETTE_URL)));
-		verify(1, getRequestedFor(urlMatching(JIRA_PROJECT_URL)));
+		verify(2, postRequestedFor(urlMatching(URL_DOKARKIV_AVSTEMREFERANSER)));
+		verify(2, postRequestedFor(urlMatching(JIRA_OPPRETTE_URL)));
+		verify(2, getRequestedFor(urlMatching(JIRA_PROJECT_URL)));
 	}
 
 	private void copyFileFromClasspathToAvstem() throws IOException {
 		Files.copy(new ClassPathResource(AvstemRouteIT.AVSTEMMINGSFIL).getInputStream(), sshdPath.resolve(AVSTEMMINGSFILMAPPE).resolve(AvstemRouteIT.AVSTEMMINGSFIL));
+		Files.copy(new ClassPathResource(AvstemRouteIT.AVSTEMMINGSFIL2).getInputStream(), sshdPath.resolve(AVSTEMMINGSFILMAPPE).resolve(AvstemRouteIT.AVSTEMMINGSFIL2));
 	}
 
 	private void preparePath(Path path) {
