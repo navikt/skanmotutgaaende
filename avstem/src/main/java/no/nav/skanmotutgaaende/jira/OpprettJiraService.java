@@ -9,6 +9,8 @@ import no.nav.dok.jiracore.exception.JiraClientException;
 import no.nav.skanmotutgaaende.exceptions.technical.SkanmotutgaaendeTechnicalException;
 import org.apache.camel.Exchange;
 import org.apache.camel.Handler;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -18,6 +20,7 @@ import java.util.List;
 
 import static java.time.DayOfWeek.MONDAY;
 import static no.nav.dok.jiracore.config.JiraConstant.ANSVARLIG_TEAM_FAGPOST;
+import static no.nav.dok.jiracore.config.JiraConstant.OK_STATUS_CODE;
 import static no.nav.skanmotutgaaende.mdc.MDCConstants.EXCHANGE_AVSTEMT_DATO;
 import static org.apache.camel.Exchange.FILE_NAME_ONLY;
 
@@ -41,10 +44,13 @@ public class OpprettJiraService {
 
 	@Handler
 	public JiraResponse opprettAvstemJiraOppgave(byte[] csvByte, Exchange exchange) {
+		/*
 		LocalDate avstemmingsfilDato = exchange.getProperty(EXCHANGE_AVSTEMT_DATO, LocalDate.class);
 		Integer antallAvstemt = exchange.getProperty(ANTALL_FILER_AVSTEMT, Integer.class);
 		Integer antallFeilet = exchange.getProperty(ANTALL_FILER_FEILET, Integer.class);
-		return opprettAvstemJiraOppgave(csvByte, antallAvstemt, antallFeilet, avstemmingsfilDato);
+		 */
+		//return opprettAvstemJiraOppgave(csvByte, antallAvstemt, antallFeilet, avstemmingsfilDato);
+		return new JiraResponse("testKey", "message", OK_STATUS_CODE, "OK");
 	}
 
 	private JiraResponse opprettAvstemJiraOppgave(byte[] csvByte, Integer antallAvstemt, Integer antallFeilet, LocalDate avstemmingsfilDato) {
