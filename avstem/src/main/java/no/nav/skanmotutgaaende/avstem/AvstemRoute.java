@@ -25,6 +25,7 @@ public class AvstemRoute extends RouteBuilder {
 	private static final int CONNECTION_TIMEOUT = 15000;
 	private final AvstemService avstemService;
 	private final OpprettJiraService opprettJiraService;
+	private static String DD_MM_YYYY_WILDCARD = "??.??.????_*";
 
 	public AvstemRoute(AvstemService avstemService,
 					   OpprettJiraService opprettJiraService) {
@@ -48,7 +49,7 @@ public class AvstemRoute extends RouteBuilder {
 		from("cron:tab?schedule={{skanmotutgaaende.avstem.schedule}}")
 				.pollEnrich("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.avstemmappe}}" +
 						"?{{skanmotutgaaende.endpointconfig}}" +
-						"&antInclude=*.txt,*.TXT" +
+						"&antInclude="+DD_MM_YYYY_WILDCARD+".txt," + DD_MM_YYYY_WILDCARD +".TXT" +
 						"&maxMessagesPerPoll=10" +
 						"&move=processed", CONNECTION_TIMEOUT)
 				.routeId("avstem_routeid")
