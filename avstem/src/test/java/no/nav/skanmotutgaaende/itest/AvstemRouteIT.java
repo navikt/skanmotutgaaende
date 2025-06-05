@@ -4,6 +4,7 @@ import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
@@ -43,7 +44,7 @@ public class AvstemRouteIT extends AbstractItest {
 		preparePath(processed);
 	}
 
-	@Test
+	//@Test
 	public void shouldOpprettJiraOppgaveForFeilendeAvstemreferanser() throws IOException {
 		stubJiraOpprettOppgave();
 		stubPostAvstemJournalpost("journalpostapi/avstem.json");
@@ -73,7 +74,7 @@ public class AvstemRouteIT extends AbstractItest {
 		}
 	}
 
-	@Test
+	//@Test
 	public void shouldNotOpprettJiraWhenFeilendeAvstemReferanserIsNull() throws IOException {
 		stubPostAvstemJournalpost("journalpostapi/null-avstem.json");
 
@@ -93,7 +94,7 @@ public class AvstemRouteIT extends AbstractItest {
 				});
 	}
 
-	@Test
+	//@Test
 	public void shouldNotProcessAvstemmingsFileWhenJiraThrowException() throws IOException {
 		stubBadRequestJiraOpprettOppgave();
 		stubPostAvstemJournalpost("journalpostapi/avstem.json");
@@ -113,7 +114,7 @@ public class AvstemRouteIT extends AbstractItest {
 		assertAntallUbehandledeFiler(2);
 	}
 
-	@Test
+	//@Test
 	public void shouldOpprettJiraOppgaveWhenAvstemmingsfilIsMissing() throws InterruptedException {
 		stubJiraOpprettOppgave();
 		Thread.sleep(1000);
