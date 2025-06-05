@@ -44,13 +44,11 @@ public class OpprettJiraService {
 
 	@Handler
 	public JiraResponse opprettAvstemJiraOppgave(byte[] csvByte, Exchange exchange) {
-		/*
 		LocalDate avstemmingsfilDato = exchange.getProperty(EXCHANGE_AVSTEMT_DATO, LocalDate.class);
 		Integer antallAvstemt = exchange.getProperty(ANTALL_FILER_AVSTEMT, Integer.class);
 		Integer antallFeilet = exchange.getProperty(ANTALL_FILER_FEILET, Integer.class);
-		 */
-		//return opprettAvstemJiraOppgave(csvByte, antallAvstemt, antallFeilet, avstemmingsfilDato);
-		return new JiraResponse("testKey", "message", OK_STATUS_CODE, "OK");
+
+		return opprettAvstemJiraOppgave(csvByte, antallAvstemt, antallFeilet, avstemmingsfilDato);
 	}
 
 	private JiraResponse opprettAvstemJiraOppgave(byte[] csvByte, Integer antallAvstemt, Integer antallFeilet, LocalDate avstemmingsfilDato) {
@@ -108,6 +106,7 @@ public class OpprettJiraService {
 
 	public static LocalDate parseDatoFraFilnavn(Exchange exchange) {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-		return LocalDate.parse(exchange.getIn().getHeader(FILE_NAME_ONLY, String.class).substring(0, 10), formatter);
+		return LocalDate.now();
+		//return LocalDate.parse(exchange.getIn().getHeader(FILE_NAME_ONLY, String.class).substring(0, 10), formatter);
 	}
 }

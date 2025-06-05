@@ -43,12 +43,19 @@ public class AvstemRouteIT extends AbstractItest {
 		preparePath(processed);
 	}
 
-	//@Test
+	@Test
 	public void shouldOpprettJiraOppgaveForFeilendeAvstemreferanser() throws IOException {
 		stubJiraOpprettOppgave();
 		stubPostAvstemJournalpost("journalpostapi/avstem.json");
 
 		copyFileFromClasspathToAvstem();
+
+		// Vent til filer ligger klare
+		await().atMost(ofSeconds(5))
+				.untilAsserted(() -> {
+					assertAntallUbehandledeFiler(2);
+					assertAntallProsesserteFiler(0);
+				});
 
 		await()
 				.atMost(ofSeconds(15))
@@ -66,7 +73,7 @@ public class AvstemRouteIT extends AbstractItest {
 		}
 	}
 
-	//@Test
+	@Test
 	public void shouldNotOpprettJiraWhenFeilendeAvstemReferanserIsNull() throws IOException {
 		stubPostAvstemJournalpost("journalpostapi/null-avstem.json");
 
@@ -86,7 +93,7 @@ public class AvstemRouteIT extends AbstractItest {
 				});
 	}
 
-	//@Test
+	@Test
 	public void shouldNotProcessAvstemmingsFileWhenJiraThrowException() throws IOException {
 		stubBadRequestJiraOpprettOppgave();
 		stubPostAvstemJournalpost("journalpostapi/avstem.json");
@@ -106,7 +113,7 @@ public class AvstemRouteIT extends AbstractItest {
 		assertAntallUbehandledeFiler(2);
 	}
 
-	//@Test
+	@Test
 	public void shouldOpprettJiraOppgaveWhenAvstemmingsfilIsMissing() throws InterruptedException {
 		stubJiraOpprettOppgave();
 		Thread.sleep(1000);
