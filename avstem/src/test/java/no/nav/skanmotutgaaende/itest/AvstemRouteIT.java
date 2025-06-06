@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.test.annotation.DirtiesContext;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -42,9 +43,11 @@ public class AvstemRouteIT extends AbstractItest {
 		final Path processed = avstem.resolve(PROCESSED);
 		preparePath(avstem);
 		preparePath(processed);
+		System.out.println("processed: " + processed.toAbsolutePath());
+		System.out.println("avstem: " + avstem.toAbsolutePath());
 	}
 
-	//@Test
+	@Test
 	public void shouldOpprettJiraOppgaveForFeilendeAvstemreferanser() throws IOException {
 		stubJiraOpprettOppgave();
 		stubPostAvstemJournalpost("journalpostapi/avstem.json");
@@ -59,7 +62,7 @@ public class AvstemRouteIT extends AbstractItest {
 				});
 
 		await()
-				.atMost(ofSeconds(15))
+				.atMost(ofSeconds(70))
 				.pollDelay(ofMillis(500))
 				.untilAsserted(() -> {
 					assertAntallUbehandledeFiler(0);
@@ -74,7 +77,7 @@ public class AvstemRouteIT extends AbstractItest {
 		}
 	}
 
-	//@Test
+	@Test
 	public void shouldNotOpprettJiraWhenFeilendeAvstemReferanserIsNull() throws IOException {
 		stubPostAvstemJournalpost("journalpostapi/null-avstem.json");
 
@@ -86,15 +89,15 @@ public class AvstemRouteIT extends AbstractItest {
 		assertAntallProsesserteFiler(0);
 
 		await()
-				.atMost(ofSeconds(15))
+				.atMost(ofSeconds(7))
 				.pollDelay(ofMillis(500))
 				.untilAsserted(() -> {
-					assertAntallProsesserteFiler(1);
-					verify(1, postRequestedFor(urlMatching(URL_DOKARKIV_AVSTEMREFERANSER)));
+					assertAntallProsesserteFiler(2);
+					verify(2, postRequestedFor(urlMatching(URL_DOKARKIV_AVSTEMREFERANSER)));
 				});
 	}
 
-	//@Test
+	@Test
 	public void shouldNotProcessAvstemmingsFileWhenJiraThrowException() throws IOException {
 		stubBadRequestJiraOpprettOppgave();
 		stubPostAvstemJournalpost("journalpostapi/avstem.json");
@@ -105,21 +108,21 @@ public class AvstemRouteIT extends AbstractItest {
 		assertThat(Files.exists(filePath)).isTrue();
 		assertAntallProsesserteFiler(0);
 
-		await().atMost(ofSeconds(15))
+		await().atMost(ofSeconds(7))
 				.pollDelay(ofMillis(500))
 				.untilAsserted(() -> {
-					verify(1, postRequestedFor(urlMatching(JIRA_OPPRETTE_URL)));
+					verify(2, postRequestedFor(urlMatching(JIRA_OPPRETTE_URL)));
 				});
 		assertAntallProsesserteFiler(0);
 		assertAntallUbehandledeFiler(2);
 	}
 
-	//@Test
+	@Test
 	public void shouldOpprettJiraOppgaveWhenAvstemmingsfilIsMissing() throws InterruptedException {
 		stubJiraOpprettOppgave();
 		Thread.sleep(1000);
 
-		await().atMost(ofSeconds(15))
+		await().atMost(ofSeconds(7))
 				.pollDelay(ofMillis(500))
 				.untilAsserted(() -> {
 					assertAntallUbehandledeFiler(0);
