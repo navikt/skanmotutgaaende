@@ -25,18 +25,18 @@ public class AvstemService {
 	}
 
 	@Handler
-	public void avstemmingsReferanser(Set<String> avstemReferenser) {
+	public Set<String> avstemReferanser(Set<String> avstemReferenser) {
 		if (isEmpty(avstemReferenser)) {
-			return;
+			return avstemReferenser;
 		}
 
 		FeilendeAvstemmingReferanser feilendeAvstemmingReferanser = journalpostConsumer.avstemReferanser(new AvstemmingReferanser(avstemReferenser));
 		if (feilendeAvstemmingReferanser == null || isEmpty(feilendeAvstemmingReferanser.referanserIkkeFunnet())) {
 			log.info(prettifySummary("Skanmotutgaaende avstemmingsrapport:", avstemReferenser.size(), 0));
-			return;
+			return avstemReferenser;
 		}
 		Set<String> referanserIkkeFunnet = feilendeAvstemmingReferanser.referanserIkkeFunnet();
 		log.info(prettifySummary(AVSTEMMINGSRAPPORT, avstemReferenser.size(), referanserIkkeFunnet.size()));
-		//return feilendeAvstemmingReferanser.referanserIkkeFunnet();
+		return feilendeAvstemmingReferanser.referanserIkkeFunnet();
 	}
 }

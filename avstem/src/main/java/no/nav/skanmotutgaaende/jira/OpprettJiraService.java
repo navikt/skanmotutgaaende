@@ -11,6 +11,7 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Handler;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -51,7 +52,7 @@ public class OpprettJiraService {
 		return opprettAvstemJiraOppgave(csvByte, antallAvstemt, antallFeilet, avstemmingsfilDato);
 	}
 
-	private JiraResponse opprettAvstemJiraOppgave(byte[] csvByte, Integer antallAvstemt, Integer antallFeilet, LocalDate avstemmingsfilDato) {
+	public JiraResponse opprettAvstemJiraOppgave(byte[] csvByte, Integer antallAvstemt, Integer antallFeilet, LocalDate avstemmingsfilDato) {
 		try {
 			if (csvByte == null) {
 				return opprettJiraForManglendeAvstemmingsfil(avstemmingsfilDato);

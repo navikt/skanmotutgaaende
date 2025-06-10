@@ -1,14 +1,13 @@
 package no.nav.skanmotutgaaende.itest;
 
 import lombok.SneakyThrows;
+import org.apache.camel.CamelContext;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.test.annotation.DirtiesContext;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -52,7 +51,8 @@ public class AvstemRouteIT extends AbstractItest {
 		stubJiraOpprettOppgave();
 		stubPostAvstemJournalpost("journalpostapi/avstem.json");
 
-		copyFileFromClasspathToAvstem();
+		copyFileFromClasspathToAvstem(AVSTEMMINGSFIL);
+		copyFileFromClasspathToAvstem(AVSTEMMINGSFIL2);
 
 		// Vent til filer ligger klare
 		await().atMost(ofSeconds(5))
@@ -62,7 +62,7 @@ public class AvstemRouteIT extends AbstractItest {
 				});
 
 		await()
-				.atMost(ofSeconds(70))
+				.atMost(ofSeconds(7))
 				.pollDelay(ofMillis(500))
 				.untilAsserted(() -> {
 					assertAntallUbehandledeFiler(0);
@@ -81,7 +81,7 @@ public class AvstemRouteIT extends AbstractItest {
 	public void shouldNotOpprettJiraWhenFeilendeAvstemReferanserIsNull() throws IOException {
 		stubPostAvstemJournalpost("journalpostapi/null-avstem.json");
 
-		copyFileFromClasspathToAvstem();
+		copyFileFromClasspathToAvstem(AVSTEMMINGSFIL);
 
 		Path filePath = sshdPath.resolve(AVSTEMMINGSFILMAPPE).resolve(AVSTEMMINGSFIL);
 
@@ -92,32 +92,34 @@ public class AvstemRouteIT extends AbstractItest {
 				.atMost(ofSeconds(7))
 				.pollDelay(ofMillis(500))
 				.untilAsserted(() -> {
-					assertAntallProsesserteFiler(2);
-					verify(2, postRequestedFor(urlMatching(URL_DOKARKIV_AVSTEMREFERANSER)));
+					assertAntallProsesserteFiler(1);
+					verify(1, postRequestedFor(urlMatching(URL_DOKARKIV_AVSTEMREFERANSER)));
 				});
 	}
 
 	@Test
+	//Exceptionen blir kastet som før, men nå blir filen overført til processed.. Tanker om hvorfor?
 	public void shouldNotProcessAvstemmingsFileWhenJiraThrowException() throws IOException {
 		stubBadRequestJiraOpprettOppgave();
 		stubPostAvstemJournalpost("journalpostapi/avstem.json");
 
-		copyFileFromClasspathToAvstem();
+		copyFileFromClasspathToAvstem(AVSTEMMINGSFIL2);
 
-		Path filePath = sshdPath.resolve(AVSTEMMINGSFILMAPPE).resolve(AVSTEMMINGSFIL);
+		Path filePath = sshdPath.resolve(AVSTEMMINGSFILMAPPE).resolve(AVSTEMMINGSFIL2);
 		assertThat(Files.exists(filePath)).isTrue();
 		assertAntallProsesserteFiler(0);
 
 		await().atMost(ofSeconds(7))
 				.pollDelay(ofMillis(500))
 				.untilAsserted(() -> {
-					verify(2, postRequestedFor(urlMatching(JIRA_OPPRETTE_URL)));
+					verify(1, postRequestedFor(urlMatching(JIRA_OPPRETTE_URL)));
+					assertAntallProsesserteFiler(0);
+					assertAntallUbehandledeFiler(1);
 				});
-		assertAntallProsesserteFiler(0);
-		assertAntallUbehandledeFiler(2);
 	}
 
 	@Test
+	//Denne har sluttet å funke fordi routen ikke starter opp uten filer på filmorådet?? Dette funket fint før?
 	public void shouldOpprettJiraOppgaveWhenAvstemmingsfilIsMissing() throws InterruptedException {
 		stubJiraOpprettOppgave();
 		Thread.sleep(1000);
@@ -138,9 +140,8 @@ public class AvstemRouteIT extends AbstractItest {
 		verify(2, getRequestedFor(urlMatching(JIRA_PROJECT_URL)));
 	}
 
-	private void copyFileFromClasspathToAvstem() throws IOException {
-		Files.copy(new ClassPathResource(AvstemRouteIT.AVSTEMMINGSFIL).getInputStream(), sshdPath.resolve(AVSTEMMINGSFILMAPPE).resolve(AvstemRouteIT.AVSTEMMINGSFIL));
-		Files.copy(new ClassPathResource(AvstemRouteIT.AVSTEMMINGSFIL2).getInputStream(), sshdPath.resolve(AVSTEMMINGSFILMAPPE).resolve(AvstemRouteIT.AVSTEMMINGSFIL2));
+	private void copyFileFromClasspathToAvstem(String filename) throws IOException {
+		Files.copy(new ClassPathResource(filename).getInputStream(), sshdPath.resolve(AVSTEMMINGSFILMAPPE).resolve(filename));
 	}
 
 	private void preparePath(Path path) {
