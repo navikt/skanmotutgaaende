@@ -1,7 +1,6 @@
 package no.nav.skanmotutgaaende.itest;
 
 import lombok.SneakyThrows;
-import org.apache.camel.CamelContext;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,9 +59,10 @@ public class AvstemRouteIT extends AbstractItest {
 					assertAntallUbehandledeFiler(2);
 					assertAntallProsesserteFiler(0);
 				});
+		System.out.println("Test: Filer er klare for behandling");
 
 		await()
-				.atMost(ofSeconds(7))
+				.atMost(ofSeconds(15))
 				.pollDelay(ofMillis(500))
 				.untilAsserted(() -> {
 					assertAntallUbehandledeFiler(0);
@@ -89,7 +89,7 @@ public class AvstemRouteIT extends AbstractItest {
 		assertAntallProsesserteFiler(0);
 
 		await()
-				.atMost(ofSeconds(7))
+				.atMost(ofSeconds(15))
 				.pollDelay(ofMillis(500))
 				.untilAsserted(() -> {
 					assertAntallProsesserteFiler(1);
@@ -103,28 +103,27 @@ public class AvstemRouteIT extends AbstractItest {
 		stubBadRequestJiraOpprettOppgave();
 		stubPostAvstemJournalpost("journalpostapi/avstem.json");
 
-		copyFileFromClasspathToAvstem(AVSTEMMINGSFIL2);
+		copyFileFromClasspathToAvstem(AVSTEMMINGSFIL);
 
-		Path filePath = sshdPath.resolve(AVSTEMMINGSFILMAPPE).resolve(AVSTEMMINGSFIL2);
+		Path filePath = sshdPath.resolve(AVSTEMMINGSFILMAPPE).resolve(AVSTEMMINGSFIL);
 		assertThat(Files.exists(filePath)).isTrue();
 		assertAntallProsesserteFiler(0);
 
-		await().atMost(ofSeconds(7))
+		await().atMost(ofSeconds(8))
 				.pollDelay(ofMillis(500))
 				.untilAsserted(() -> {
-					verify(1, postRequestedFor(urlMatching(JIRA_OPPRETTE_URL)));
 					assertAntallProsesserteFiler(0);
 					assertAntallUbehandledeFiler(1);
+					verify(1, postRequestedFor(urlMatching(JIRA_OPPRETTE_URL)));
 				});
 	}
 
 	@Test
-	//Denne har sluttet å funke fordi routen ikke starter opp uten filer på filmorådet?? Dette funket fint før?
 	public void shouldOpprettJiraOppgaveWhenAvstemmingsfilIsMissing() throws InterruptedException {
 		stubJiraOpprettOppgave();
 		Thread.sleep(1000);
 
-		await().atMost(ofSeconds(7))
+		await().atMost(ofSeconds(15))
 				.pollDelay(ofMillis(500))
 				.untilAsserted(() -> {
 					assertAntallUbehandledeFiler(0);

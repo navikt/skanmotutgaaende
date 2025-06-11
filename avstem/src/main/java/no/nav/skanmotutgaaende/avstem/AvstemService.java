@@ -4,11 +4,11 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotutgaaende.consumers.journalpostapi.JournalpostConsumer;
 import no.nav.skanmotutgaaende.consumers.journalpostapi.data.AvstemmingReferanser;
 import no.nav.skanmotutgaaende.consumers.journalpostapi.data.FeilendeAvstemmingReferanser;
-import org.apache.camel.Handler;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
 
+import static java.util.Collections.emptySet;
 import static no.nav.skanmotutgaaende.jira.OpprettJiraService.prettifySummary;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
@@ -24,10 +24,9 @@ public class AvstemService {
 		this.journalpostConsumer = journalpostConsumer;
 	}
 
-	@Handler
 	public Set<String> avstemReferanser(Set<String> avstemReferenser) {
 		if (isEmpty(avstemReferenser)) {
-			return avstemReferenser;
+			return emptySet();
 		}
 
 		FeilendeAvstemmingReferanser feilendeAvstemmingReferanser = journalpostConsumer.avstemReferanser(new AvstemmingReferanser(avstemReferenser));
