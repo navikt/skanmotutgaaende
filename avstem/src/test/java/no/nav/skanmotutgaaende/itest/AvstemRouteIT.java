@@ -74,7 +74,7 @@ public class AvstemRouteIT extends AbstractItest {
 		try (Stream<Path> files = Files.list(sshdPath.resolve(AVSTEMMINGSFILMAPPE).resolve(PROCESSED))) {
 			List<String> processedMappe = files.map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
 					.toList();
-			assertThat(processedMappe).containsExactly(AVSTEMMINGSFIL, AVSTEMMINGSFIL2);
+			assertThat(processedMappe).containsExactlyInAnyOrder(AVSTEMMINGSFIL, AVSTEMMINGSFIL2);
 		}
 	}
 
@@ -113,10 +113,10 @@ public class AvstemRouteIT extends AbstractItest {
 		await().atMost(ofSeconds(8))
 				.pollDelay(ofMillis(500))
 				.untilAsserted(() -> {
-					assertAntallProsesserteFiler(0);
-					assertAntallUbehandledeFiler(1);
 					verify(1, postRequestedFor(urlMatching(JIRA_OPPRETTE_URL)));
 				});
+		assertAntallProsesserteFiler(0);
+		assertAntallUbehandledeFiler(1);
 	}
 
 	@Test
