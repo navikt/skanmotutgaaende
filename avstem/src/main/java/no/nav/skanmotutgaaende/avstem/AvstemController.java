@@ -30,7 +30,6 @@ public class AvstemController {
 
 	@Handler
 	public void avstemAlleReferanser(Exchange exchange) {
-		log.info("TestService called with exchange: {}", exchange);
 		Set<Exchange> exchanges = exchange.getIn().getBody(Set.class);
 
 		LocalDate avstemtDato = finnForrigeVirkedag();

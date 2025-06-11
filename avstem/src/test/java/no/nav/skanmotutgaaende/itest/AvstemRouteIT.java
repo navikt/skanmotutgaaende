@@ -46,6 +46,7 @@ public class AvstemRouteIT extends AbstractItest {
 	}
 
 	@Test
+	//Denne testen feiler typ 1/5 ganger og jeg skjønner ikke hvorfor. Noen tanker?
 	public void shouldOpprettJiraOppgaveForFeilendeAvstemreferanser() throws IOException {
 		stubJiraOpprettOppgave();
 		stubPostAvstemJournalpost("journalpostapi/avstem.json");

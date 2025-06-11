@@ -35,7 +35,7 @@ public class AvstemRoute extends RouteBuilder {
 		//For testing
 		//Den feilende testen "shouldNotProcessAvstemmingsFileWhenJiraThrowException" blir fanget her..
 		//Hvordan fullfører da routen slik at messagen blir moved til processed?
-		//Setter her handled eksplisitt til false for å være 100% siker på at den ikke blir håndtert (antar false er default tho)
+		//Setter her handled eksplisitt til false for å være 100% siker på at den ikke blir håndtert
 		onException(JiraClientException.class)
 				.handled(false)
 				.log(ERROR, log, "JiraError ${exception}");
@@ -48,14 +48,15 @@ public class AvstemRoute extends RouteBuilder {
 				.pollEnrich("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.avstemmappe}}" +
 						"?{{skanmotutgaaende.endpointconfig}}" +
 						"&antInclude=*.txt,*.TXT" +
-						"&move=processed",
+						"&move=processed" +
+						"&moveFailed=noop", //Prøver her å stoppe filen fra å bli overført til processed om det skjer en feil i routen.. Funker dårlig :(
 						CONNECTION_TIMEOUT)
 				.autoStartup("{{skanmotutgaaende.avstem.startup}}")
 				.routeId("avstem_routeid")
 				.process(new MdcSetterProcessor())
 				.log(INFO, log, "Skanmotutgaaende starter cron jobb for å avstemme referanser...")
 				.aggregate(constant(true), new GroupedExchangeAggregationStrategy())
-				.completionTimeout(100)
+				.completionTimeout(500)
 				.convertBodyTo(Set.class)
 				.bean(avstemController)
 				.process(new RemoveMdcProcessor());
