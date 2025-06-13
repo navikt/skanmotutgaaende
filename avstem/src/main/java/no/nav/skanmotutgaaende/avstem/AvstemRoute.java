@@ -19,6 +19,9 @@ public class AvstemRoute extends RouteBuilder {
 	private static final int CONNECTION_TIMEOUT = 1500;
 	private final AvstemController avstemController;
 
+	public static String FEIL_ROUTE = "direct:feil";
+	public static String FERDIG_ROUTE = "direct:ferdig";
+
 	public AvstemRoute(AvstemController avstemController) {
 		this.avstemController = avstemController;
 	}
@@ -38,6 +41,7 @@ public class AvstemRoute extends RouteBuilder {
 		//Setter her handled eksplisitt til false for å være 100% siker på at den ikke blir håndtert
 		onException(JiraClientException.class)
 				.handled(false)
+				.to("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.avstemmappe}}/feilet")
 				.log(ERROR, log, "JiraError ${exception}");
 
 		onException(GenericFileOperationFailedException.class)
@@ -47,9 +51,7 @@ public class AvstemRoute extends RouteBuilder {
 		from("cron:tab?schedule={{skanmotutgaaende.avstem.schedule}}")
 				.pollEnrich("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.avstemmappe}}" +
 						"?{{skanmotutgaaende.endpointconfig}}" +
-						"&antInclude=*.txt,*.TXT" +
-						"&move=processed" +
-						"&moveFailed=noop", //Prøver her å stoppe filen fra å bli overført til processed om det skjer en feil i routen.. Funker dårlig :(
+						"&antInclude=*.txt,*.TXT" + //Prøver her å stoppe filen fra å bli overført til processed om det skjer en feil i routen.. Funker dårlig :(
 						CONNECTION_TIMEOUT)
 				.autoStartup("{{skanmotutgaaende.avstem.startup}}")
 				.routeId("avstem_routeid")
@@ -59,6 +61,21 @@ public class AvstemRoute extends RouteBuilder {
 				.completionTimeout(500)
 				.convertBodyTo(Set.class)
 				.bean(avstemController)
+				.process(new RemoveMdcProcessor());
+
+		from(FERDIG_ROUTE)
+				.routeId("avstem_ferdig_routeid")
+				.process(new MdcSetterProcessor())
+				.log(INFO, log, "Skanmotutgaaende avstemte referanser ferdig.")
+				.to("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.avstemmappe}}/processed")
+				.process(new RemoveMdcProcessor());
+
+
+		from(FEIL_ROUTE)
+				.routeId("avstem_feil_routeid")
+				.process(new MdcSetterProcessor())
+				.log(INFO, log, "Sender feilet melding til feilmappe.")
+				.to("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.avstemmappe}}/feil")
 				.process(new RemoveMdcProcessor());
 		// @formatter:on
 	}

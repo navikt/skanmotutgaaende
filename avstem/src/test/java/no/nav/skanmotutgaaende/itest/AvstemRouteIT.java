@@ -28,6 +28,7 @@ public class AvstemRouteIT extends AbstractItest {
 
 	private static final String AVSTEMMINGSFILMAPPE = "avstemmappe";
 	private static final String PROCESSED = "processed";
+	private static final String FEIL = "feil";
 	private static final String AVSTEMMINGSFIL = "04.01.2024_avstemmingsfil_1.txt";
 	private static final String AVSTEMMINGSFIL2 = "04.01.2024_avstemmingsfil_2.txt";
 
@@ -39,10 +40,13 @@ public class AvstemRouteIT extends AbstractItest {
 		super.setUpStubs();
 		final Path avstem = sshdPath.resolve(AVSTEMMINGSFILMAPPE);
 		final Path processed = avstem.resolve(PROCESSED);
+		final Path feil = avstem.resolve(FEIL);
 		preparePath(avstem);
 		preparePath(processed);
+		preparePath(feil);
 		System.out.println("processed: " + processed.toAbsolutePath());
 		System.out.println("avstem: " + avstem.toAbsolutePath());
+		System.out.println("feilet: " + feil.toAbsolutePath());
 	}
 
 	@Test
@@ -116,7 +120,8 @@ public class AvstemRouteIT extends AbstractItest {
 					verify(1, postRequestedFor(urlMatching(JIRA_OPPRETTE_URL)));
 				});
 		assertAntallProsesserteFiler(0);
-		assertAntallUbehandledeFiler(1);
+		assertAntallUbehandledeFiler(0);
+		assertAntallFeilededeFiler(1);
 	}
 
 	@Test
@@ -167,6 +172,15 @@ public class AvstemRouteIT extends AbstractItest {
 	@SneakyThrows
 	private void assertAntallUbehandledeFiler(int forventetAntallFiler) {
 		try (Stream<Path> files = Files.list(sshdPath.resolve(AVSTEMMINGSFILMAPPE))) {
+			assertThat(files.filter(path -> !Files.isDirectory(path))
+					.collect(Collectors.toSet())).hasSize(forventetAntallFiler);
+		}
+	}
+
+
+	@SneakyThrows
+	private void assertAntallFeilededeFiler(int forventetAntallFiler) {
+		try (Stream<Path> files = Files.list(sshdPath.resolve(FEIL))) {
 			assertThat(files.filter(path -> !Files.isDirectory(path))
 					.collect(Collectors.toSet())).hasSize(forventetAntallFiler);
 		}

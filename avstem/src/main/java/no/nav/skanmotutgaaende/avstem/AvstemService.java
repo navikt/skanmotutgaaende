@@ -32,7 +32,7 @@ public class AvstemService {
 		FeilendeAvstemmingReferanser feilendeAvstemmingReferanser = journalpostConsumer.avstemReferanser(new AvstemmingReferanser(avstemReferenser));
 		if (feilendeAvstemmingReferanser == null || isEmpty(feilendeAvstemmingReferanser.referanserIkkeFunnet())) {
 			log.info(prettifySummary("Skanmotutgaaende avstemmingsrapport:", avstemReferenser.size(), 0));
-			return avstemReferenser;
+			return emptySet();
 		}
 		Set<String> referanserIkkeFunnet = feilendeAvstemmingReferanser.referanserIkkeFunnet();
 		log.info(prettifySummary(AVSTEMMINGSRAPPORT, avstemReferenser.size(), referanserIkkeFunnet.size()));

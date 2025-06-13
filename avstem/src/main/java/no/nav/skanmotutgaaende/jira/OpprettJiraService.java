@@ -55,12 +55,16 @@ public class OpprettJiraService {
 	}
 
 	public JiraResponse opprettJiraForManglendeAvstemmingsfil(LocalDate avstemmingsfilDato) {
-		return jiraService.opprettJiraIKTOppgave(JiraRequest.builder()
-						.summary("Skanmotutgaaende: Avstemmingfil mangler for " + avstemmingsfilDato)
-						.description("Skanmotutgaaende fant ikke avstemmingsfil for " + avstemmingsfilDato + ". Undersøk tilfellet og kontakt evt. Iron Mountain.")
-						.labels(LABEL)
-						.build(),
-				ANSVARLIG_TEAM_FAGPOST);
+		try {
+			return jiraService.opprettJiraIKTOppgave(JiraRequest.builder()
+							.summary("Skanmotutgaaende: Avstemmingfil mangler for " + avstemmingsfilDato)
+							.description("Skanmotutgaaende fant ikke avstemmingsfil for " + avstemmingsfilDato + ". Undersøk tilfellet og kontakt evt. Iron Mountain.")
+							.labels(LABEL)
+							.build(),
+					ANSVARLIG_TEAM_FAGPOST);
+		} catch (JiraClientException e)	{
+			throw new SkanmotutgaaendeTechnicalException("kunne ikke opprette jira oppgave for manglende avstemmingsfil", e);
+		}
 	}
 
 	public static String prettifySummary(String melding, int antallAvstemt, int antallFeilet) {
