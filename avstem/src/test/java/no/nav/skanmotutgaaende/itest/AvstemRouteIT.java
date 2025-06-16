@@ -28,6 +28,7 @@ public class AvstemRouteIT extends AbstractItest {
 
 	private static final String AVSTEMMINGSFILMAPPE = "avstemmappe";
 	private static final String PROCESSED = "processed";
+	private static final String HISTORISKE = "historiske";
 	private static final String FEIL = "feil";
 	private static final String AVSTEMMINGSFIL = "04.01.2024_avstemmingsfil_1.txt";
 	private static final String AVSTEMMINGSFIL2 = "04.01.2024_avstemmingsfil_2.txt";
@@ -41,16 +42,13 @@ public class AvstemRouteIT extends AbstractItest {
 		final Path avstem = sshdPath.resolve(AVSTEMMINGSFILMAPPE);
 		final Path processed = avstem.resolve(PROCESSED);
 		final Path feil = avstem.resolve(FEIL);
+		final Path historiske = avstem.resolve(HISTORISKE);
 		preparePath(avstem);
 		preparePath(processed);
 		preparePath(feil);
-		System.out.println("processed: " + processed.toAbsolutePath());
-		System.out.println("avstem: " + avstem.toAbsolutePath());
-		System.out.println("feilet: " + feil.toAbsolutePath());
 	}
 
 	@Test
-	//Denne testen feiler typ 1/5 ganger og jeg skjønner ikke hvorfor. Noen tanker?
 	public void shouldOpprettJiraOppgaveForFeilendeAvstemreferanser() throws IOException {
 		stubJiraOpprettOppgave();
 		stubPostAvstemJournalpost("journalpostapi/avstem.json");
@@ -59,7 +57,7 @@ public class AvstemRouteIT extends AbstractItest {
 		copyFileFromClasspathToAvstem(AVSTEMMINGSFIL2);
 
 		// Vent til filer ligger klare
-		await().atMost(ofSeconds(5))
+		await().atMost(ofSeconds(15))
 				.untilAsserted(() -> {
 					assertAntallUbehandledeFiler(2);
 					assertAntallProsesserteFiler(0);
@@ -68,12 +66,11 @@ public class AvstemRouteIT extends AbstractItest {
 
 		await()
 				.atMost(ofSeconds(15))
-				.pollDelay(ofMillis(500))
-				.untilAsserted(() -> {
-					assertAntallUbehandledeFiler(0);
-					assertAntallProsesserteFiler(2);
-					verifyRequest();
-				});
+				.pollDelay(ofMillis(100))
+				.untilAsserted(this::verifyRequest);
+		assertAntallUbehandledeFiler(0);
+		assertAntallProsesserteFiler(2);
+		assertAntallHistoriskeFiler(2);
 
 		try (Stream<Path> files = Files.list(sshdPath.resolve(AVSTEMMINGSFILMAPPE).resolve(PROCESSED))) {
 			List<String> processedMappe = files.map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
@@ -88,22 +85,21 @@ public class AvstemRouteIT extends AbstractItest {
 
 		copyFileFromClasspathToAvstem(AVSTEMMINGSFIL);
 
-		Path filePath = sshdPath.resolve(AVSTEMMINGSFILMAPPE).resolve(AVSTEMMINGSFIL);
-
-		assertThat(Files.exists(filePath)).isTrue();
-		assertAntallProsesserteFiler(0);
-
 		await()
 				.atMost(ofSeconds(15))
 				.pollDelay(ofMillis(500))
 				.untilAsserted(() -> {
 					assertAntallProsesserteFiler(1);
 					verify(1, postRequestedFor(urlMatching(URL_DOKARKIV_AVSTEMREFERANSER)));
+					verify(0, postRequestedFor(urlMatching(JIRA_OPPRETTE_URL)));
 				});
+		assertAntallProsesserteFiler(1);
+		assertAntallHistoriskeFiler(1);
+		assertAntallFeiledeFiler(0);
+
 	}
 
 	@Test
-	//Exceptionen blir kastet som før, men nå blir filen overført til processed.. Tanker om hvorfor?
 	public void shouldNotProcessAvstemmingsFileWhenJiraThrowException() throws IOException {
 		stubBadRequestJiraOpprettOppgave();
 		stubPostAvstemJournalpost("journalpostapi/avstem.json");
@@ -114,14 +110,20 @@ public class AvstemRouteIT extends AbstractItest {
 		assertThat(Files.exists(filePath)).isTrue();
 		assertAntallProsesserteFiler(0);
 
-		await().atMost(ofSeconds(8))
+		await().atMost(ofSeconds(15))
 				.pollDelay(ofMillis(500))
 				.untilAsserted(() -> {
 					verify(1, postRequestedFor(urlMatching(JIRA_OPPRETTE_URL)));
 				});
-		assertAntallProsesserteFiler(0);
-		assertAntallUbehandledeFiler(0);
-		assertAntallFeilededeFiler(1);
+
+		await().atMost(ofSeconds(5))
+				.pollDelay(ofMillis(100))
+				.untilAsserted(() -> {
+					assertAntallProsesserteFiler(0);
+					assertAntallUbehandledeFiler(0);
+					assertAntallFeiledeFiler(1);
+					assertAntallHistoriskeFiler(1);
+				});
 	}
 
 	@Test
@@ -134,6 +136,7 @@ public class AvstemRouteIT extends AbstractItest {
 				.untilAsserted(() -> {
 					assertAntallUbehandledeFiler(0);
 					assertAntallProsesserteFiler(0);
+					assertAntallFeiledeFiler(0);
 					verify(1, getRequestedFor(urlMatching(JIRA_PROJECT_URL)));
 					verify(1, postRequestedFor(urlMatching(JIRA_OPPRETTE_URL)));
 				});
@@ -162,6 +165,14 @@ public class AvstemRouteIT extends AbstractItest {
 	}
 
 	@SneakyThrows
+	private void assertAntallUbehandledeFiler(int forventetAntallFiler) {
+		try (Stream<Path> files = Files.list(sshdPath.resolve(AVSTEMMINGSFILMAPPE))) {
+			assertThat(files.filter(path -> !Files.isDirectory(path))
+					.collect(Collectors.toSet())).hasSize(forventetAntallFiler);
+		}
+	}
+
+	@SneakyThrows
 	private void assertAntallProsesserteFiler(int forventetAntallFiler) {
 		try (Stream<Path> files = Files.list(sshdPath.resolve(AVSTEMMINGSFILMAPPE).resolve(PROCESSED))) {
 			assertThat(files.filter(path -> !Files.isDirectory(path))
@@ -170,17 +181,16 @@ public class AvstemRouteIT extends AbstractItest {
 	}
 
 	@SneakyThrows
-	private void assertAntallUbehandledeFiler(int forventetAntallFiler) {
-		try (Stream<Path> files = Files.list(sshdPath.resolve(AVSTEMMINGSFILMAPPE))) {
+	private void assertAntallFeiledeFiler(int forventetAntallFiler) {
+		try (Stream<Path> files = Files.list(sshdPath.resolve(AVSTEMMINGSFILMAPPE).resolve(FEIL))) {
 			assertThat(files.filter(path -> !Files.isDirectory(path))
 					.collect(Collectors.toSet())).hasSize(forventetAntallFiler);
 		}
 	}
 
-
 	@SneakyThrows
-	private void assertAntallFeilededeFiler(int forventetAntallFiler) {
-		try (Stream<Path> files = Files.list(sshdPath.resolve(FEIL))) {
+	private void assertAntallHistoriskeFiler(int forventetAntallFiler) {
+		try (Stream<Path> files = Files.list(sshdPath.resolve(AVSTEMMINGSFILMAPPE).resolve(HISTORISKE))) {
 			assertThat(files.filter(path -> !Files.isDirectory(path))
 					.collect(Collectors.toSet())).hasSize(forventetAntallFiler);
 		}

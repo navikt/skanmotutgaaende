@@ -40,11 +40,9 @@ public class AvstemController {
 		for (Exchange e : exchanges) {
 			try {
 				String body = e.getIn().getBody(String.class);
-				e.getIn().setBody(body);
 				if (isBlank(body)) {
-					JiraResponse jiraResponse = opprettJiraForManglendeAvstemmingsfil(e);
+					JiraResponse jiraResponse = opprettJiraService.opprettJiraForManglendeAvstemmingsfil(finnForrigeVirkedag());
 					log.error("Skanmotutgaaende fant ikke avstemmingsfil for {}. Undersøk tilfellet og se opprettet Jira-sak={}", avstemtDato, jiraResponse.jiraIssueKey());
-					sendMessageToRoute(FEIL_ROUTE, e);
 					return;
 				}
 
@@ -59,6 +57,7 @@ public class AvstemController {
 				sendMessageToRoute(FERDIG_ROUTE, e);
 			} catch (Exception exception) {
 				log.error("Skanmotutgaaende feilet ved avstemming av referanser. Exception: {}", exception.getMessage(), exception);
+				sendMessageToRoute(FEIL_ROUTE, e);
 			}
 		}
 	}
@@ -67,15 +66,6 @@ public class AvstemController {
 		try {
 			byte[] csvByteArray = getfeiledeReferanserAsCsvByteArray(feiledeReferanser);
 			return opprettJiraService.opprettAvstemJiraOppgave(csvByteArray, referanser.size(), feiledeReferanser.size(), avstemtDato);
-		} catch (Exception e) {
-			sendMessageToRoute(FEIL_ROUTE, exchange);
-			throw e;
-		}
-	}
-
-	private JiraResponse opprettJiraForManglendeAvstemmingsfil(Exchange exchange) {
-		try {
-			return opprettJiraService.opprettJiraForManglendeAvstemmingsfil(finnForrigeVirkedag());
 		} catch (Exception e) {
 			sendMessageToRoute(FEIL_ROUTE, exchange);
 			throw e;
