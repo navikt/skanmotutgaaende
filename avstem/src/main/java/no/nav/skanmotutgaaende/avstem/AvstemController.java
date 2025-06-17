@@ -35,6 +35,7 @@ public class AvstemController {
 	@Handler
 	public void avstemAlleReferanser(Exchange exchange) {
 		Set<Exchange> exchanges = exchange.getIn().getBody(Set.class);
+		log.info("fant {} avstemmingsreferanser for avstemming", exchanges.size());
 
 		LocalDate avstemtDato = finnForrigeVirkedag();
 		for (Exchange e : exchanges) {
@@ -43,18 +44,18 @@ public class AvstemController {
 				if (isBlank(body)) {
 					JiraResponse jiraResponse = opprettJiraService.opprettJiraForManglendeAvstemmingsfil(finnForrigeVirkedag());
 					log.error("Skanmotutgaaende fant ikke avstemmingsfil for {}. Undersøk tilfellet og se opprettet Jira-sak={}", avstemtDato, jiraResponse.jiraIssueKey());
-					return;
-				}
+				} else {
 
-				Set<String> referanser = new HashSet<>(List.of(body.split("\\n+")));
-				Set<String> feiledeReferanser = avstemService.avstemReferanser(referanser);
-
-				if (!feiledeReferanser.isEmpty()) {
+					Set<String> referanser = new HashSet<>(List.of(body.split("\\n+")));
+					Set<String> feiledeReferanser = avstemService.avstemReferanser(referanser);
 					log.info("Skanmotutgaaende fant {} feilende avstemmingsreferanser", feiledeReferanser.size());
-					JiraResponse jiraResponse = opprettJiraSakForFeiledeReferanser(referanser, feiledeReferanser, avstemtDato, e);
-					log.info("Skanmotutgaaende har opprettet Jira-sak={} for feilende skanmotutgaaende avstemmingsreferanser", jiraResponse.jiraIssueKey());
+
+					if (!feiledeReferanser.isEmpty()) {
+						JiraResponse jiraResponse = opprettJiraSakForFeiledeReferanser(referanser, feiledeReferanser, avstemtDato, e);
+						log.info("Skanmotutgaaende har opprettet Jira-sak={} for feilende skanmotutgaaende avstemmingsreferanser", jiraResponse.jiraIssueKey());
+					}
+					sendMessageToRoute(FERDIG_ROUTE, e);
 				}
-				sendMessageToRoute(FERDIG_ROUTE, e);
 			} catch (Exception exception) {
 				log.error("Skanmotutgaaende feilet ved avstemming av referanser. Exception: {}", exception.getMessage(), exception);
 				sendMessageToRoute(FEIL_ROUTE, e);

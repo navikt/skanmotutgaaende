@@ -68,9 +68,16 @@ public class AvstemRouteIT extends AbstractItest {
 				.atMost(ofSeconds(15))
 				.pollDelay(ofMillis(100))
 				.untilAsserted(this::verifyRequest);
-		assertAntallUbehandledeFiler(0);
-		assertAntallProsesserteFiler(2);
-		assertAntallHistoriskeFiler(2);
+
+		await()
+				.atMost(ofSeconds(15))
+				.pollDelay(ofMillis(100))
+				.untilAsserted(() -> {
+					assertAntallUbehandledeFiler(0);
+					assertAntallProsesserteFiler(2);
+					assertAntallHistoriskeFiler(2);
+				});
+
 
 		try (Stream<Path> files = Files.list(sshdPath.resolve(AVSTEMMINGSFILMAPPE).resolve(PROCESSED))) {
 			List<String> processedMappe = files.map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
