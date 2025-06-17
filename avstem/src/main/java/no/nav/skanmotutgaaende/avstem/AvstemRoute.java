@@ -43,6 +43,7 @@ public class AvstemRoute extends RouteBuilder {
 				.pollEnrich("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.avstemmappe}}" +
 								"?{{skanmotutgaaende.endpointconfig}}" +
 								"&antInclude=*.txt,*.TXT"+
+								"&maxMessagesPerPoll=10" +
 								"&move=historiske",
 								CONNECTION_TIMEOUT)
 				.autoStartup("{{skanmotutgaaende.avstem.startup}}")
