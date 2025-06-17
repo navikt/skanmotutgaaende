@@ -39,19 +39,19 @@ public class AvstemRoute extends RouteBuilder {
 				.log(ERROR, log, "Skanmotutgaaende fant ikke avstemmingsfil. Undersøk tilfellet og evt. kontakt Iron Mountain. Exception:${exception}");
 
 
-		from("cron:tab?schedule={{skanmotutgaaende.avstem.schedule}}")
-				.pollEnrich("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.avstemmappe}}" +
+		//from("cron:tab?schedule={{skanmotutgaaende.avstem.schedule}}").
+				from("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.avstemmappe}}" +
 								"?{{skanmotutgaaende.endpointconfig}}" +
 								"&antInclude=*.txt,*.TXT"+
 								"&maxMessagesPerPoll=10" +
-								"&move=historiske",
-								CONNECTION_TIMEOUT)
+								"&move=historiske" +
+						"&scheduler=spring&scheduler.cron={{skanmotutgaaende.utgaaende.schedule}}")
 				.autoStartup("{{skanmotutgaaende.avstem.startup}}")
 				.routeId("avstem_routeid")
 				.process(new MdcSetterProcessor())
 				.log(INFO, log, "Skanmotutgaaende starter cron jobb for å avstemme referanser")
 				.aggregate(constant(true), new GroupedExchangeAggregationStrategy())
-				.completionTimeout(500)
+				 .completionTimeout(500)
 				.convertBodyTo(Set.class)
 				.bean(avstemController)
 				.log(INFO, log, "Skanmotutgaaende har kjørt cron jobb for å avstemme referanser")
