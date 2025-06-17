@@ -61,7 +61,7 @@ public class AvstemRoute extends RouteBuilder {
 				.routeId("avstem_ferdig_routeid")
 				.process(new MdcSetterProcessor())
 				.log(INFO, log, "Skanmotutgaaende avstemte referanser ferdig.")
-				.to("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.avstemmappe}}/processed")
+				.to("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.avstemmappe}}/processed?{{skanmotutgaaende.endpointconfig}}")
 				.process(new RemoveMdcProcessor())
 				.end();
 
@@ -70,7 +70,7 @@ public class AvstemRoute extends RouteBuilder {
 				.routeId("avstem_feil_routeid")
 				.process(new MdcSetterProcessor())
 				.log(INFO, log, "Sender feilet melding til feilmappe.")
-				.to("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.avstemmappe}}/feil")
+				.to("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.avstemmappe}}/feil?{{skanmotutgaaende.endpointconfig}}")
 				.process(new RemoveMdcProcessor())
 				.end();
 		// @formatter:on
