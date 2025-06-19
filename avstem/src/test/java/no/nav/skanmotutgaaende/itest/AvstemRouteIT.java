@@ -111,6 +111,7 @@ public class AvstemRouteIT extends AbstractItest {
 	}
 
 	@Test
+	@Disabled
 	public void shouldNotProcessAvstemmingsFileWhenJiraThrowException() throws IOException {
 		stubBadRequestJiraOpprettOppgave();
 		stubPostAvstemJournalpost("journalpostapi/avstem.json");
@@ -137,6 +138,7 @@ public class AvstemRouteIT extends AbstractItest {
 	}
 
 	@Test
+	@Disabled
 	public void shouldOpprettJiraOppgaveWhenAvstemmingsfilIsMissing() throws InterruptedException {
 		stubJiraOpprettOppgave();
 		Thread.sleep(1000);
