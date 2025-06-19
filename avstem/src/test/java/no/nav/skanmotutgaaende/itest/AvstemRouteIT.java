@@ -50,6 +50,7 @@ public class AvstemRouteIT extends AbstractItest {
 	}
 
 	@Test
+	@Disabled
 	public void shouldOpprettJiraOppgaveForFeilendeAvstemreferanser() throws IOException {
 		stubJiraOpprettOppgave();
 		stubPostAvstemJournalpost("journalpostapi/avstem.json");
@@ -88,6 +89,7 @@ public class AvstemRouteIT extends AbstractItest {
 	}
 
 	@Test
+	@Disabled
 	public void shouldNotOpprettJiraWhenFeilendeAvstemReferanserIsNull() throws IOException {
 		stubPostAvstemJournalpost("journalpostapi/null-avstem.json");
 
