@@ -8,6 +8,7 @@ import no.nav.dok.jiraapi.client.JiraClient;
 import no.nav.dok.jiracore.exception.JiraClientException;
 import no.nav.skanmotutgaaende.exceptions.technical.SkanmotutgaaendeTechnicalException;
 import org.apache.camel.Exchange;
+import org.apache.camel.Handler;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -17,6 +18,7 @@ import java.util.List;
 
 import static java.time.DayOfWeek.MONDAY;
 import static no.nav.dok.jiracore.config.JiraConstant.ANSVARLIG_TEAM_FAGPOST;
+import static no.nav.skanmotutgaaende.mdc.MDCConstants.EXCHANGE_AVSTEMT_DATO;
 import static org.apache.camel.Exchange.FILE_NAME_ONLY;
 
 @Slf4j
@@ -54,11 +56,13 @@ public class OpprettJiraService {
 		}
 	}
 
-	public JiraResponse opprettJiraForManglendeAvstemmingsfil(LocalDate avstemmingsfilDato) {
+	@Handler
+	public JiraResponse opprettJiraForManglendeAvstemmingsfil() {
+		LocalDate forrigeVirkedag = finnForrigeVirkedag();
 		try {
 			return jiraService.opprettJiraIKTOppgave(JiraRequest.builder()
-							.summary("Skanmotutgaaende: Avstemmingfil mangler for " + avstemmingsfilDato)
-							.description("Skanmotutgaaende fant ikke avstemmingsfil for " + avstemmingsfilDato + ". Undersøk tilfellet og kontakt evt. Iron Mountain.")
+							.summary("Skanmotutgaaende: Avstemmingfil mangler for " + forrigeVirkedag)
+							.description("Skanmotutgaaende fant ikke avstemmingsfil for " + forrigeVirkedag + ". Undersøk tilfellet og kontakt evt. Iron Mountain.")
 							.labels(LABEL)
 							.build(),
 					ANSVARLIG_TEAM_FAGPOST);

@@ -9,7 +9,6 @@ import org.apache.camel.ProducerTemplate;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
@@ -18,7 +17,6 @@ import java.util.Set;
 import static no.nav.skanmotutgaaende.avstem.AvstemRoute.FEIL_ROUTE;
 import static no.nav.skanmotutgaaende.avstem.AvstemRoute.FERDIG_ROUTE;
 import static no.nav.skanmotutgaaende.jira.OpprettJiraService.finnForrigeVirkedag;
-import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Slf4j
 @Component
@@ -40,22 +38,15 @@ public class AvstemController {
 		LocalDate avstemtDato = finnForrigeVirkedag();
 		for (Exchange e : exchanges) {
 			try {
-				String body = e.getIn().getBody(String.class);
-				if (isBlank(body)) {
-					JiraResponse jiraResponse = opprettJiraService.opprettJiraForManglendeAvstemmingsfil(finnForrigeVirkedag());
-					log.error("Skanmotutgaaende fant ikke avstemmingsfil for {}. Undersøk tilfellet og se opprettet Jira-sak={}", avstemtDato, jiraResponse.jiraIssueKey());
-				} else {
+				Set<String> referanser = new HashSet<>(List.of(e.getIn().getBody(String.class).split("\\n+")));
+				Set<String> feiledeReferanser = avstemService.avstemReferanser(referanser);
+				log.info("Skanmotutgaaende fant {} feilende avstemmingsreferanser", feiledeReferanser.size());
 
-					Set<String> referanser = new HashSet<>(List.of(body.split("\\n+")));
-					Set<String> feiledeReferanser = avstemService.avstemReferanser(referanser);
-					log.info("Skanmotutgaaende fant {} feilende avstemmingsreferanser", feiledeReferanser.size());
-
-					if (!feiledeReferanser.isEmpty()) {
-						JiraResponse jiraResponse = opprettJiraSakForFeiledeReferanser(referanser, feiledeReferanser, avstemtDato, e);
-						log.info("Skanmotutgaaende har opprettet Jira-sak={} for feilende skanmotutgaaende avstemmingsreferanser", jiraResponse.jiraIssueKey());
-					}
-					sendMessageToRoute(FERDIG_ROUTE, e);
+				if (!feiledeReferanser.isEmpty()) {
+					JiraResponse jiraResponse = opprettJiraSakForFeiledeReferanser(referanser, feiledeReferanser, avstemtDato, e);
+					log.info("Skanmotutgaaende har opprettet Jira-sak={} for feilende skanmotutgaaende avstemmingsreferanser", jiraResponse.jiraIssueKey());
 				}
+				sendMessageToRoute(FERDIG_ROUTE, e);
 			} catch (Exception exception) {
 				log.error("Skanmotutgaaende feilet ved avstemming av referanser. Exception: {}", exception.getMessage(), exception);
 				sendMessageToRoute(FEIL_ROUTE, e);
