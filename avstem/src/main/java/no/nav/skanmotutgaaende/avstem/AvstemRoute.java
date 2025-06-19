@@ -1,5 +1,6 @@
 package no.nav.skanmotutgaaende.avstem;
 
+import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotutgaaende.MdcSetterProcessor;
 import no.nav.skanmotutgaaende.RemoveMdcProcessor;
 import no.nav.skanmotutgaaende.jira.OpprettJiraService;
@@ -17,6 +18,7 @@ import static org.apache.camel.Exchange.FILE_NAME;
 import static org.apache.camel.LoggingLevel.ERROR;
 import static org.apache.camel.LoggingLevel.INFO;
 
+@Slf4j
 @Component
 public class AvstemRoute extends RouteBuilder {
 
@@ -53,17 +55,23 @@ public class AvstemRoute extends RouteBuilder {
 		from("cron:tab?schedule={{skanmotutgaaende.avstem.schedule}}")
 				.pollEnrich("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.avstemmappe}}" +
 						"?{{skanmotutgaaende.endpointconfig}}" +
-						"&antInclude=*.txt,*.TXT", CONNECTION_TIMEOUT)
+						"&antInclude=*.txt,*.TXT" +
+						"&noop=true", CONNECTION_TIMEOUT)
 				.routeId("verifiser_avstem_routeid")
 				.autoStartup("{{skanmotutgaaende.avstem.startup}}")
 				.log(INFO, log, "Skanmotutgaaende starter cron jobb for å avstemme referanser...")
 				.process(new MdcSetterProcessor())
+				.process(exchange -> {
+					String fileName = exchange.getIn().getHeader(FILE_NAME, String.class);
+					log.info("Mottok exchange med filnavn: " + fileName);
+					log.info("Headers: " + exchange.getIn().getHeaders().toString());
+				})
 				.choice()
-				.when(header(FILE_NAME).isNull())
-				.process(exchange -> exchange.setProperty(EXCHANGE_AVSTEMT_DATO, finnForrigeVirkedag()))
-				.log(ERROR, log, "Skanmotutgaaende fant ikke avstemmingsfil for ${exchangeProperty." + EXCHANGE_AVSTEMT_DATO + "}. Undersøk tilfellet og se opprettet Jira-sak.")
-				.bean(opprettJiraService)
-				.log(INFO, log, "Skanmotutgaaende opprettet jira-sak med key=${body.jiraIssueKey} for manglende avstemmingsfil.")
+					.when(header(FILE_NAME).isNull())
+					.process(exchange -> exchange.setProperty(EXCHANGE_AVSTEMT_DATO, finnForrigeVirkedag()))
+					.log(ERROR, log, "Skanmotutgaaende fant ikke avstemmingsfil for ${exchangeProperty." + EXCHANGE_AVSTEMT_DATO + "}. Undersøk tilfellet og se opprettet Jira-sak.")
+					.bean(opprettJiraService)
+					.log(INFO, log, "Skanmotutgaaende opprettet jira-sak med key=${body.jiraIssueKey} for manglende avstemmingsfil.")
 				.endChoice()
 				.process(new RemoveMdcProcessor())
 				.end();

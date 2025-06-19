@@ -92,6 +92,11 @@ public class AvstemRouteIT extends AbstractItest {
 		stubPostAvstemJournalpost("journalpostapi/null-avstem.json");
 
 		copyFileFromClasspathToAvstem(AVSTEMMINGSFIL);
+		await().atMost(ofSeconds(15))
+				.untilAsserted(() -> {
+					assertAntallUbehandledeFiler(1);
+					assertAntallProsesserteFiler(0);
+				});
 
 		await()
 				.atMost(ofSeconds(15))
