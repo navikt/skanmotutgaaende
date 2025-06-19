@@ -29,7 +29,6 @@ public class AvstemRouteIT extends AbstractItest {
 
 	private static final String AVSTEMMINGSFILMAPPE = "avstemmappe";
 	private static final String PROCESSED = "processed";
-	private static final String HISTORISKE = "historiske";
 	private static final String FEIL = "feil";
 	private static final String AVSTEMMINGSFIL = "04.01.2024_avstemmingsfil_1.txt";
 	private static final String AVSTEMMINGSFIL2 = "04.01.2024_avstemmingsfil_2.txt";
@@ -43,7 +42,6 @@ public class AvstemRouteIT extends AbstractItest {
 		final Path avstem = sshdPath.resolve(AVSTEMMINGSFILMAPPE);
 		final Path processed = avstem.resolve(PROCESSED);
 		final Path feil = avstem.resolve(FEIL);
-		final Path historiske = avstem.resolve(HISTORISKE);
 		preparePath(avstem);
 		preparePath(processed);
 		preparePath(feil);
@@ -77,7 +75,6 @@ public class AvstemRouteIT extends AbstractItest {
 				.untilAsserted(() -> {
 					assertAntallUbehandledeFiler(0);
 					assertAntallProsesserteFiler(2);
-					assertAntallHistoriskeFiler(2);
 				});
 
 
@@ -109,7 +106,6 @@ public class AvstemRouteIT extends AbstractItest {
 					verify(0, postRequestedFor(urlMatching(JIRA_OPPRETTE_URL)));
 				});
 		assertAntallProsesserteFiler(1);
-		assertAntallHistoriskeFiler(1);
 		assertAntallFeiledeFiler(0);
 
 	}
@@ -137,7 +133,6 @@ public class AvstemRouteIT extends AbstractItest {
 					assertAntallProsesserteFiler(0);
 					assertAntallUbehandledeFiler(0);
 					assertAntallFeiledeFiler(1);
-					assertAntallHistoriskeFiler(1);
 				});
 	}
 
@@ -198,14 +193,6 @@ public class AvstemRouteIT extends AbstractItest {
 	@SneakyThrows
 	private void assertAntallFeiledeFiler(int forventetAntallFiler) {
 		try (Stream<Path> files = Files.list(sshdPath.resolve(AVSTEMMINGSFILMAPPE).resolve(FEIL))) {
-			assertThat(files.filter(path -> !Files.isDirectory(path))
-					.collect(Collectors.toSet())).hasSize(forventetAntallFiler);
-		}
-	}
-
-	@SneakyThrows
-	private void assertAntallHistoriskeFiler(int forventetAntallFiler) {
-		try (Stream<Path> files = Files.list(sshdPath.resolve(AVSTEMMINGSFILMAPPE).resolve(HISTORISKE))) {
 			assertThat(files.filter(path -> !Files.isDirectory(path))
 					.collect(Collectors.toSet())).hasSize(forventetAntallFiler);
 		}
