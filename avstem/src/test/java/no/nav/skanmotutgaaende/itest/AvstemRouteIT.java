@@ -113,9 +113,9 @@ public class AvstemRouteIT extends AbstractItest {
 	}
 
 	@Test
-	public void shouldOpprettJiraOppgaveWhenAvstemmingsfilIsMissing() throws InterruptedException {
+	public void shouldOpprettJiraOppgaveWhenAvstemmingsfilIsMissing()  {
 		stubJiraOpprettOppgave();
-		Thread.sleep(1000);
+		stubJiraHentProject();
 
 		await().atMost(ofSeconds(15))
 				.pollDelay(ofMillis(500))
