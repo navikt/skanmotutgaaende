@@ -15,7 +15,6 @@ import static no.nav.skanmotutgaaende.jira.OpprettJiraService.finnForrigeVirkeda
 import static no.nav.skanmotutgaaende.jira.OpprettJiraService.parseDatoFraFilnavn;
 import static no.nav.skanmotutgaaende.mdc.MDCConstants.EXCHANGE_AVSTEMMINGSFIL_NAVN;
 import static no.nav.skanmotutgaaende.mdc.MDCConstants.EXCHANGE_AVSTEMT_DATO;
-import static org.apache.camel.Exchange.FILE_NAME;
 import static org.apache.camel.LoggingLevel.ERROR;
 import static org.apache.camel.LoggingLevel.INFO;
 
@@ -45,51 +44,60 @@ public class AvstemRoute extends RouteBuilder {
 				.process(new MdcSetterProcessor())
 				.log(ERROR, log, "Skanmotutgaaende fant ikke avstemmingsfil for ${exchangeProperty." + EXCHANGE_AVSTEMT_DATO + "}. Undersøk tilfellet og evt. kontakt Iron Mountain. Exception:${exception}");
 
-		from("cron:tab?schedule={{skanmotutgaaende.avstem.schedule}}")
-				.pollEnrich("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.avstemmappe}}" +
-						"?{{skanmotutgaaende.endpointconfig}}" +
-						"&antInclude=*.txt,*.TXT" +
-						"&move=processed", CONNECTION_TIMEOUT)
-				.routeId("avstem_routeid")
+		from("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.avstemmappe}}" +
+				"?{{skanmotutgaaende.endpointconfig}}" +
+						"&include=^.*" +
+						"&sendEmptyMessageWhenIdle=true" +
+						"&move=processed" +
+						"&scheduler=spring&scheduler.cron={{skanmotutgaaende.avstem.schedule}}")
+				.routeId("ftp-trigger")
 				.autoStartup("{{skanmotutgaaende.avstem.startup}}")
 				.log(INFO, log, "Skanmotutgaaende starter cron jobb for å avstemme referanser...")
 				.process(new MdcSetterProcessor())
 				.choice()
-					.when(header(FILE_NAME).isNull())
+					.when(simple("${body}").isNull())
 						.process(exchange -> exchange.setProperty(EXCHANGE_AVSTEMT_DATO, finnForrigeVirkedag()))
 						.log(ERROR, log, "Skanmotutgaaende fant ikke avstemmingsfil for ${exchangeProperty." + EXCHANGE_AVSTEMT_DATO + "}. Undersøk tilfellet og se opprettet Jira-sak.")
 						.bean(opprettJiraService)
 						.log(INFO, log, "Skanmotutgaaende opprettet jira-sak med key=${body.jiraIssueKey} for manglende avstemmingsfil.")
-				.otherwise()
-					.log(INFO, log, "Skanmotutgaaende starter behandling av avstemmingsfil=${file:name}.")
-					.process(exchange -> {
-						exchange.setProperty(EXCHANGE_AVSTEMMINGSFIL_NAVN, simple("${file:name}"));
-						exchange.setProperty(EXCHANGE_AVSTEMT_DATO,  parseDatoFraFilnavn(exchange));
-					})
-					.split(body().tokenize())
-					.streaming()
-						.aggregationStrategy(new AvstemAggregationStrategy())
-						.convertBodyTo(Set.class)
-					.end()
-					.process(exchange -> {
-						Set<String> avstemmingsReferanser = exchange.getIn().getBody(Set.class);
-						exchange.getIn().setBody(avstemmingsReferanser);
-					})
-					.setProperty(ANTALL_FILER_AVSTEMT, simple("${body.size}"))
-					.log(INFO, log, "Skanmotutgaaende hentet ${body.size} avstemmingReferanser fra sftp server")
-					.bean(avstemService)
-					.choice()
-						.when(simple("${body}").isNotNull())
-							.setProperty(ANTALL_FILER_FEILET, simple("${body.size}"))
-							.log(INFO, log, "Skanmotutgaaende fant ${body.size} feilende avstemmingsreferanser")
-							.marshal().csv()
-							.bean(opprettJiraService)
-							.log(INFO, log, "Skanmotutgaaende har opprettet Jira-sak=${body.jiraIssueKey} for feilende skanmotutgaaende avstemmingsreferanser")
-							.process(new RemoveMdcProcessor())
+					.otherwise()
+						.split(body())
+						.streaming()
+						.to("direct:processEachFile")
 					.endChoice()
-				.endChoice()
+				.end();
+
+		from("direct:processEachFile")
+				.routeId("avstem-routeid")
+				.log(INFO, log, "Skanmotutgaaende starter behandling av avstemmingsfil=${file:name}.")
+				.process(exchange -> {
+					exchange.setProperty(EXCHANGE_AVSTEMMINGSFIL_NAVN, simple("${file:name}"));
+					exchange.setProperty(EXCHANGE_AVSTEMT_DATO,  parseDatoFraFilnavn(exchange));
+				})
+				.split(body().tokenize())
+				.streaming()
+					.aggregationStrategy(new AvstemAggregationStrategy())
+					.convertBodyTo(Set.class)
 				.end()
-				.log(INFO, log, "Skanmotutgaaende behandlet ferdig avstemmingsfil: ${file:name}");
+				.process(exchange -> {
+					Set<String> avstemmingsReferanser = exchange.getIn().getBody(Set.class);
+					exchange.getIn().setBody(avstemmingsReferanser);
+				})
+				.setProperty(ANTALL_FILER_AVSTEMT, simple("${body.size}"))
+				.log(INFO, log, "Skanmotutgaaende hentet ${body.size} avstemmingReferanser fra sftp server")
+				.bean(avstemService)
+				.choice()
+					.when(simple("${body}").isNotNull())
+						.setProperty(ANTALL_FILER_FEILET, simple("${body.size}"))
+						.log(INFO, log, "Skanmotutgaaende fant ${body.size} feilende avstemmingsreferanser")
+						.marshal().csv()
+						.bean(opprettJiraService)
+						.log(INFO, log, "Skanmotutgaaende har opprettet Jira-sak=${body.jiraIssueKey} for feilende skanmotutgaaende avstemmingsreferanser")
+						.process(new RemoveMdcProcessor())
+				.endChoice()
+			.endChoice()
+			.end()
+			.log(INFO, log, "Skanmotutgaaende behandlet ferdig avstemmingsfil: ${file:name}");
 		// @formatter:on
 	}
 }

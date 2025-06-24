@@ -77,7 +77,7 @@ public abstract class AbstractItest {
 	}
 
 	public static void stubJiraHentProject() {
-		stubFor(get(JIRA_PROJECT_URL)
+		stubFor(get(urlMatching(JIRA_PROJECT_URL))
 				.willReturn(aResponse().withStatus(OK.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("jira/project.json")));
