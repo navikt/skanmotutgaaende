@@ -118,7 +118,6 @@ public class AvstemRouteIT extends AbstractItest {
 		stubJiraHentProject();
 
 		await().atMost(ofSeconds(15))
-				.pollDelay(ofMillis(500))
 				.untilAsserted(() -> {
 					assertAntallUbehandledeFiler(0);
 					assertAntallProsesserteFiler(0);
