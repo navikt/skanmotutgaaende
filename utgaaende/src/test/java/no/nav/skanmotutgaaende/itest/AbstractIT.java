@@ -15,6 +15,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.put;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
 import static org.junit.platform.commons.util.StringUtils.isBlank;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
@@ -32,6 +33,8 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public abstract class AbstractIT {
 
 	private static final String URL_DOKARKIV_JOURNALPOST_BAD_REQUEST = "/rest/internal/journalpostapi/v1/journalpost/4000004/mottaDokumentUtgaaendeSkanning";
+	static final String SLACK_POST_MESSAGE_PATH = "/slack/api/chat.postMessage";
+	private static final String SLACK_AUTH_PATH = "/slack/api/auth.test";
 
 	public static final String INNGAAENDE = "inngaaende";
 	public static final String FEILMAPPE = "feilmappe";
@@ -39,11 +42,12 @@ public abstract class AbstractIT {
 	public static final String URL_DOKARKIV_JOURNALPOST_GEN = "/rest/internal/journalpostapi/v1/journalpost/\\d+/mottaDokumentUtgaaendeSkanning";
 
 	void setUpHappyStubs() {
-		stubFor(put(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)).willReturn(aResponse()
-				.withStatus(OK.value())
-				.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-				.withHeader("Connection", "close")
-				.withBody("{}")));
+		stubFor(put(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN))
+				.willReturn(aResponse()
+						.withStatus(OK.value())
+						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withHeader("Connection", "close")
+						.withBody("{}")));
 	}
 
 	public void stubAzureToken() {
@@ -55,13 +59,29 @@ public abstract class AbstractIT {
 	}
 
 	void setUpBadStubs() {
-		stubFor(put(urlMatching(URL_DOKARKIV_JOURNALPOST_BAD_REQUEST)).willReturn(aResponse()
-				.withStatus(BAD_REQUEST.value()).withHeader("Connection", "close")));
+		stubFor(put(urlMatching(URL_DOKARKIV_JOURNALPOST_BAD_REQUEST))
+				.willReturn(aResponse()
+						.withStatus(BAD_REQUEST.value())
+						.withHeader("Connection", "close")));
 	}
 
 	void setUpConflictStubs() {
-		stubFor(put(urlMatching(URL_DOKARKIV_JOURNALPOST_BAD_REQUEST)).willReturn(aResponse()
-				.withStatus(CONFLICT.value()).withHeader("Connection", "close")));
+		stubFor(put(urlMatching(URL_DOKARKIV_JOURNALPOST_BAD_REQUEST))
+				.willReturn(aResponse()
+						.withStatus(CONFLICT.value())
+						.withHeader("Connection", "close")));
+	}
+
+	public void stubSlack() {
+		stubFor(post(urlPathEqualTo(SLACK_AUTH_PATH))
+				.willReturn(aResponse()
+						.withBodyFile("slack/auth_response.json")
+						.withStatus(OK.value())));
+
+		stubFor(post(urlPathEqualTo(SLACK_POST_MESSAGE_PATH))
+				.willReturn(aResponse()
+						.withBodyFile("slack/message_response.json")
+						.withStatus(OK.value())));
 	}
 
 	public List<Path> fetchFileSecurely(Path sshdPath, String path, String file) throws IOException {

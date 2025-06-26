@@ -25,6 +25,7 @@ public class SkanmotutgaaendeProperties {
     private final FilomraadeProperties filomraade = new FilomraadeProperties();
     private final ServiceUserProperties serviceuser = new ServiceUserProperties();
     private final JiraConfigProperties jira = new JiraConfigProperties();
+    private final SlackProperties slack = new SlackProperties();
 
     @NotEmpty
     private String endpointuri;
@@ -137,6 +138,19 @@ public class SkanmotutgaaendeProperties {
 
         @NotEmpty
         private String url;
+    }
+
+    @Data
+    @Validated
+    public static class SlackProperties {
+        @NotEmpty
+        @ToString.Exclude
+        private String token;
+
+        @NotEmpty
+        private String channel;
+
+        private boolean enabled;
     }
 }
 

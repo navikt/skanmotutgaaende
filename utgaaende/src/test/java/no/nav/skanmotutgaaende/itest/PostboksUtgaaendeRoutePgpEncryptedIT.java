@@ -13,9 +13,12 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.List;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.exactly;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,6 +35,8 @@ public class PostboksUtgaaendeRoutePgpEncryptedIT extends AbstractIT {
 	@BeforeEach
 	void beforeEach() {
 		stubAzureToken();
+		stubSlack();
+
 		final Path inngaaende = sshdPath.resolve(INNGAAENDE);
 		final Path processed = inngaaende.resolve("processed");
 		final Path feilmappe = sshdPath.resolve(FEILMAPPE);
@@ -75,6 +80,14 @@ public class PostboksUtgaaendeRoutePgpEncryptedIT extends AbstractIT {
 				assertThat(Files.list(sshdPath.resolve(FAGPOST_MAPPE)
 						.resolve(ZIP_FILE_NAME_NO_EXTENSION)))
 						.hasSize(2);
+
+				verify(exactly(3), putRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
+				verify(exactly(1), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH))
+						.withRequestBody(containing("no.nav.skanmotutgaaende.exceptions.functional.InvalidMetadataException")));
+				verify(exactly(1), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH))
+						.withRequestBody(containing("no.nav.skanmotutgaaende.exceptions.functional.SkanmotutgaaendeFunctionalException")));
+				verify(exactly(2), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH))
+						.withRequestBody(containing("no.nav.skanmotutgaaende.exceptions.technical.ForsendelseNotCompleteException")));
 			} catch (NoSuchFileException e) {
 				fail();
 			}
@@ -96,8 +109,6 @@ public class PostboksUtgaaendeRoutePgpEncryptedIT extends AbstractIT {
 				"01.07.2020_R123456784_0003.zip",
 				"01.07.2020_R123456784_0004.zip"
 		)));
-
-		verify(exactly(3), putRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
 	}
 
 // Skanmotutgaaende-pgp feilet funksjonelt for fil=01.07.2020_R300000000_0004, batch=01.07.2020_R3000000000. no.nav.skanmotutgaaende.exceptions.functional.SkanmotutgaaendeFunctionalException: lagreFilDetaljer feilet funksjonelt med statusKode=400 BAD_REQUEST. Feilmelding=
@@ -134,6 +145,12 @@ public class PostboksUtgaaendeRoutePgpEncryptedIT extends AbstractIT {
 				assertThat(Files.list(sshdPath.resolve(FAGPOST_MAPPE)
 						.resolve(ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION)))
 						.hasSize(2);
+
+				verify(exactly(56), putRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
+				verify(exactly(1), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH))
+						.withRequestBody(containing("no.nav.skanmotutgaaende.exceptions.functional.InvalidMetadataException")));
+				verify(exactly(2), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH))
+						.withRequestBody(containing("no.nav.skanmotutgaaende.exceptions.technical.ForsendelseNotCompleteException")));
 			} catch (NoSuchFileException e) {
 				fail();
 			}
@@ -158,8 +175,6 @@ public class PostboksUtgaaendeRoutePgpEncryptedIT extends AbstractIT {
 				"01.07.2020_R300000000_0003.zip",
 				"01.07.2020_R300000000_0004.zip"
 		)));
-
-		verify(exactly(56), putRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
 	}
 
 	@Test
@@ -172,7 +187,12 @@ public class PostboksUtgaaendeRoutePgpEncryptedIT extends AbstractIT {
 
 		assertTrue(Files.exists(sshdPath.resolve(INNGAAENDE).resolve(ZIP_FILE_NAME_NO_EXTENSION + ".zip.pgp")));
 
-		await().atMost(15, SECONDS).untilAsserted(() -> assertTrue(Files.exists(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION + ".zip.pgp"))));
+		await().atMost(15, SECONDS).untilAsserted(() -> {
+					assertTrue(Files.exists(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION + ".zip.pgp")));
+					verify(exactly(1), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH))
+							.withRequestBody(containing("org.bouncycastle.openpgp.PGPException")));
+				}
+		);
 	}
 
 	private void copyFileFromClasspathToInngaaende(final String zipfilename) throws IOException {

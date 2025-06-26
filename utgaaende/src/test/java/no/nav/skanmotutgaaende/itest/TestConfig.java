@@ -1,5 +1,7 @@
 package no.nav.skanmotutgaaende.itest;
 
+import com.slack.api.Slack;
+import com.slack.api.methods.MethodsClient;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotutgaaende.CoreConfig;
 import no.nav.skanmotutgaaende.config.props.IMVaultProperties;
@@ -16,11 +18,13 @@ import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.auth.UserAuthNoneFactory;
 import org.apache.sshd.server.auth.pubkey.AcceptAllPublickeyAuthenticator;
 import org.apache.sshd.sftp.server.SftpSubsystemFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -44,6 +48,17 @@ import static java.util.Collections.singletonList;
 		CoreConfig.class,
 		DokCounter.class})
 public class TestConfig {
+
+	@Value("${skanmotutgaaende.slack.url}")
+	private String slackUrl;
+
+	@Bean
+	@Primary
+	MethodsClient slackClient(SkanmotutgaaendeProperties skanmotutgaaendeProperties) {
+		var slackClient = Slack.getInstance().methods(skanmotutgaaendeProperties.getSlack().getToken());
+		slackClient.setEndpointUrlPrefix(slackUrl);
+		return slackClient;
+	}
 
 	@Configuration
 	static class CamelTestStartupConfig {
