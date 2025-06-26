@@ -8,7 +8,7 @@ import no.nav.skanmotutgaaende.exceptions.functional.JournalpostConflictExceptio
 import no.nav.skanmotutgaaende.exceptions.functional.SkanmotutgaaendeFunctionalException;
 import no.nav.skanmotutgaaende.exceptions.technical.SkanmotutgaaendeTechnicalException;
 import org.slf4j.MDC;
-import org.springframework.boot.autoconfigure.codec.CodecProperties;
+import org.springframework.boot.autoconfigure.http.codec.HttpCodecsProperties;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
@@ -35,14 +35,14 @@ public class JournalpostConsumer {
 	public JournalpostConsumer(
 			WebClient webClient,
 			SkanmotutgaaendeProperties skanmotutgaaendeProperties,
-			CodecProperties codecProperties
+			HttpCodecsProperties httpCodecsProperties
 	) {
 		this.webClient = webClient.mutate()
 				.baseUrl(skanmotutgaaendeProperties.getEndpoints().getDokarkiv().getUrl())
 				.defaultHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 				.exchangeStrategies(ExchangeStrategies.builder()
 						.codecs(clientCodecConfigurer -> clientCodecConfigurer.defaultCodecs()
-								.maxInMemorySize((int) codecProperties.getMaxInMemorySize().toBytes()))
+								.maxInMemorySize((int) httpCodecsProperties.getMaxInMemorySize().toBytes()))
 						.build())
 				.build();
 	}
