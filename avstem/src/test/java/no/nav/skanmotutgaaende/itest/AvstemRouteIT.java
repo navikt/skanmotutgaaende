@@ -3,6 +3,7 @@ package no.nav.skanmotutgaaende.itest;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import lombok.SneakyThrows;
 import org.apache.camel.CamelContext;
+import org.apache.camel.builder.AdviceWith;
 import org.apache.camel.spi.RouteController;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -46,6 +47,7 @@ public class AvstemRouteIT extends AbstractItest {
 		final Path processed = avstem.resolve(PROCESSED);
 		preparePath(avstem);
 		preparePath(processed);
+		startRoutes();
 	}
 
 	@SneakyThrows
@@ -69,7 +71,6 @@ public class AvstemRouteIT extends AbstractItest {
 					assertAntallProsesserteFiler(0);
 				});
 
-		startRoutes();
 		await()
 				.atMost(ofSeconds(15))
 				.untilAsserted(() -> {
@@ -93,7 +94,6 @@ public class AvstemRouteIT extends AbstractItest {
 
 		Path filePath = sshdPath.resolve(AVSTEMMINGSFILMAPPE).resolve(AVSTEMMINGSFIL);
 
-		startRoutes();
 		assertThat(Files.exists(filePath)).isTrue();
 		assertAntallProsesserteFiler(0);
 
@@ -115,7 +115,6 @@ public class AvstemRouteIT extends AbstractItest {
 		Path filePath = sshdPath.resolve(AVSTEMMINGSFILMAPPE).resolve(AVSTEMMINGSFIL);
 		assertThat(Files.exists(filePath)).isTrue();
 
-		startRoutes();
 		assertAntallProsesserteFiler(0);
 
 		await().atMost(ofSeconds(15))
@@ -130,7 +129,6 @@ public class AvstemRouteIT extends AbstractItest {
 	public void shouldOpprettJiraOppgaveWhenAvstemmingsfilIsMissing() {
 		stubJiraOpprettOppgave();
 
-		startRoutes();
 		await().atMost(ofSeconds(10))
 				.untilAsserted(() -> {
 					verify(1, getRequestedFor(urlMatching(JIRA_PROJECT_URL)));
@@ -140,16 +138,21 @@ public class AvstemRouteIT extends AbstractItest {
 
 	@SneakyThrows
 	private void startRoutes() {
+		AdviceWith.adviceWith(camelContext, "ftp-trigger", a -> {
+			a.replaceFromWith("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.avstemmappe}}" +
+					"?{{skanmotutgaaende.endpointconfig}}" +
+					"&include=^.*" +
+					"&sendEmptyMessageWhenIdle=true" +
+					"&move=processed");
+		});
 		RouteController routeController = camelContext.getRouteController();
 		routeController.startRoute("ftp-trigger");
-		routeController.startRoute("avstem-routeid");
 	}
 
 	@SneakyThrows
 	private void stopRoutes() {
 		RouteController routeController = camelContext.getRouteController();
 		routeController.stopRoute("ftp-trigger");
-		routeController.stopRoute("avstem-routeid");
 	}
 
 	private void verifyRequest() {

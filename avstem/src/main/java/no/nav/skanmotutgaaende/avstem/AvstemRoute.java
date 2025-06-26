@@ -70,7 +70,6 @@ public class AvstemRoute extends RouteBuilder {
 
 		from("direct:processEachFile")
 				.routeId("avstem-routeid")
-				.autoStartup("{{skanmotutgaaende.avstem.startup}}")
 				.log(INFO, log, "Skanmotutgaaende starter behandling av avstemmingsfil=${file:name}.")
 				.process(exchange -> {
 					exchange.setProperty(EXCHANGE_AVSTEMMINGSFIL_NAVN, simple("${file:name}"));
