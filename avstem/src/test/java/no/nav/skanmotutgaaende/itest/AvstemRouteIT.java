@@ -56,19 +56,6 @@ public class AvstemRouteIT extends AbstractItest {
 	}
 
 	@Test
-	public void shouldOpprettJiraOppgaveWhenAvstemmingsfilIsMissing() {
-		stubJiraOpprettOppgave();
-
-		startRoutes();
-		await().atMost(ofSeconds(10))
-				.untilAsserted(() -> {
-					verify(1, getRequestedFor(urlMatching(JIRA_PROJECT_URL)));
-					verify(1, postRequestedFor(urlMatching(JIRA_OPPRETTE_URL)));
-				});
-	}
-
-
-	@Test
 	public void shouldOpprettJiraOppgaveForFeilendeAvstemreferanser() throws IOException {
 		stubJiraOpprettOppgave();
 		stubPostAvstemJournalpost("journalpostapi/avstem.json");
@@ -137,6 +124,18 @@ public class AvstemRouteIT extends AbstractItest {
 				});
 		assertAntallProsesserteFiler(0);
 		assertAntallUbehandledeFiler(1);
+	}
+
+	@Test
+	public void shouldOpprettJiraOppgaveWhenAvstemmingsfilIsMissing() {
+		stubJiraOpprettOppgave();
+
+		startRoutes();
+		await().atMost(ofSeconds(10))
+				.untilAsserted(() -> {
+					verify(1, getRequestedFor(urlMatching(JIRA_PROJECT_URL)));
+					verify(1, postRequestedFor(urlMatching(JIRA_OPPRETTE_URL)));
+				});
 	}
 
 	@SneakyThrows
