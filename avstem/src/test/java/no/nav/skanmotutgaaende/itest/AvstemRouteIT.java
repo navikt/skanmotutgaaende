@@ -1,8 +1,12 @@
 package no.nav.skanmotutgaaende.itest;
 
+import com.github.tomakehurst.wiremock.client.WireMock;
 import lombok.SneakyThrows;
+import org.apache.camel.CamelContext;
+import org.apache.camel.spi.RouteController;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +23,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
-import static java.time.Duration.ofMillis;
 import static java.time.Duration.ofSeconds;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -33,6 +36,9 @@ public class AvstemRouteIT extends AbstractItest {
 	@Autowired
 	private Path sshdPath;
 
+	@Autowired
+	private CamelContext camelContext;
+
 	@BeforeEach
 	void beforeEach() {
 		super.setUpStubs();
@@ -40,6 +46,13 @@ public class AvstemRouteIT extends AbstractItest {
 		final Path processed = avstem.resolve(PROCESSED);
 		preparePath(avstem);
 		preparePath(processed);
+	}
+
+	@SneakyThrows
+	@AfterEach
+	void cleanUp() {
+		WireMock.removeAllMappings();
+		stopRoutes();
 	}
 
 	@Test
@@ -56,9 +69,9 @@ public class AvstemRouteIT extends AbstractItest {
 					assertAntallProsesserteFiler(0);
 				});
 
+		startRoutes();
 		await()
 				.atMost(ofSeconds(15))
-				.pollDelay(ofMillis(500))
 				.untilAsserted(() -> {
 					assertAntallUbehandledeFiler(0);
 					assertAntallProsesserteFiler(1);
@@ -80,12 +93,12 @@ public class AvstemRouteIT extends AbstractItest {
 
 		Path filePath = sshdPath.resolve(AVSTEMMINGSFILMAPPE).resolve(AVSTEMMINGSFIL);
 
+		startRoutes();
 		assertThat(Files.exists(filePath)).isTrue();
 		assertAntallProsesserteFiler(0);
 
 		await()
 				.atMost(ofSeconds(15))
-				.pollDelay(ofMillis(500))
 				.untilAsserted(() -> {
 					assertAntallProsesserteFiler(1);
 					verify(1, postRequestedFor(urlMatching(URL_DOKARKIV_AVSTEMREFERANSER)));
@@ -101,10 +114,11 @@ public class AvstemRouteIT extends AbstractItest {
 
 		Path filePath = sshdPath.resolve(AVSTEMMINGSFILMAPPE).resolve(AVSTEMMINGSFIL);
 		assertThat(Files.exists(filePath)).isTrue();
+
+		startRoutes();
 		assertAntallProsesserteFiler(0);
 
 		await().atMost(ofSeconds(15))
-				.pollDelay(ofMillis(500))
 				.untilAsserted(() -> {
 					verify(1, postRequestedFor(urlMatching(JIRA_OPPRETTE_URL)));
 				});
@@ -113,18 +127,29 @@ public class AvstemRouteIT extends AbstractItest {
 	}
 
 	@Test
-	public void shouldOpprettJiraOppgaveWhenAvstemmingsfilIsMissing()  {
+	public void shouldOpprettJiraOppgaveWhenAvstemmingsfilIsMissing() {
 		stubJiraOpprettOppgave();
-		stubJiraHentProject();
 
-		await().atMost(ofSeconds(15))
-				.pollDelay(ofMillis(500))
+		startRoutes();
+		await().atMost(ofSeconds(10))
 				.untilAsserted(() -> {
-					assertAntallUbehandledeFiler(0);
-					assertAntallProsesserteFiler(0);
 					verify(1, getRequestedFor(urlMatching(JIRA_PROJECT_URL)));
 					verify(1, postRequestedFor(urlMatching(JIRA_OPPRETTE_URL)));
 				});
+	}
+
+	@SneakyThrows
+	private void startRoutes() {
+		RouteController routeController = camelContext.getRouteController();
+		routeController.startRoute("ftp-trigger");
+		routeController.startRoute("avstem-routeid");
+	}
+
+	@SneakyThrows
+	private void stopRoutes() {
+		RouteController routeController = camelContext.getRouteController();
+		routeController.stopRoute("ftp-trigger");
+		routeController.stopRoute("avstem-routeid");
 	}
 
 	private void verifyRequest() {

@@ -21,7 +21,6 @@ import static org.apache.camel.LoggingLevel.INFO;
 @Component
 public class AvstemRoute extends RouteBuilder {
 
-	private static final int CONNECTION_TIMEOUT = 15000;
 	private final AvstemService avstemService;
 	private final OpprettJiraService opprettJiraService;
 
@@ -42,7 +41,8 @@ public class AvstemRoute extends RouteBuilder {
 
 		onException(GenericFileOperationFailedException.class)
 				.process(new MdcSetterProcessor())
-				.log(ERROR, log, "Skanmotutgaaende fant ikke avstemmingsfil for ${exchangeProperty." + EXCHANGE_AVSTEMT_DATO + "}. Undersøk tilfellet og evt. kontakt Iron Mountain. Exception:${exception}");
+				.log(ERROR, log, "Skanmotutgaaende fant ikke avstemmingsfil for ${exchangeProperty." + EXCHANGE_AVSTEMT_DATO + "}. Undersøk tilfellet og evt. kontakt Iron Mountain. Exception:${exception}")
+				.process(new RemoveMdcProcessor());
 
 		from("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.avstemmappe}}" +
 				"?{{skanmotutgaaende.endpointconfig}}" +
@@ -65,7 +65,8 @@ public class AvstemRoute extends RouteBuilder {
 						.streaming()
 						.to("direct:processEachFile")
 					.endChoice()
-				.end();
+				.end()
+				.process(new RemoveMdcProcessor());
 
 		from("direct:processEachFile")
 				.routeId("avstem-routeid")
@@ -93,7 +94,6 @@ public class AvstemRoute extends RouteBuilder {
 						.marshal().csv()
 						.bean(opprettJiraService)
 						.log(INFO, log, "Skanmotutgaaende har opprettet Jira-sak=${body.jiraIssueKey} for feilende skanmotutgaaende avstemmingsreferanser")
-						.process(new RemoveMdcProcessor())
 				.endChoice()
 			.endChoice()
 			.end()
