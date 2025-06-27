@@ -68,3 +68,6 @@ spec:
     logging:
       destinations:
         - id: elastic
+        - id: loki
+  envFrom:
+    - secret: slack-alerts
