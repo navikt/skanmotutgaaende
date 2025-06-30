@@ -82,9 +82,9 @@ public class PostboksUtgaaendeRoutePgpEncryptedIT extends AbstractIT {
 						.hasSize(2);
 
 				verify(exactly(3), putRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
-				verify(exactly(1), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH))
+				verify(exactly(0), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH))
 						.withRequestBody(containing("no.nav.skanmotutgaaende.exceptions.functional.InvalidMetadataException")));
-				verify(exactly(1), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH))
+				verify(exactly(0), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH))
 						.withRequestBody(containing("no.nav.skanmotutgaaende.exceptions.functional.SkanmotutgaaendeFunctionalException")));
 				verify(exactly(2), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH))
 						.withRequestBody(containing("no.nav.skanmotutgaaende.exceptions.technical.ForsendelseNotCompleteException")));
@@ -147,7 +147,7 @@ public class PostboksUtgaaendeRoutePgpEncryptedIT extends AbstractIT {
 						.hasSize(2);
 
 				verify(exactly(56), putRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
-				verify(exactly(1), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH))
+				verify(exactly(0), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH))
 						.withRequestBody(containing("no.nav.skanmotutgaaende.exceptions.functional.InvalidMetadataException")));
 				verify(exactly(2), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH))
 						.withRequestBody(containing("no.nav.skanmotutgaaende.exceptions.technical.ForsendelseNotCompleteException")));

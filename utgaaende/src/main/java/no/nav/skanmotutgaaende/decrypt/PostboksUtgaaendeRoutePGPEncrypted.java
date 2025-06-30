@@ -96,10 +96,7 @@ public class PostboksUtgaaendeRoutePGPEncrypted extends RouteBuilder {
 				.process(new ErrorMetricsProcessor())
 				.log(WARN, log, "Skanmotutgaaende-pgp feilet funksjonelt for " + KEY_LOGGING_INFO + ". ${exception}")
 				.setHeader(FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}/${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}.zip"))
-				.to(PGP_FAGPOST_AVVIK)
-				.log(WARN, log, "Skanmotutgaaende-pgp skrev feiletzip=${header." + FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".")
-				.setBody(simple("Innlesing av fil feilet funksjonelt med exception=${exception.getClass().getName()}."))
-				.to(SEND_SLACKMELDING_RUTE);
+				.to(PGP_FAGPOST_AVVIK);
 
 		from(SEND_SLACKMELDING_RUTE)
 				.bean(slackService, "sendMelding(${body})");
@@ -155,11 +152,14 @@ public class PostboksUtgaaendeRoutePGPEncrypted extends RouteBuilder {
 		from(PGP_FAGPOST_AVVIK)
 				.routeId("pgp_encrypted_fagpost_avvik")
 				.choice().when(body().isInstanceOf(PostboksUtgaaendeEnvelope.class))
-				.setBody(simple("${body.createZip}"))
-				.to("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.fagpostmappe}}" +
-						"?{{skanmotutgaaende.endpointconfig}}")
+					.setBody(simple("${body.createZip}"))
+					.to("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.fagpostmappe}}" +
+							"?{{skanmotutgaaende.endpointconfig}}")
+					.log(WARN, log, "Skanmotutgaaende-pgp skrev feiletzip=${header." + FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".")
 				.otherwise()
-				.log(ERROR, log, "Skanmotutgaaende funksjonell feil der " + KEY_LOGGING_INFO + ". ikke ble flyttet til feilområde. Må analyseres.")
+					.log(ERROR, log, "Skanmotutgaaende funksjonell feil der " + KEY_LOGGING_INFO + ". ikke ble flyttet til feilområde. Må analyseres.")
+					.setBody(simple("Innlesing av fil feilet funksjonelt med exception=${exception.getClass().getName()}."))
+					.to(SEND_SLACKMELDING_RUTE)
 				.end()
 				.process(new MdcRemoverProcessor());
 
