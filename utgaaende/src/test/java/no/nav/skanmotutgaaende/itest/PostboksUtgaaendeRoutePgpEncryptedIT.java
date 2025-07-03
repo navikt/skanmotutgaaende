@@ -1,6 +1,7 @@
 package no.nav.skanmotutgaaende.itest;
 
 import org.apache.commons.io.FileUtils;
+import org.awaitility.core.ConditionTimeoutException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static wiremock.org.apache.commons.io.FilenameUtils.getName;
@@ -82,9 +84,9 @@ public class PostboksUtgaaendeRoutePgpEncryptedIT extends AbstractIT {
 						.hasSize(2);
 
 				verify(exactly(3), putRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
-				verify(exactly(1), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH))
+				verify(exactly(0), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH))
 						.withRequestBody(containing("no.nav.skanmotutgaaende.exceptions.functional.InvalidMetadataException")));
-				verify(exactly(1), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH))
+				verify(exactly(0), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH))
 						.withRequestBody(containing("no.nav.skanmotutgaaende.exceptions.functional.SkanmotutgaaendeFunctionalException")));
 				verify(exactly(2), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH))
 						.withRequestBody(containing("no.nav.skanmotutgaaende.exceptions.technical.ForsendelseNotCompleteException")));
@@ -136,7 +138,7 @@ public class PostboksUtgaaendeRoutePgpEncryptedIT extends AbstractIT {
 		final String ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION = "01.07.2020_R300000000_1_1000_ordered_xml_first_big";
 		copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION + ".zip.pgp");
 
-		await().atMost(25, SECONDS).untilAsserted(() -> {
+		await().atMost(15, SECONDS).untilAsserted(() -> {
 			try {
 				assertThat(Files.list(sshdPath.resolve(FEILMAPPE)
 						.resolve(ZIP_FILE_NAME_ORDERED_XML_FIRST_NO_EXTENSION)))
@@ -147,7 +149,7 @@ public class PostboksUtgaaendeRoutePgpEncryptedIT extends AbstractIT {
 						.hasSize(2);
 
 				verify(exactly(56), putRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
-				verify(exactly(1), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH))
+				verify(exactly(0), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH))
 						.withRequestBody(containing("no.nav.skanmotutgaaende.exceptions.functional.InvalidMetadataException")));
 				verify(exactly(2), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH))
 						.withRequestBody(containing("no.nav.skanmotutgaaende.exceptions.technical.ForsendelseNotCompleteException")));
@@ -187,12 +189,28 @@ public class PostboksUtgaaendeRoutePgpEncryptedIT extends AbstractIT {
 
 		assertTrue(Files.exists(sshdPath.resolve(INNGAAENDE).resolve(ZIP_FILE_NAME_NO_EXTENSION + ".zip.pgp")));
 
-		await().atMost(15, SECONDS).untilAsserted(() -> {
+		await().atMost(5, SECONDS).untilAsserted(() -> {
 					assertTrue(Files.exists(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION + ".zip.pgp")));
 					verify(exactly(1), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH))
 							.withRequestBody(containing("org.bouncycastle.openpgp.PGPException")));
 				}
 		);
+	}
+
+	@Test
+	public void shouldNotMoveToFeilmappeWhenUnknownTechnicalException() throws IOException {
+		final String ZIP_FILE_NAME_NO_EXTENSION = "EMPTY_FOLDER";
+		copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_NO_EXTENSION + ".zip.pgp");
+
+		assertTrue(Files.exists(sshdPath.resolve(INNGAAENDE).resolve(ZIP_FILE_NAME_NO_EXTENSION + ".zip.pgp")));
+
+		// For å verifisere at filen ikke blir sendt til feilmappen sjekker vi om den finnes i løpet av 5 sekunder, og viss ikke kastes ConditionTimeoutException
+		assertThrows(ConditionTimeoutException.class, () ->
+				await().atMost(5, SECONDS).untilAsserted(() -> {
+							assertTrue(Files.exists(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION + ".zip.pgp")));
+						}
+				));
+		verify(exactly(1), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH)));
 	}
 
 	private void copyFileFromClasspathToInngaaende(final String zipfilename) throws IOException {
