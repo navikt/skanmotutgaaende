@@ -1,5 +1,5 @@
 {
-  "SKANMOTUTGAAENDE_SECRET" : "skanmotutgaaende",
+  "SKANMOTUTGAAENDE_SECRET" : "skanmotutgaaende-q2",
   "SKANMOTUTGAAENDE_JIRA_URL": "https://jira-q1.adeo.no",
   "SKANMOTUTGAAENDE_ENDPOINTS_DOKARKIV_URL": "http://dokarkiv.teamdokumenthandtering.svc.nais.local/rest",
   "SKANMOTUTGAAENDE_ENDPOINTS_DOKARKIV_SCOPE": "api://dev-fss.teamdokumenthandtering.dokarkiv/.default",
