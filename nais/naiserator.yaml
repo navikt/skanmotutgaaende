@@ -10,9 +10,9 @@ spec:
     - name: SKANMOTUTGAAENDE_SFTP_PRIVATEKEY
       value: /var/run/secrets/nais.io/skanmotutgaaende/sftp/sftpprivatekey
     - name: SKANMOTUTGAAENDE_SFTP_HOSTKEY
-      value: /var/run/secrets/nais.io/skanmotutgaaende/keys/hostkey
+      value: /var/run/secrets/nais.io/skanmotutgaaende/sftp/hostkey
     - name: SKANMOTUTGAAENDE_PGP_PRIVATEKEY
-      value: /var/run/secrets/nais.io/skanmotutgaaende/keys/pgpprivatekey
+      value: /var/run/secrets/nais.io/skanmotutgaaende/pgp/pgpprivatekey
     - name: SKANMOTUTGAAENDE_ENDPOINTS_DOKARKIV_URL
       value: {{ SKANMOTUTGAAENDE_ENDPOINTS_DOKARKIV_URL }}
     - name: SKANMOTUTGAAENDE_ENDPOINTS_DOKARKIV_SCOPE
