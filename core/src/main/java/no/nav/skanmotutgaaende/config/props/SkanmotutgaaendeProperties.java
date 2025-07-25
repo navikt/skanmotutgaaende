@@ -1,5 +1,6 @@
 package no.nav.skanmotutgaaende.config.props;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -11,147 +12,151 @@ import org.springframework.validation.annotation.Validated;
 
 import java.time.Duration;
 
-@Getter
-@Setter
-@ToString
+@Data
 @Validated
 @ConfigurationProperties("skanmotutgaaende")
 public class SkanmotutgaaendeProperties {
 
-    private final Endpoints endpoints = new Endpoints();
-    private final Utgaaende utgaaende = new Utgaaende();
-    private final Avstem avstem = new Avstem();
-    private final SftpProperties sftp = new SftpProperties();
-    private final FilomraadeProperties filomraade = new FilomraadeProperties();
-    private final ServiceUserProperties serviceuser = new ServiceUserProperties();
-    private final JiraConfigProperties jira = new JiraConfigProperties();
-    private final SlackProperties slack = new SlackProperties();
+	@Valid
+	private final Endpoints endpoints = new Endpoints();
+	@Valid
+	private final Utgaaende utgaaende = new Utgaaende();
+	@Valid
+	private final Avstem avstem = new Avstem();
+	@Valid
+	private final SftpProperties sftp = new SftpProperties();
+	@Valid
+	private final FilomraadeProperties filomraade = new FilomraadeProperties();
+	@Valid
+	private final JiraConfigProperties jira = new JiraConfigProperties();
+	@Valid
+	private final SlackProperties slack = new SlackProperties();
+	@Valid
+	private final Pgp pgp = new Pgp();
 
-    @NotEmpty
-    private String endpointuri;
+	@NotEmpty
+	private String endpointuri;
 
-    @NotEmpty
-    private String endpointconfig;
+	@NotEmpty
+	private String endpointconfig;
 
-    @NotNull
-    private Duration completiontimeout;
+	@NotNull
+	private Duration completiontimeout;
 
-    @Data
-    @Validated
-    public static class Endpoints {
+	@Data
+	public static class Endpoints {
 
-        @NotNull
-        private AzureEndpoint dokarkiv;
-    }
+		@NotNull
+		private AzureEndpoint dokarkiv;
+	}
 
-    @Data
-    @Validated
-    public static class AzureEndpoint {
-        /**
-         * Url til tjeneste som har azure autorisasjon
-         */
-        @NotEmpty
-        private String url;
-        /**
-         * Scope til azure client credential flow
-         */
-        @NotEmpty
-        private String scope;
-    }
+	@Data
+	public static class AzureEndpoint {
+		/**
+		 * Url til tjeneste som har azure autorisasjon
+		 */
+		@NotEmpty
+		private String url;
+		/**
+		 * Scope til azure client credential flow
+		 */
+		@NotEmpty
+		private String scope;
+	}
 
-    @Data
-    @Validated
-    public static class Utgaaende {
-        @NotEmpty
-        private String schedule;
-    }
+	@Data
+	public static class Utgaaende {
+		@NotEmpty
+		private String schedule;
+	}
 
-    @Data
-    @Validated
-    public static class Avstem {
-        @NotEmpty
-        private String schedule;
+	@Data
+	public static class Avstem {
+		@NotEmpty
+		private String schedule;
 
-        private boolean startup;
+		private boolean startup;
 
-    }
+	}
 
-    @Getter
-    @Setter
-    @Validated
-    public static class FilomraadeProperties {
+	@Getter
+	@Setter
+	public static class FilomraadeProperties {
 
-        @NotEmpty
-        private String inngaaendemappe;
+		@NotEmpty
+		private String inngaaendemappe;
 
-        @NotEmpty
-        private String feilmappe;
+		@NotEmpty
+		private String feilmappe;
 
-        @NotEmpty
-        private String avstemmappe;
-    }
+		@NotEmpty
+		private String avstemmappe;
 
-    @Getter
-    @Setter
-    @Validated
-    public static class ServiceUserProperties {
+		@NotEmpty
+		private String fagpostmappe;
+	}
 
-        @NotEmpty
-        private String username;
+	@Getter
+	@Setter
+	public static class SftpProperties {
 
-        @NotEmpty
-        @ToString.Exclude
-        private String password;
-    }
+		@NotNull
+		private String host;
 
-    @Getter
-    @Setter
-    @Validated
-    public static class SftpProperties {
+		@NotNull
+		@ToString.Exclude
+		private String privateKey;
 
-        @NotNull
-        private String host;
+		@NotNull
+		@ToString.Exclude
+		private String hostKey;
 
-        @NotNull
-        @ToString.Exclude
-        private String privateKey;
+		@NotNull
+		private String username;
 
-        @NotNull
-        @ToString.Exclude
-        private String hostKey;
+		@NotNull
+		private String port;
+	}
 
-        @NotNull
-        private String username;
+	@Data
+	public static class JiraConfigProperties {
+		@NotEmpty
+		private String username;
 
-        @NotNull
-        private String port;
-    }
+		@NotEmpty
+		private String password;
 
-    @Data
-    @Validated
-    public static class JiraConfigProperties {
-        @NotEmpty
-        private String username;
+		@NotEmpty
+		private String url;
+	}
 
-        @NotEmpty
-        private String password;
+	@Data
+	public static class SlackProperties {
+		@NotEmpty
+		@ToString.Exclude
+		private String token;
 
-        @NotEmpty
-        private String url;
-    }
+		@NotEmpty
+		private String channel;
 
-    @Data
-    @Validated
-    public static class SlackProperties {
-        @NotEmpty
-        @ToString.Exclude
-        private String token;
+		private boolean enabled;
+	}
 
-        @NotEmpty
-        private String channel;
+	@Data
+	public static class Pgp {
+		/**
+		 * passphrase for PGP-tjeneste
+		 */
+		@NotEmpty
+		@ToString.Exclude
+		private String passphrase;
 
-        private boolean enabled;
-    }
+		/**
+		 * privateKey for PGP-tjeneste
+		 */
+		@NotEmpty
+		private String privateKey;
+	}
 }
 
 

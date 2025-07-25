@@ -1,6 +1,5 @@
 package no.nav.skanmotutgaaende;
 
-import no.nav.skanmotutgaaende.config.props.IMVaultProperties;
 import no.nav.skanmotutgaaende.config.props.SkanmotutgaaendeProperties;
 import no.nav.skanmotutgaaende.consumers.azure.AzureProperties;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
@@ -20,7 +19,6 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 @EnableAspectJAutoProxy
 @EnableConfigurationProperties({
 		SkanmotutgaaendeProperties.class,
-		IMVaultProperties.class,
 		AzureProperties.class
 })
 @Configuration

@@ -3,7 +3,6 @@ package no.nav.skanmotutgaaende.itest;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotutgaaende.CoreConfig;
 import no.nav.skanmotutgaaende.avstem.AvstemConfig;
-import no.nav.skanmotutgaaende.config.props.IMVaultProperties;
 import no.nav.skanmotutgaaende.config.props.SkanmotutgaaendeProperties;
 import no.nav.skanmotutgaaende.consumers.azure.AzureOAuthEnabledWebClientConfig;
 import no.nav.skanmotutgaaende.consumers.azure.AzureProperties;
@@ -36,7 +35,6 @@ import static java.util.Collections.singletonList;
 @EnableConfigurationProperties({
 		SkanmotutgaaendeProperties.class,
 		AzureProperties.class,
-		IMVaultProperties.class
 })
 @Import({
 		CoreConfig.class,
