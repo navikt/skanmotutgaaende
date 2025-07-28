@@ -4,7 +4,6 @@ import com.slack.api.Slack;
 import com.slack.api.methods.MethodsClient;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotutgaaende.CoreConfig;
-import no.nav.skanmotutgaaende.config.props.IMVaultProperties;
 import no.nav.skanmotutgaaende.config.props.SkanmotutgaaendeProperties;
 import no.nav.skanmotutgaaende.consumers.azure.AzureOAuthEnabledWebClientConfig;
 import no.nav.skanmotutgaaende.consumers.azure.AzureProperties;
@@ -39,7 +38,6 @@ import static java.util.Collections.singletonList;
 @EnableAutoConfiguration
 @EnableConfigurationProperties({
 		SkanmotutgaaendeProperties.class,
-		IMVaultProperties.class,
 		AzureProperties.class
 })
 @Import({TestConfig.CamelTestStartupConfig.class,
