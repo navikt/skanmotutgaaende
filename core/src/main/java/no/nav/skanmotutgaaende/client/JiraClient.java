@@ -1,4 +1,4 @@
-package no.nav.skanmotutgaaende.jira.client;
+package no.nav.skanmotutgaaende.client;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.dok.jiraapi.JiraProperties;
 import no.nav.dok.jiraapi.JiraRequest;
 import no.nav.dok.jiracore.config.JiraMapper;
-import no.nav.dok.jiracore.config.JsonBodyHandler;
 import no.nav.dok.jiracore.exception.JiraClientException;
 import no.nav.dok.jiracore.interndomain.AnsvarligTeam;
 import no.nav.dok.jiracore.interndomain.CompleteJiraIssue;

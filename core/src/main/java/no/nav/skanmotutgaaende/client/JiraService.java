@@ -1,4 +1,4 @@
-package no.nav.skanmotutgaaende.jira.client;
+package no.nav.skanmotutgaaende.client;
 
 import jakarta.validation.ValidationException;
 import no.nav.dok.jiraapi.JiraRequest;
