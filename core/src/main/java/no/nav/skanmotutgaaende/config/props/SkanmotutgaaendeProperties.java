@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import no.nav.dok.validators.Exists;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
@@ -104,11 +105,11 @@ public class SkanmotutgaaendeProperties {
 		private String host;
 
 		@NotNull
-		@ToString.Exclude
+		@Exists
 		private String privateKey;
 
 		@NotNull
-		@ToString.Exclude
+		@Exists
 		private String hostKey;
 
 		@NotNull
@@ -155,6 +156,7 @@ public class SkanmotutgaaendeProperties {
 		 * privateKey for PGP-tjeneste
 		 */
 		@NotEmpty
+		@Exists
 		private String privateKey;
 	}
 }

@@ -44,6 +44,10 @@
             <groupId>no.nav.dok-common</groupId>
             <artifactId>jiraapi</artifactId>
         </dependency>
+        <dependency>
+            <groupId>no.nav.dok-common</groupId>
+            <artifactId>util</artifactId>
+        </dependency>
 
         <!-- caching -->
         <dependency>
