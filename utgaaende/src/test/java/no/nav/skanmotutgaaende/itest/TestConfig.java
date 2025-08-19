@@ -4,7 +4,9 @@ import com.slack.api.Slack;
 import com.slack.api.methods.MethodsClient;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotutgaaende.CoreConfig;
+import no.nav.skanmotutgaaende.config.props.JiraAuthProperties;
 import no.nav.skanmotutgaaende.config.props.SkanmotutgaaendeProperties;
+import no.nav.skanmotutgaaende.config.props.SlackProperties;
 import no.nav.skanmotutgaaende.consumers.azure.AzureOAuthEnabledWebClientConfig;
 import no.nav.skanmotutgaaende.consumers.azure.AzureProperties;
 import no.nav.skanmotutgaaende.metrics.DokCounter;
@@ -38,6 +40,8 @@ import static java.util.Collections.singletonList;
 @EnableAutoConfiguration
 @EnableConfigurationProperties({
 		SkanmotutgaaendeProperties.class,
+		SlackProperties.class,
+		JiraAuthProperties.class,
 		AzureProperties.class
 })
 @Import({TestConfig.CamelTestStartupConfig.class,
@@ -52,8 +56,8 @@ public class TestConfig {
 
 	@Bean
 	@Primary
-	MethodsClient slackClient(SkanmotutgaaendeProperties skanmotutgaaendeProperties) {
-		var slackClient = Slack.getInstance().methods(skanmotutgaaendeProperties.getSlack().getToken());
+	MethodsClient slackClient(SlackProperties slackProperties) {
+		var slackClient = Slack.getInstance().methods(slackProperties.token());
 		slackClient.setEndpointUrlPrefix(slackUrl);
 		return slackClient;
 	}

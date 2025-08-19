@@ -7,7 +7,7 @@ import com.slack.api.model.block.SectionBlock;
 import com.slack.api.model.block.composition.MarkdownTextObject;
 import com.slack.api.model.block.composition.PlainTextObject;
 import lombok.extern.slf4j.Slf4j;
-import no.nav.skanmotutgaaende.config.props.SkanmotutgaaendeProperties;
+import no.nav.skanmotutgaaende.config.props.SlackProperties;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -17,16 +17,16 @@ import java.util.Arrays;
 public class SlackService {
 
 	private final MethodsClient slackClient;
-	private final SkanmotutgaaendeProperties.SlackProperties slackProperties;
+	private final SlackProperties slackProperties;
 
-	SlackService(SkanmotutgaaendeProperties skanmotutgaaendeProperties,
+	SlackService(SlackProperties slackProperties,
 				 MethodsClient slackClient) {
-		slackProperties = skanmotutgaaendeProperties.getSlack();
+		this.slackProperties = slackProperties;
 		this.slackClient = slackClient;
 	}
 
 	public void sendMelding(String melding) {
-		if (slackProperties.isEnabled()) {
+		if (slackProperties.enabled()) {
 			try {
 				log.info("Sender melding til Slack med melding={}", melding);
 
@@ -44,12 +44,12 @@ public class SlackService {
 	private ChatPostMessageRequest jobbFeiletMelding(String feilmelding) {
 		String headerText = ":rotating_light: Skedulert jobb feilet!";
 		String bodyText = """
-                 *Applikasjon:* skanmotutgaaende
-                 *Feilmelding:* %s
-                 """.formatted(feilmelding).stripIndent();
+				*Applikasjon:* skanmotutgaaende
+				*Feilmelding:* %s
+				""".formatted(feilmelding).stripIndent();
 
 		return ChatPostMessageRequest.builder()
-				.channel(slackProperties.getChannel())
+				.channel(slackProperties.channel())
 				.text(bodyText) //ved bruk av blocks fungerer dette som fallback-tekst for varsel
 				.blocks(Arrays.asList(
 						HeaderBlock.builder()

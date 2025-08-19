@@ -7,8 +7,9 @@ import no.nav.dok.jiraapi.JiraProperties;
 import no.nav.dok.jiraapi.JiraProperties.JiraServiceUser;
 import no.nav.dok.jiraapi.JiraService;
 import no.nav.dok.jiraapi.client.JiraClient;
+import no.nav.skanmotutgaaende.config.props.JiraAuthProperties;
 import no.nav.skanmotutgaaende.config.props.SkanmotutgaaendeProperties;
-import no.nav.skanmotutgaaende.config.props.SkanmotutgaaendeProperties.JiraConfigProperties;
+import no.nav.skanmotutgaaende.config.props.SlackProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -18,8 +19,8 @@ import org.springframework.context.annotation.Configuration;
 @Slf4j
 public class CoreConfig {
 	@Bean
-	MethodsClient slackClient(SkanmotutgaaendeProperties skanmotutgaandeProperties) {
-		return Slack.getInstance().methods(skanmotutgaandeProperties.getSlack().getToken());
+	MethodsClient slackClient(SlackProperties slackProperties) {
+		return Slack.getInstance().methods(slackProperties.token());
 	}
 
 	@Bean
@@ -28,17 +29,11 @@ public class CoreConfig {
 	}
 
 	@Bean
-	public JiraClient jiraClient(SkanmotutgaaendeProperties properties) {
-		return new JiraClient(jiraProperties(properties));
+	public JiraClient jiraClient(SkanmotutgaaendeProperties properties, JiraAuthProperties jiraAuthProperties) {
+		return new JiraClient(JiraProperties.builder()
+				.jiraServiceUser(new JiraServiceUser(jiraAuthProperties.username(), jiraAuthProperties.password()))
+				.url(properties.getJira().getUrl())
+				.build());
 	}
 
-	public JiraProperties jiraProperties(SkanmotutgaaendeProperties properties) {
-		JiraConfigProperties jira = properties.getJira();
-		var xyzzy = JiraProperties.builder()
-				.jiraServiceUser(new JiraServiceUser(jira.getUsername(), jira.getPassword()))
-				.url(jira.getUrl())
-				.build();
-		log.info("url {} / user {}", xyzzy.url(), xyzzy.jiraServiceUser().username());
-		return xyzzy;
-	}
 }

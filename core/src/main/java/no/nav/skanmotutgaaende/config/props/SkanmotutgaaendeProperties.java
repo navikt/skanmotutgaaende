@@ -31,8 +31,6 @@ public class SkanmotutgaaendeProperties {
 	@Valid
 	private final JiraConfigProperties jira = new JiraConfigProperties();
 	@Valid
-	private final SlackProperties slack = new SlackProperties();
-	@Valid
 	private final Pgp pgp = new Pgp();
 
 	@NotEmpty
@@ -122,25 +120,7 @@ public class SkanmotutgaaendeProperties {
 	@Data
 	public static class JiraConfigProperties {
 		@NotEmpty
-		private String username;
-
-		@NotEmpty
-		private String password;
-
-		@NotEmpty
 		private String url;
-	}
-
-	@Data
-	public static class SlackProperties {
-		@NotEmpty
-		@ToString.Exclude
-		private String token;
-
-		@NotEmpty
-		private String channel;
-
-		private boolean enabled;
 	}
 
 	@Data

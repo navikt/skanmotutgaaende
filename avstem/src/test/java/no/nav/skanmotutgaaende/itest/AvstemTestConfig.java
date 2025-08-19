@@ -3,7 +3,9 @@ package no.nav.skanmotutgaaende.itest;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotutgaaende.CoreConfig;
 import no.nav.skanmotutgaaende.avstem.AvstemConfig;
+import no.nav.skanmotutgaaende.config.props.JiraAuthProperties;
 import no.nav.skanmotutgaaende.config.props.SkanmotutgaaendeProperties;
+import no.nav.skanmotutgaaende.config.props.SlackProperties;
 import no.nav.skanmotutgaaende.consumers.azure.AzureOAuthEnabledWebClientConfig;
 import no.nav.skanmotutgaaende.consumers.azure.AzureProperties;
 import no.nav.skanmotutgaaende.metrics.DokCounter;
@@ -34,6 +36,8 @@ import static java.util.Collections.singletonList;
 @EnableAutoConfiguration
 @EnableConfigurationProperties({
 		SkanmotutgaaendeProperties.class,
+		SlackProperties.class,
+		JiraAuthProperties.class,
 		AzureProperties.class,
 })
 @Import({
