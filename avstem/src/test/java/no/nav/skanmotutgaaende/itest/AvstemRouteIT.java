@@ -6,11 +6,14 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.spi.RouteController;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.RandomUtils;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -27,6 +30,7 @@ import static java.time.Duration.ofSeconds;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
+@ActiveProfiles({"itest", "virkedag"})
 public class AvstemRouteIT extends AbstractItest {
 
 	private static final String AVSTEMMINGSFILMAPPE = "avstemmappe";
@@ -38,6 +42,11 @@ public class AvstemRouteIT extends AbstractItest {
 
 	@Autowired
 	private CamelContext camelContext;
+
+	@BeforeAll
+	public static void beforeTestClass() {
+		System.setProperty("skanmotutgaaende.sftp.port", String.valueOf(RandomUtils.secure().randomInt(2000, 65000)));
+	}
 
 	@BeforeEach
 	void beforeEach() {
@@ -141,14 +150,14 @@ public class AvstemRouteIT extends AbstractItest {
 	@SneakyThrows
 	private void startRoutes() {
 		RouteController routeController = camelContext.getRouteController();
-		routeController.startRoute("ftp-trigger");
+		routeController.startRoute("sftp-trigger");
 		routeController.startRoute("avstem-routeid");
 	}
 
 	@SneakyThrows
 	private void stopRoutes() {
 		RouteController routeController = camelContext.getRouteController();
-		routeController.stopRoute("ftp-trigger");
+		routeController.stopRoute("sftp-trigger");
 		routeController.stopRoute("avstem-routeid");
 	}
 
