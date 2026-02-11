@@ -25,6 +25,7 @@ public class SlackService {
 		this.slackClient = slackClient;
 	}
 
+	@SuppressWarnings("unused")
 	public void sendMelding(String melding) {
 		if (slackProperties.alertsEnabled()) {
 			try {
