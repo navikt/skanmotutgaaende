@@ -208,9 +208,9 @@ public class PostboksUtgaaendeRoutePgpEncryptedIT extends AbstractIT {
 		assertThrows(ConditionTimeoutException.class, () ->
 				await().atMost(5, SECONDS).untilAsserted(() -> {
 							assertTrue(Files.exists(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION + ".zip.pgp")));
+							verify(exactly(1), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH)));
 						}
 				));
-		verify(exactly(1), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH)));
 	}
 
 	private void copyFileFromClasspathToInngaaende(final String zipfilename) throws IOException {
