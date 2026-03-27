@@ -1,6 +1,7 @@
 {
   "SKANMOTUTGAAENDE_SECRET" : "skanmotutgaaende",
   "SKANMOTUTGAAENDE_JIRA_URL": "https://jira.adeo.no",
+  "SKANMOTUTGAAENDE_SLACK_VARSEL_CRON": "0 45 10 * * MON-FRI",
   "SKANMOTUTGAAENDE_ENDPOINTS_DOKARKIV_URL": "http://dokarkiv.teamdokumenthandtering.svc.nais.local/rest",
   "SKANMOTUTGAAENDE_ENDPOINTS_DOKARKIV_SCOPE": "api://prod-fss.teamdokumenthandtering.dokarkiv/.default",
   "INGRESSES": [

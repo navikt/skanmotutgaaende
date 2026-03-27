@@ -25,6 +25,8 @@ spec:
       value: {{ SKANMOTUTGAAENDE_ENDPOINTS_DOKARKIV_SCOPE }}
     - name: SKANMOTUTGAAENDE_JIRA_URL
       value: {{ SKANMOTUTGAAENDE_JIRA_URL }}
+    - name: SKANMOTUTGAAENDE_SLACK_VARSEL_CRON
+      value: "{{ SKANMOTUTGAAENDE_SLACK_VARSEL_CRON }}"
   image: {{ image }}
   ingresses:
     {{#each INGRESSES}}

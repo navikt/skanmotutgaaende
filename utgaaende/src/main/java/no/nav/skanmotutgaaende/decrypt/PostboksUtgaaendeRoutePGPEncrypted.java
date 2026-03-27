@@ -8,7 +8,7 @@ import no.nav.skanmotutgaaende.SkanningmetadataUnmarshaller;
 import no.nav.skanmotutgaaende.config.props.SkanmotutgaaendeProperties;
 import no.nav.skanmotutgaaende.exceptions.functional.AbstractSkanmotutgaaendeFunctionalException;
 import no.nav.skanmotutgaaende.metrics.DokCounter;
-import no.nav.skanmotutgaaende.slack.SlackService;
+import no.nav.skanmotutgaaende.slack.ExceptionMessageBatchingService;
 import no.nav.skanmotutgaaende.utgaaende.PostboksUtgaaendeEnvelope;
 import no.nav.skanmotutgaaende.utgaaende.PostboksUtgaaendeService;
 import no.nav.skanmotutgaaende.utgaaende.PostboksUtgaaendeSkanningAggregator;
@@ -47,17 +47,17 @@ public class PostboksUtgaaendeRoutePGPEncrypted extends RouteBuilder {
 	private final SkanmotutgaaendeProperties skanmotutgaaendeProperties;
 	private final PostboksUtgaaendeService postboksUtgaaendeService;
 	private final PgpDecryptService pgpDecryptService;
-	private final SlackService slackService;
+	private final ExceptionMessageBatchingService exceptionMessageBatchingService;
 
 	public PostboksUtgaaendeRoutePGPEncrypted(
 			SkanmotutgaaendeProperties skanmotutgaaendeProperties,
 			PostboksUtgaaendeService postboksUtgaaendeService,
 			PgpDecryptService pgpDecryptService,
-			SlackService slackService) {
+			ExceptionMessageBatchingService exceptionMessageBatchingService) {
 		this.skanmotutgaaendeProperties = skanmotutgaaendeProperties;
 		this.postboksUtgaaendeService = postboksUtgaaendeService;
 		this.pgpDecryptService = pgpDecryptService;
-		this.slackService = slackService;
+		this.exceptionMessageBatchingService = exceptionMessageBatchingService;
 	}
 
 	@Override
@@ -71,7 +71,7 @@ public class PostboksUtgaaendeRoutePGPEncrypted extends RouteBuilder {
 				.setHeader(FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}/${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}-teknisk.zip"))
 				.to(PGP_AVVIK)
 				.log(ERROR, log, "Skanmotutgaaende-pgp skrev feiletzip=${header." + FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".")
-				.setBody(simple("Innlesing av fil feilet teknisk med exception=${exception.getClass().getName()}."))
+				.setBody(simple("Innlesing av fil feilet teknisk med exception=${exception.getClass().getName()}"))
 				.to(SEND_SLACKMELDING_RUTE);
 
 		// Får ikke dekryptert .zip.pgp - mest sannsynlig mismatch mellom private key og public key
@@ -86,7 +86,7 @@ public class PostboksUtgaaendeRoutePGPEncrypted extends RouteBuilder {
 				.log(ERROR, log, "Skanmotutgaaende-pgp skrev feiletzip=${header." + FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".")
 				.end()
 				.process(new MdcRemoverProcessor())
-				.setBody(simple("Innlesing av fil feilet dekryptering med exception=${exception.getClass().getName()}."))
+				.setBody(simple("Innlesing av fil feilet dekryptering med exception=${exception.getClass().getName()}"))
 				.to(SEND_SLACKMELDING_RUTE);
 
 		// Kjente funksjonelle feil
@@ -99,7 +99,7 @@ public class PostboksUtgaaendeRoutePGPEncrypted extends RouteBuilder {
 				.to(PGP_FAGPOST_AVVIK);
 
 		from(SEND_SLACKMELDING_RUTE)
-				.bean(slackService, "sendMelding(${body})");
+				.bean(exceptionMessageBatchingService, "saveMeldingForBatchedSend(${body})");
 
 		from("{{skanmotutgaaende.endpointuri}}/{{skanmotutgaaende.filomraade.inngaaendemappe}}" +
 				"?{{skanmotutgaaende.endpointconfig}}" +

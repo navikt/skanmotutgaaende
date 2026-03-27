@@ -1,7 +1,7 @@
 package no.nav.skanmotutgaaende.config.props;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.Getter;
@@ -33,14 +33,17 @@ public class SkanmotutgaaendeProperties {
 	@Valid
 	private final Pgp pgp = new Pgp();
 
-	@NotEmpty
+	@NotBlank
 	private String endpointuri;
 
-	@NotEmpty
+	@NotBlank
 	private String endpointconfig;
 
 	@NotNull
 	private Duration completiontimeout;
+
+	@NotBlank
+	String slackVarselCron;
 
 	@Data
 	public static class Endpoints {
@@ -54,24 +57,24 @@ public class SkanmotutgaaendeProperties {
 		/**
 		 * Url til tjeneste som har azure autorisasjon
 		 */
-		@NotEmpty
+		@NotBlank
 		private String url;
 		/**
 		 * Scope til azure client credential flow
 		 */
-		@NotEmpty
+		@NotBlank
 		private String scope;
 	}
 
 	@Data
 	public static class Utgaaende {
-		@NotEmpty
+		@NotBlank
 		private String schedule;
 	}
 
 	@Data
 	public static class Avstem {
-		@NotEmpty
+		@NotBlank
 		private String schedule;
 
 		private boolean startup;
@@ -82,16 +85,16 @@ public class SkanmotutgaaendeProperties {
 	@Setter
 	public static class FilomraadeProperties {
 
-		@NotEmpty
+		@NotBlank
 		private String inngaaendemappe;
 
-		@NotEmpty
+		@NotBlank
 		private String feilmappe;
 
-		@NotEmpty
+		@NotBlank
 		private String avstemmappe;
 
-		@NotEmpty
+		@NotBlank
 		private String fagpostmappe;
 	}
 
@@ -99,27 +102,27 @@ public class SkanmotutgaaendeProperties {
 	@Setter
 	public static class SftpProperties {
 
-		@NotNull
+		@NotBlank
 		private String host;
 
-		@NotNull
+		@NotBlank
 		@Exists
 		private String privateKey;
 
-		@NotNull
+		@NotBlank
 		@Exists
 		private String hostKey;
 
-		@NotNull
+		@NotBlank
 		private String username;
 
-		@NotNull
+		@NotBlank
 		private String port;
 	}
 
 	@Data
 	public static class JiraConfigProperties {
-		@NotEmpty
+		@NotBlank
 		private String url;
 	}
 
@@ -128,14 +131,14 @@ public class SkanmotutgaaendeProperties {
 		/**
 		 * passphrase for PGP-tjeneste
 		 */
-		@NotEmpty
+		@NotBlank
 		@ToString.Exclude
 		private String passphrase;
 
 		/**
 		 * privateKey for PGP-tjeneste
 		 */
-		@NotEmpty
+		@NotBlank
 		@Exists
 		private String privateKey;
 	}
