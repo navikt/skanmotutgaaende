@@ -1,5 +1,6 @@
 package no.nav.skanmotutgaaende.itest;
 
+import no.nav.skanmotutgaaende.slack.ExceptionMessageBatchingService;
 import org.apache.commons.io.FileUtils;
 import org.awaitility.core.ConditionTimeoutException;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,6 +34,8 @@ public class PostboksUtgaaendeRoutePgpEncryptedIT extends AbstractIT {
 
 	@Autowired
 	private Path sshdPath;
+	@Autowired
+	private ExceptionMessageBatchingService exceptionMessageBatchingService;
 
 	@BeforeEach
 	void beforeEach() {
@@ -84,11 +87,13 @@ public class PostboksUtgaaendeRoutePgpEncryptedIT extends AbstractIT {
 						.hasSize(2);
 
 				verify(exactly(3), putRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
+				exceptionMessageBatchingService.sendMeldinger();
+
 				verify(exactly(0), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH))
 						.withRequestBody(containing("no.nav.skanmotutgaaende.exceptions.functional.InvalidMetadataException")));
 				verify(exactly(0), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH))
 						.withRequestBody(containing("no.nav.skanmotutgaaende.exceptions.functional.SkanmotutgaaendeFunctionalException")));
-				verify(exactly(2), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH))
+				verify(exactly(1), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH))
 						.withRequestBody(containing("no.nav.skanmotutgaaende.exceptions.technical.ForsendelseNotCompleteException")));
 			} catch (NoSuchFileException e) {
 				fail();
@@ -149,9 +154,11 @@ public class PostboksUtgaaendeRoutePgpEncryptedIT extends AbstractIT {
 						.hasSize(2);
 
 				verify(exactly(56), putRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
+				exceptionMessageBatchingService.sendMeldinger();
+
 				verify(exactly(0), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH))
 						.withRequestBody(containing("no.nav.skanmotutgaaende.exceptions.functional.InvalidMetadataException")));
-				verify(exactly(2), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH))
+				verify(exactly(1), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH))
 						.withRequestBody(containing("no.nav.skanmotutgaaende.exceptions.technical.ForsendelseNotCompleteException")));
 			} catch (NoSuchFileException e) {
 				fail();
@@ -191,6 +198,7 @@ public class PostboksUtgaaendeRoutePgpEncryptedIT extends AbstractIT {
 
 		await().atMost(5, SECONDS).untilAsserted(() -> {
 					assertTrue(Files.exists(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION + ".zip.pgp")));
+					exceptionMessageBatchingService.sendMeldinger();
 					verify(exactly(1), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH))
 							.withRequestBody(containing("org.bouncycastle.openpgp.PGPException")));
 				}

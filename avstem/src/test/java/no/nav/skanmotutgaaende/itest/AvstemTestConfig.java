@@ -32,7 +32,7 @@ import java.time.Instant;
 
 import static java.lang.Integer.parseInt;
 import static java.util.Collections.singletonList;
-import static no.nav.skanmotutgaaende.CoreConfig.DEFAULT_ZONE_ID;
+
 
 @Slf4j
 @EnableAutoConfiguration
@@ -59,7 +59,7 @@ public class AvstemTestConfig {
 		@Profile("virkedag")
 		Clock forrigeDagVirkedagClock() {
 			Instant fixedInstant = Instant.parse("2025-08-01T10:00:00Z");
-			return Clock.fixed(fixedInstant, DEFAULT_ZONE_ID);
+			return Clock.fixed(fixedInstant, CoreConfig.NORGE_ZONE);
 		}
 
 		@Bean
@@ -67,7 +67,7 @@ public class AvstemTestConfig {
 		@Profile("fridag")
 		Clock forrigeDagFridagClock() {
 			Instant fixedInstant = Instant.parse("2025-05-18T10:00:00Z");
-			return Clock.fixed(fixedInstant, DEFAULT_ZONE_ID);
+			return Clock.fixed(fixedInstant, CoreConfig.NORGE_ZONE);
 		}
 	}
 

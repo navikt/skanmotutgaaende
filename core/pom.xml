@@ -80,6 +80,13 @@
             <artifactId>slack-api-client</artifactId>
         </dependency>
 
+        <!-- Test -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
         <!-- Metrikker -->
         <dependency>
             <groupId>io.micrometer</groupId>
