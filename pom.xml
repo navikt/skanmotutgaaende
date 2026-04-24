@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.10</version>
+        <version>4.0.6</version>
     </parent>
 
     <groupId>no.nav.skanmotutgaaende</groupId>
@@ -27,8 +27,8 @@
 
         <dok-common.version>1.6.0</dok-common.version>
 
-        <camel-spring-boot-dependencies.version>4.19.0</camel-spring-boot-dependencies.version>
-        <logstash-logback-encoder.version>8.1</logstash-logback-encoder.version>
+        <camel.version>4.20.0</camel.version>
+        <logstash-logback-encoder.version>9.0</logstash-logback-encoder.version>
         <commons-compress.version>1.28.0</commons-compress.version>
         <commons-io.version>2.21.0</commons-io.version>
         <bouncycastle.version>1.84</bouncycastle.version>
@@ -37,7 +37,7 @@
 
         <!-- Test -->
         <sshd-core.version>2.17.1</sshd-core.version>
-        <spring-cloud-contract-wiremock.version>4.3.0</spring-cloud-contract-wiremock.version>
+        <wiremock-spring-boot.version>4.2.1</wiremock-spring-boot.version>
 
         <!-- Plugins -->
         <maven-toolchains-plugin.version>3.2.0</maven-toolchains-plugin.version>
@@ -71,11 +71,17 @@
                 <artifactId>util</artifactId>
                 <version>${dok-common.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>org.apache.camel.springboot</groupId>
+                <artifactId>camel-spring-boot-bom</artifactId>
+                <version>${camel.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>org.apache.camel.springboot</groupId>
                 <artifactId>camel-spring-boot-dependencies</artifactId>
-                <version>${camel-spring-boot-dependencies.version}</version>
+                <version>${camel.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -119,9 +125,9 @@
 
             <!-- Test -->
             <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-contract-wiremock</artifactId>
-                <version>${spring-cloud-contract-wiremock.version}</version>
+                <groupId>org.wiremock.integrations</groupId>
+                <artifactId>wiremock-spring-boot</artifactId>
+                <version>${wiremock-spring-boot.version}</version>
                 <scope>test</scope>
             </dependency>
 
@@ -182,6 +188,9 @@
 			<plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <argLine>-Dio.netty.allocator.type=pooled</argLine>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

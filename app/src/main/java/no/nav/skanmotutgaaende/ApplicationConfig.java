@@ -4,6 +4,7 @@ import no.nav.skanmotutgaaende.config.props.JiraAuthProperties;
 import no.nav.skanmotutgaaende.config.props.SkanmotutgaaendeProperties;
 import no.nav.skanmotutgaaende.config.props.SlackProperties;
 import no.nav.skanmotutgaaende.consumers.azure.AzureProperties;
+import org.apache.hc.client5.http.config.ConnectionConfig;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.core5.http.io.SocketConfig;
@@ -33,18 +34,17 @@ public class ApplicationConfig {
 	public ClientHttpRequestFactory azureTokenHttpRequestFactory() {
 
 		var readTimeout = SocketConfig.custom().setSoTimeout(Timeout.ofSeconds(20)).build();
+		var connectTimeout = ConnectionConfig.custom().setConnectTimeout(Timeout.ofSeconds(3)).build();
 		var connectionManager = new PoolingHttpClientConnectionManager();
 		connectionManager.setDefaultSocketConfig(readTimeout);
+		connectionManager.setDefaultConnectionConfig(connectTimeout);
 
 		var httpClient = HttpClients.custom()
 				.setConnectionManager(connectionManager)
 				.useSystemProperties()
 				.build();
 
-		var clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
-		clientHttpRequestFactory.setConnectTimeout(3_000);
-
-		return clientHttpRequestFactory;
+		return new HttpComponentsClientHttpRequestFactory(httpClient);
 	}
 
 }
