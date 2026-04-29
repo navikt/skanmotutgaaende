@@ -1,8 +1,8 @@
 package no.nav.skanmotutgaaende.itest;
 
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.test.context.ActiveProfiles;
+import org.wiremock.spring.EnableWireMock;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -16,9 +16,9 @@ import static com.github.tomakehurst.wiremock.client.WireMock.put;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
-import static org.apache.http.HttpHeaders.CONTENT_TYPE;
 import static org.junit.platform.commons.util.StringUtils.isBlank;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.OK;
@@ -28,7 +28,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 		classes = TestConfig.class,
 		webEnvironment = RANDOM_PORT
 )
-@AutoConfigureWireMock(port = 0)
+@EnableWireMock
 @ActiveProfiles("itest")
 public abstract class AbstractIT {
 

@@ -7,7 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
-import wiremock.org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.FilenameUtils;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -28,7 +28,7 @@ import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static wiremock.org.apache.commons.io.FilenameUtils.getName;
+import static org.apache.commons.io.FilenameUtils.getName;
 
 public class PostboksUtgaaendeRoutePgpEncryptedIT extends AbstractIT {
 

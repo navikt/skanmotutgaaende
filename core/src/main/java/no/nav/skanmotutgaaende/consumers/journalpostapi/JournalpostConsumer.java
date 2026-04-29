@@ -8,8 +8,8 @@ import no.nav.skanmotutgaaende.exceptions.functional.JournalpostConflictExceptio
 import no.nav.skanmotutgaaende.exceptions.functional.SkanmotutgaaendeFunctionalException;
 import no.nav.skanmotutgaaende.exceptions.technical.SkanmotutgaaendeTechnicalException;
 import org.slf4j.MDC;
-import org.springframework.boot.autoconfigure.http.codec.HttpCodecsProperties;
-import org.springframework.retry.annotation.Retryable;
+import org.springframework.boot.http.codec.autoconfigure.HttpCodecsProperties;
+import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -47,7 +47,7 @@ public class JournalpostConsumer {
 				.build();
 	}
 
-	@Retryable(retryFor = SkanmotutgaaendeTechnicalException.class)
+	@Retryable(includes = SkanmotutgaaendeTechnicalException.class)
 	public void lagreFilDetaljer(LagreFildetaljerRequest lagreFildetaljerRequest, String journalpostId) {
 		webClient.put()
 				.uri(uriBuilder -> uriBuilder
@@ -62,7 +62,7 @@ public class JournalpostConsumer {
 				.block();
 	}
 
-	@Retryable(retryFor = SkanmotutgaaendeTechnicalException.class)
+	@Retryable(includes = SkanmotutgaaendeTechnicalException.class)
 	public FeilendeAvstemmingReferanser avstemReferanser(AvstemmingReferanser avstemmingReferanser) {
 		return webClient.post()
 				.uri("/journalpostapi/v1/avstemReferanser")
