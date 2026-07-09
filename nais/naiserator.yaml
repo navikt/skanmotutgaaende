@@ -74,3 +74,4 @@ spec:
     - secret: {{ SKANMOTUTGAAENDE_SECRET }}
     - secret: slack-alerts
     - secret: jira-service-user
+    - configmap: skanmotutgaaende
