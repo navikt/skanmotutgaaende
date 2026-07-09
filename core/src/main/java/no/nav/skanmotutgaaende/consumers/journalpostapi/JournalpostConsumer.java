@@ -65,7 +65,7 @@ public class JournalpostConsumer {
 	@Retryable(includes = SkanmotutgaaendeTechnicalException.class)
 	public FeilendeAvstemmingReferanser avstemReferanser(AvstemmingReferanser avstemmingReferanser) {
 		return webClient.post()
-				.uri("/journalpostapi/v1/avstemReferanser")
+				.uri("/internal/avstemReferanser")
 				.header(NAV_CALL_ID, MDC.get(MDC_CALL_ID))
 				.attributes(clientRegistrationId(CLIENT_REGISTRATION_DOKARKIV))
 				.bodyValue(avstemmingReferanser)
