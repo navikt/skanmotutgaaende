@@ -27,7 +27,7 @@
 
         <dok-common.version>1.6.0</dok-common.version>
 
-        <camel.version>4.20.0</camel.version>
+        <camel.version>4.21.0</camel.version>
         <logstash-logback-encoder.version>9.0</logstash-logback-encoder.version>
         <commons-compress.version>1.28.0</commons-compress.version>
         <commons-io.version>2.22.0</commons-io.version>
